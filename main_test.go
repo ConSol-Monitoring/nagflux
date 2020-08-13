@@ -6,6 +6,7 @@ import (
 	"github.com/ConSol/nagflux/target/influx"
 	"io/ioutil"
 	"net/http"
+        "crypto/tls"
 	"net/url"
 	"os"
 	"reflect"
@@ -258,6 +259,7 @@ func checkDatabase() {
 }
 
 func getEverything(database string) (*influx.ShowSeriesResult, error) {
+        http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	resp, err := http.Get(influxParam + "/query?db=" + url.QueryEscape(database) + "&q=select%20*%20from%20/.*/&epoch=ms&u=omdadmin&p=omd")
 	if err != nil {
 		return nil, err
