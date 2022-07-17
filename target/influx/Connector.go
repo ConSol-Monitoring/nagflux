@@ -37,11 +37,12 @@ type Connector struct {
 	clientTimeout             int
 	createDatabaseIfNotExists bool
 	healthUrl                 string
+	authToken                 string
 }
 
 //ConnectorFactory Constructor which will create some workers if the connection is established.
 func ConnectorFactory(jobs chan collector.Printable, connectionHost, connectionArgs, dumpFile, version string,
-	workerAmount, maxWorkers int, createDatabaseIfNotExists, stopReadingDataIfDown bool, target data.Target, clientTimeout int, healthUrl string) *Connector {
+	workerAmount, maxWorkers int, createDatabaseIfNotExists, stopReadingDataIfDown bool, target data.Target, clientTimeout int, healthUrl string, authToken string) *Connector {
 	parsedArgs := helper.StringToMap(connectionArgs, "&", "=")
 	var databaseName string
 	if db, found_db := parsedArgs["db"]; found_db {
@@ -56,6 +57,29 @@ func ConnectorFactory(jobs chan collector.Printable, connectionHost, connectionA
 		workers: make([]*Worker, workerAmount), maxWorkers: maxWorkers, jobs: jobs, quit: make(chan bool),
 		log: logging.GetLogger(), version: version, isAlive: false, databaseExists: false, databaseName: databaseName,
 		httpClient: client, target: target, stopReadingDataIfDown: stopReadingDataIfDown, clientTimeout: clientTimeout, createDatabaseIfNotExists: createDatabaseIfNotExists, healthUrl: healthUrl,
+		authToken: authToken,
+	}
+
+	// InfluxDB v2
+	if version == "2.0" {
+		// InfluxDB OSS requires either org or orgID
+		var orgInfo string
+		for _, v := range []string{"org", "orgID"} {
+			if o, ok := parsedArgs[v]; ok {
+				orgInfo = o
+				break
+			}
+		}
+		if orgInfo == "" {
+			result := helper.GetHeaders(s.httpClient, s.connectionHost+"/ping", "GET")
+			if len(result) != 0 && result["X-Influxdb-Build"] == "OSS" {
+				s.log.Critical("InfluxDB OSS requires Orgranization Details. Please provide either orgID or org")
+				s.isAlive = false
+				return s
+			}
+		}
+		// In InfluxDB 2.0 or later versions, databases no longer exist, they are replaced by buckets.
+		createDatabaseIfNotExists = false
 	}
 
 	if createDatabaseIfNotExists && databaseName == "" {
@@ -90,6 +114,9 @@ func ConnectorFactory(jobs chan collector.Printable, connectionHost, connectionA
 	}
 
 	gen := WorkerGenerator(jobs, connectionHost+"/write?"+connectionArgs, dumpFile, version, s, target, stopReadingDataIfDown)
+	if s.version == "2.0" {
+		gen = WorkerGenerator(jobs, connectionHost+"/api/v2/write?"+connectionArgs, dumpFile, version, s, target, stopReadingDataIfDown)
+	}
 	s.TestIfIsAlive(stopReadingDataIfDown)
 	if !s.isAlive && !stopReadingDataIfDown {
 		s.log.Warnf("InfluxDB server(%s) is down but starting anyway due to 'stopReadingDataIfDown' = %t", target.Name, stopReadingDataIfDown)
@@ -135,6 +162,12 @@ func (connector *Connector) AddWorker() {
 			connector.jobs, connector.connectionHost+"/write?"+connector.connectionArgs,
 			connector.dumpFile, connector.version, connector, connector.target, connector.stopReadingDataIfDown,
 		)
+		if connector.version == "2.0" {
+			gen = WorkerGenerator(
+				connector.jobs, connector.connectionHost+"/api/v2/write?"+connector.connectionArgs,
+				connector.dumpFile, connector.version, connector, connector.target, connector.stopReadingDataIfDown,
+			)
+		}
 		connector.workers = append(connector.workers, gen(oldLength+2))
 		connector.log.Infof("Starting Worker: %d -> %d", oldLength, connector.AmountWorkers())
 	}

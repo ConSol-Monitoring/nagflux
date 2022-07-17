@@ -94,9 +94,13 @@ For further informations / bugs reportes: https://github.com/ConSol/nagflux
 			resultQueues[target],
 			influxConfig.Address, influxConfig.Arguments, cfg.Main.DumpFile, influxConfig.Version,
 			cfg.Main.InfluxWorker, cfg.Main.MaxInfluxWorker, cfg.InfluxDBGlobal.CreateDatabaseIfNotExists,
-			influxConfig.StopPullingDataIfDown, target, cfg.InfluxDBGlobal.ClientTimeout, influxConfig.HealthUrl,
+			influxConfig.StopPullingDataIfDown, target, cfg.InfluxDBGlobal.ClientTimeout, influxConfig.HealthUrl, influxConfig.AuthToken,
 		)
-		stoppables = append(stoppables, influx)
+		if influx.IsAlive() {
+			stoppables = append(stoppables, influx)
+		} else {
+			log.Criticalf("Nagflux is disabled for InfluxDB(%s)", target.Name)
+		}
 		influxDumpFileCollector := nagflux.NewDumpfileCollector(resultQueues[target], cfg.Main.DumpFile, target, cfg.Main.FileBufferSize)
 		waitForDumpfileCollector(influxDumpFileCollector)
 		stoppables = append(stoppables, influxDumpFileCollector)
