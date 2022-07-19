@@ -79,6 +79,7 @@ func ConnectorFactory(jobs chan collector.Printable, connectionHost, connectionA
 			}
 		}
 		// In InfluxDB 2.0 or later versions, databases no longer exist, they are replaced by buckets.
+		s.createDatabaseIfNotExists = false
 		createDatabaseIfNotExists = false
 	}
 
