@@ -1,3 +1,12 @@
+## v0.5.1 - 04.10.2024
+### Changes
+- changed git location to https://github.com/ConSol-Monitoring/nagflux
+### Feature
+- add go version to build tag
+### Fix
+- fix parsing empty perf data fields
+
+
 ## v0.5.0 - 14.12.2020
 ### Feature
 - added support for non InfluxDB targets implementing the HTTP Line Protocol: 
