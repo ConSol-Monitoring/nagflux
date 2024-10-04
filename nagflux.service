@@ -1,6 +1,6 @@
 [Unit]
 Description=A connector which transforms performancedata from Nagios/Icinga(2)/Naemon to InfluxDB/Elasticsearch
-Documentation=https://github.com/ConSol/nagflux
+Documentation=https://github.com/ConSol-Monitoring/nagflux
 After=network-online.target
 
 [Service]
