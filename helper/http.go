@@ -62,3 +62,27 @@ func getBody(resp *http.Response) string {
 	}
 	return ""
 }
+
+//GetHeaders makes an HEAD or GET request. If no errors, it will return all HTTP Response Headers
+func GetHeaders(client http.Client, url, function string) map[string]string {
+	var resp *http.Response
+	var err error
+	r := make(map[string]string)
+	switch function {
+	case "HEAD":
+		resp, err = client.Head(url)
+	case "GET":
+		resp, err = client.Get(url)
+	default:
+		err = errors.New("Unknown Function")
+	}
+	if err == nil {
+		for name, values := range resp.Header {
+			// Loop over all values for the name.
+			for _, value := range values {
+				r[name] = value
+			}
+		}
+	}
+	return r
+}

@@ -62,6 +62,14 @@
     Arguments = "precision=ms&u=root&p=root&db=nagflux"
     StopPullingDataIfDown = true
 
+[InfluxDB "nagflux2"]
+    Enabled = true
+    Version = 2.0
+    Address = "http://127.0.0.1:8086"
+    Arguments = "precision=ms&org=nagflux&bucket=nagflux"
+    AuthToken = "ABCDEFGHIJLKMNOPQRSTUVWXYZ"
+    StopPullingDataIfDown = true
+
 [InfluxDB "fast"]
     Enabled = false
     Version = 1.0
