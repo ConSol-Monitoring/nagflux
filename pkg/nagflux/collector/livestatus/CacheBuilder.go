@@ -21,29 +21,32 @@ type CacheBuilder struct {
 }
 
 const (
-	// Updateinterval on livestatus data.
-	intervalToCheckLivestatusCache = time.Duration(30) * time.Second
-	// QueryForServicesInDowntime livestatusquery for services in downtime.
+	// default update interval on livestatus data.
+	defaultIntervalToCheckLivestatusCache = time.Duration(30) * time.Second
+
+	// QueryForServicesInDowntime livestatus query for services in downtime.
 	QueryForServicesInDowntime = `GET services
 Columns: downtimes host_name display_name
 Filter: scheduled_downtime_depth > 0
 OutputFormat: csv
 
 `
-	// QueryForHostsInDowntime livestatusquery for hosts in downtime
+	// QueryForHostsInDowntime livestatus query for hosts in downtime
 	QueryForHostsInDowntime = `GET hosts
 Columns: downtimes name
 Filter: scheduled_downtime_depth > 0
 OutputFormat: csv
 
 `
-	// QueryForDowntimeid livestatusquery for downtime start/end
+	// QueryForDowntimeid livestatus query for downtime start/end
 	QueryForDowntimeid = `GET downtimes
 Columns: id start_time entry_time
 OutputFormat: csv
 
 `
 )
+
+var intervalToCheckLivestatusCache = defaultIntervalToCheckLivestatusCache
 
 // NewLivestatusCacheBuilder constructor, which also starts it immediately.
 func NewLivestatusCacheBuilder(livestatusConnector *Connector) *CacheBuilder {

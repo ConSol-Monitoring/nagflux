@@ -1,20 +1,20 @@
 package livestatus
 
 import (
-	"reflect"
 	"testing"
 	"time"
 
 	"pkg/nagflux/logging"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewCacheBuilder(t *testing.T) {
 	logging.InitTestLogger()
 	connector := &Connector{logging.GetLogger(), "localhost:6558", "tcp"}
 	builder := NewLivestatusCacheBuilder(connector)
-	if builder == nil {
-		t.Error("Constructor returned null pointer")
-	}
+	require.NotNilf(t, builder, "Constructor returned pointer")
 }
 
 func TestDisabledServiceInDowntime(t *testing.T) {
@@ -27,31 +27,29 @@ func TestDisabledServiceInDowntime(t *testing.T) {
 	go livestatus.StartMockLivestatus()
 	connector := &Connector{logging.GetLogger(), livestatus.LivestatusAddress, livestatus.ConnectionType}
 
+	intervalToCheckLivestatusCache = 2 * time.Second
 	cacheBuilder := NewLivestatusCacheBuilder(connector)
-	time.Sleep(time.Duration(2) * time.Second)
+
+	// wait 10 seconds till cache matches
+	waitUntil := time.Now().Add(10 * time.Second)
+	for time.Now().Before(waitUntil) {
+		if cacheBuilder.IsServiceInDowntime("host1", "service1", "1") {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
 
 	cacheBuilder.Stop()
 	livestatus.StopMockLivestatus()
 
 	intern := map[string]map[string]string{"host1": {"": "1", "service1": "1"}, "host2": {"": "2"}}
 	cacheBuilder.mutex.Lock()
-	if !reflect.DeepEqual(cacheBuilder.downtimeCache.downtime, intern) {
-		t.Errorf("Internall Cache does not fit.\nExpexted:%s\nResult:%s\n", intern, cacheBuilder.downtimeCache.downtime)
-	}
+	assert.Equalf(t, intern, cacheBuilder.downtimeCache.downtime, "internal cache does not fit.")
 	cacheBuilder.mutex.Unlock()
-	if !cacheBuilder.IsServiceInDowntime("host1", "service1", "1") {
-		t.Errorf(`"host1","service1","1" should be in downtime`)
-	}
-	if !cacheBuilder.IsServiceInDowntime("host1", "service1", "2") {
-		t.Errorf(`"host1","service1","2" should be in downtime`)
-	}
-	if cacheBuilder.IsServiceInDowntime("host1", "service1", "0") {
-		t.Errorf(`"host1","service1","0" should NOT be in downtime`)
-	}
-	if cacheBuilder.IsServiceInDowntime("host1", "", "0") {
-		t.Errorf(`"host1","","0" should NOT be in downtime`)
-	}
-	if !cacheBuilder.IsServiceInDowntime("host1", "", "2") {
-		t.Errorf(`"host1","","2" should be in downtime`)
-	}
+
+	assert.Truef(t, cacheBuilder.IsServiceInDowntime("host1", "service1", "1"), `"host1","service1","1" should be in downtime`)
+	assert.Truef(t, cacheBuilder.IsServiceInDowntime("host1", "service1", "2"), `"host1","service1","2" should be in downtime`)
+	assert.Falsef(t, cacheBuilder.IsServiceInDowntime("host1", "service1", "0"), `"host1","service1","0" should not be in downtime`)
+	assert.Falsef(t, cacheBuilder.IsServiceInDowntime("host1", "", "0"), `"host1","","0" should not be in downtime`)
+	assert.Truef(t, cacheBuilder.IsServiceInDowntime("host1", "", "2"), `"host1","","2" should not be in downtime`)
 }
