@@ -1,6 +1,7 @@
 ## next
 ### Changes
 - remove [error] output from performance data
+- moved source into pkg/nagflux
 
 ## v0.5.1 - 04.10.2024
 ### Changes
@@ -13,7 +14,7 @@
 
 ## v0.5.0 - 14.12.2020
 ### Feature
-- added support for non InfluxDB targets implementing the HTTP Line Protocol: 
+- added support for non InfluxDB targets implementing the HTTP Line Protocol:
   e.g. Victoriametrics and Telegraf, which have no db concept and other ping/health urls.
 - InfluxDB: optional Database check depending on "db" label in Arguments, to enable multiple targets with database check for InfluxDB
   (for backwards compatibility of config files, would fit better in InfluxDB sections)
@@ -37,9 +38,9 @@
 
 ## v0.4.0-b1 - 16.03.2017
 ### Feature
-- It is possible to define multiple Influxdbs, each addressed by an name, as well es Elasticsearchs, they are all called "targets". 
-If the data contains an NAGFLUX:TARGET field, this one is used to direct this certain data to a specific target. 
-If this tag is not added to the data, the config defines the default tag, by default "all" which means that the data is 
+- It is possible to define multiple Influxdbs, each addressed by an name, as well es Elasticsearchs, they are all called "targets".
+If the data contains an NAGFLUX:TARGET field, this one is used to direct this certain data to a specific target.
+If this tag is not added to the data, the config defines the default tag, by default "all" which means that the data is
 will be send to all targets. So "all" is a magic word and should not be uses as target name. See issue [#25](https://github.com/Griesbacher/nagflux/issues/25).
 - If an Influxdb is not reachable the option "StopPullingDataIfDown" decides if reading new data into Nagflux should go on or not.
 
@@ -50,7 +51,7 @@ will be send to all targets. So "all" is a magic word and should not be uses as 
 ### Fix
 - Allow comma separated Performancedata
 - Spoolfilebuffer is now configurable
-- Nagflux Tags and Fields are ignoring empty or malformed data. Valid but ignored Performancedate would be: NAGFLUX:TAG::$_SERVICENAGFLUX_TAG$ or NAGFLUX:TAG::  
+- Nagflux Tags and Fields are ignoring empty or malformed data. Valid but ignored Performancedate would be: NAGFLUX:TAG::$_SERVICENAGFLUX_TAG$ or NAGFLUX:TAG::
 
 ## v0.3.0 - 07.12.2016
 ### Fix
@@ -93,7 +94,7 @@ will be send to all targets. So "all" is a magic word and should not be uses as 
 - Prometheus api
 
 ### Breaks
-- When using go1.5 the envvar GO15VENDOREXPERIMENT should be set to 1 
+- When using go1.5 the envvar GO15VENDOREXPERIMENT should be set to 1
 
 ## v0.2.3 - 08.09.2016
 ### Fix
