@@ -9,8 +9,10 @@ SERVICEINTERVAL::1.000000
 
 ` + string([]rune{'\x00', '\x00', '\x00', '\x00'})
 
-const cypher = `W6brRuzUSGFMjsddHulCbHRaHLCMYD40YD67LKD/zzFyqvonQilrtPkStkdLc3gtA675Il3QAK2BJnGCA6iP05y+9OLXGEOIfibCh8sOITacCOkF0XfyBv2qEQmjkdA8iSiqO5hFxPqyZbMIhzFJU1cQ1EszAAT+2vuG/IjqXSY9i9l6a/I3p/M6uQB/mFDhwqnV6NmfeRyQ0REKTCuv3ywnzwPci/90GpI6Vwn5bBNlVk8pi6cYcjJG7JaZ8oMWn3M6Q+zP5zfA+6lYKItwTmy7hf/ekGPV7dxkUaFSm5HMc2BKXZdfLYxfp8LIuH+gutIEJjEtsxY99kwq20/hUyiDkAg5gNf2mSQUNCfEwcpBwy5UMKoBJOG6es7VFB1T+PrPFdPdtxhr7zOS9Ws+GA==`
-const key = `ac4tgMnAZhhUytwdTMJHnEtTbFMrVja`
+const (
+	cypher = `W6brRuzUSGFMjsddHulCbHRaHLCMYD40YD67LKD/zzFyqvonQilrtPkStkdLc3gtA675Il3QAK2BJnGCA6iP05y+9OLXGEOIfibCh8sOITacCOkF0XfyBv2qEQmjkdA8iSiqO5hFxPqyZbMIhzFJU1cQ1EszAAT+2vuG/IjqXSY9i9l6a/I3p/M6uQB/mFDhwqnV6NmfeRyQ0REKTCuv3ywnzwPci/90GpI6Vwn5bBNlVk8pi6cYcjJG7JaZ8oMWn3M6Q+zP5zfA+6lYKItwTmy7hf/ekGPV7dxkUaFSm5HMc2BKXZdfLYxfp8LIuH+gutIEJjEtsxY99kwq20/hUyiDkAg5gNf2mSQUNCfEwcpBwy5UMKoBJOG6es7VFB1T+PrPFdPdtxhr7zOS9Ws+GA==`
+	key    = `ac4tgMnAZhhUytwdTMJHnEtTbFMrVja`
+)
 
 func TestNewAESECBDecrypter(t *testing.T) {
 	t.Parallel()
@@ -39,6 +41,6 @@ func TestAESECBDecrypter_Decypt(t *testing.T) {
 	}
 	result, err = pt.Decypt([]byte("123"))
 	if result != nil && err == nil {
-		t.Error("There should be no result: result:", result)
+		t.Error("There should be no result:", result)
 	}
 }

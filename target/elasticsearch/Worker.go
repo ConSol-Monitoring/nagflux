@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -38,9 +38,11 @@ type Worker struct {
 
 const dataTimeout = time.Duration(20) * time.Second
 
-var errorInterrupted = errors.New("Got interrupted")
-var errorBadRequest = errors.New("400 Bad Request")
-var errorHTTPClient = errors.New("Http Client got an error")
+var (
+	errorInterrupted = errors.New("Got interrupted")
+	errorBadRequest  = errors.New("400 Bad Request")
+	errorHTTPClient  = errors.New("Http Client got an error")
+)
 
 // WorkerGenerator generates a new Worker and starts it.
 func WorkerGenerator(jobs chan collector.Printable, connection, index, dumpFile, version string, connector *Connector) func(workerId int) *Worker {
@@ -50,8 +52,11 @@ func WorkerGenerator(jobs chan collector.Printable, connection, index, dumpFile,
 			make(chan bool, 1), jobs,
 			connection, dumpFile,
 			logging.GetLogger(), version,
-			connector, http.Client{}, true, index,
-			statistics.GetPrometheusServer()}
+			connector,
+			http.Client{},
+			true, index,
+			statistics.GetPrometheusServer(),
+		}
 		go worker.run()
 		return worker
 	}
@@ -82,7 +87,7 @@ func (worker Worker) run() {
 				case query = <-worker.jobs:
 					queries = append(queries, query)
 					if len(queries) == 10000 {
-						//9000 ~= 2,4 MB
+						// 9000 ~= 2,4 MB
 						worker.sendBuffer(queries)
 						queries = queries[:0]
 					}
@@ -91,7 +96,7 @@ func (worker Worker) run() {
 					queries = queries[:0]
 				}
 			} else {
-				//Test Database
+				// Test Database
 				worker.connector.TestTemplateExists()
 				worker.log.Critical("Database does not exists, waiting for the end to come")
 				if worker.waitForExternalQuit() {
@@ -99,7 +104,7 @@ func (worker Worker) run() {
 				}
 			}
 		} else {
-			//Test Influxdb
+			// Test Influxdb
 			worker.connector.TestIfIsAlive()
 			worker.log.Critical("InfluxDB is not running, waiting for the end to come")
 			if worker.waitForExternalQuit() {
@@ -142,10 +147,10 @@ func (worker Worker) sendBuffer(queries []collector.Printable) {
 	startTime := time.Now()
 	sendErr := worker.sendData([]byte(dataToSend), true)
 	if sendErr != nil {
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			switch sendErr {
 			case errorBadRequest:
-				//Maybe just a few queries are wrong, so send them one by one and find the bad one
+				// Maybe just a few queries are wrong, so send them one by one and find the bad one
 				var badQueries []string
 				for _, lineQuery := range lineQueries {
 					queryErr := worker.sendData([]byte(lineQuery), false)
@@ -156,20 +161,20 @@ func (worker Worker) sendBuffer(queries []collector.Printable) {
 				worker.dumpErrorQueries("\n\nOne of the values is not clean..\n", badQueries)
 				sendErr = nil
 			case nil:
-				//Single point of exit
+				// Single point of exit
 				break
 			default:
 				if err := worker.waitForQuitOrGoOn(); err != nil {
-					//No error handling, because it's time to terminate
+					// No error handling, because it's time to terminate
 					worker.dumpRemainingQueries(lineQueries)
 					sendErr = nil
 				}
-				//Resend Data
+				// Resend Data
 				sendErr = worker.sendData([]byte(dataToSend), true)
 			}
 		}
 		if sendErr != nil {
-			//if there is still an error dump the queries and go on
+			// if there is still an error dump the queries and go on
 			worker.dumpErrorQueries("\n\n"+sendErr.Error()+"\n", lineQueries)
 		}
 
@@ -225,7 +230,7 @@ func (worker Worker) readQueriesFromQueue() []string {
 // sends the raw data to influxdb and returns an err if given.
 func (worker Worker) sendData(rawData []byte, log bool) error {
 	worker.log.Debug(string(rawData))
-	req, err := http.NewRequest("POST", worker.connection, bytes.NewBuffer(rawData))
+	req, err := http.NewRequest(http.MethodPost, worker.connection, bytes.NewBuffer(rawData))
 	if err != nil {
 		worker.log.Warn(err)
 	}
@@ -236,19 +241,19 @@ func (worker Worker) sendData(rawData []byte, log bool) error {
 		return errorHTTPClient
 	}
 	defer resp.Body.Close()
-	jsonSrc, _ := ioutil.ReadAll(resp.Body)
+	jsonSrc, _ := io.ReadAll(resp.Body)
 	var result JSONResult
 	json.Unmarshal(jsonSrc, &result)
 	if !result.Errors {
-		//OK
+		// OK
 		return nil
 	}
-	//Bad Request
+	// Bad Request
 	if log {
 		worker.printErrors(result, rawData)
 		worker.log.Warn(result.Items)
 	}
-	return nil //TODO: return error
+	return nil // TODO: return error
 }
 
 func (worker Worker) printErrors(result JSONResult, rawData []byte) {
@@ -259,20 +264,20 @@ func (worker Worker) printErrors(result JSONResult, rawData []byte) {
 		}
 	}
 
-	ioutil.WriteFile(worker.dumpFile+".currupt.json", rawData, 0644)
-	ioutil.WriteFile(worker.dumpFile+".error.json", []byte(fmt.Sprintf("%v", errors)), 0644)
+	os.WriteFile(worker.dumpFile+".currupt.json", rawData, 0o644)
+	os.WriteFile(worker.dumpFile+".error.json", []byte(fmt.Sprintf("%v", errors)), 0o644)
 	panic("")
 }
 
 // Waits on an internal quit signal.
 func (worker Worker) waitForQuitOrGoOn() error {
 	select {
-	//Got stop signal
+	// Got stop signal
 	case <-worker.quitInternal:
 		worker.log.Debug("Received quit")
 		worker.quitInternal <- true
 		return errorInterrupted
-	//Timeout and retry
+	// Timeout and retry
 	case <-time.After(time.Duration(10) * time.Second):
 		return nil
 	}
@@ -285,7 +290,7 @@ func (worker Worker) dumpQueries(filename string, queries []string) {
 			worker.log.Critical(err)
 		}
 	}
-	if f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, 0600); err != nil {
+	if f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY, 0o600); err != nil {
 		worker.log.Critical(err)
 	} else {
 		defer f.Close()

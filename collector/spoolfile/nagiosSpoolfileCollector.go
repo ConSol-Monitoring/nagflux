@@ -1,7 +1,7 @@
 package spoolfile
 
 import (
-	"io/ioutil"
+	"os"
 	"path"
 	"time"
 
@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	//MinFileAge is the duration to wait, before the files are parsed
+	// MinFileAge is the duration to wait, before the files are parsed
 	MinFileAge = time.Duration(10) * time.Second
-	//IntervalToCheckDirectory the interval to check if there are new files
+	// IntervalToCheckDirectory the interval to check if there are new files
 	IntervalToCheckDirectory = time.Duration(5) * time.Second
 )
 
@@ -29,7 +29,8 @@ type NagiosSpoolfileCollector struct {
 
 // NagiosSpoolfileCollectorFactory creates the give amount of Woker and starts them.
 func NagiosSpoolfileCollectorFactory(spoolDirectory string, workerAmount int, results collector.ResultQueues,
-	livestatusCacheBuilder *livestatus.CacheBuilder, fileBufferSize int, defaultTarget collector.Filterable) *NagiosSpoolfileCollector {
+	livestatusCacheBuilder *livestatus.CacheBuilder, fileBufferSize int, defaultTarget collector.Filterable,
+) *NagiosSpoolfileCollector {
 	s := &NagiosSpoolfileCollector{
 		quit:           make(chan bool),
 		jobs:           make(chan string, 100),
@@ -39,7 +40,7 @@ func NagiosSpoolfileCollectorFactory(spoolDirectory string, workerAmount int, re
 
 	gen := NagiosSpoolfileWorkerGenerator(s.jobs, results, livestatusCacheBuilder, fileBufferSize, defaultTarget)
 
-	for w := 0; w < workerAmount; w++ {
+	for w := range workerAmount {
 		s.workers[w] = gen()
 	}
 
@@ -73,7 +74,7 @@ func (s *NagiosSpoolfileCollector) run() {
 			}
 
 			logging.GetLogger().Debug("Reading Directory: ", s.spoolDirectory)
-			files, _ := ioutil.ReadDir(s.spoolDirectory)
+			files, _ := os.ReadDir(s.spoolDirectory)
 			promServer.SpoolFilesOnDisk.Set(float64(len(files)))
 			for _, currentFile := range files {
 				select {
@@ -91,10 +92,14 @@ func (s *NagiosSpoolfileCollector) run() {
 
 // FilesInDirectoryOlderThanX returns a list of file, of a folder, names which are older then a certain duration.
 func FilesInDirectoryOlderThanX(folder string, age time.Duration) []string {
-	files, _ := ioutil.ReadDir(folder)
+	files, _ := os.ReadDir(folder)
 	var oldFiles []string
 	for _, currentFile := range files {
-		if IsItTime(currentFile.ModTime(), age) {
+		fsinfo, err := currentFile.Info()
+		if err != nil {
+			continue
+		}
+		if IsItTime(fsinfo.ModTime(), age) {
 			oldFiles = append(oldFiles, path.Join(folder, currentFile.Name()))
 		}
 	}

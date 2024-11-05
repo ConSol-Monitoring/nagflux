@@ -3,7 +3,6 @@ package json
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"time"
@@ -13,7 +12,7 @@ import (
 	"github.com/kdar/factorlog"
 )
 
-type JSONFileWorker struct {
+type FileWorker struct {
 	rotationDuration time.Duration
 	rotation         bool
 	jobs             chan collector.Printable
@@ -25,8 +24,8 @@ type JSONFileWorker struct {
 }
 
 // NewJSONFileWorker creates a new JSONFileWorker
-func NewJSONFileWorker(log *factorlog.FactorLog, rotation int, jobs chan collector.Printable, target data.Target, path string) *JSONFileWorker {
-	w := &JSONFileWorker{
+func NewJSONFileWorker(log *factorlog.FactorLog, rotation int, jobs chan collector.Printable, target data.Target, path string) *FileWorker {
+	w := &FileWorker{
 		jobs:      jobs,
 		target:    target,
 		path:      path,
@@ -56,7 +55,7 @@ func NewJSONFileWorker(log *factorlog.FactorLog, rotation int, jobs chan collect
 }
 
 // Stop stops the Dumper.
-func (t *JSONFileWorker) Stop() {
+func (t *FileWorker) Stop() {
 	if t.IsRunning {
 		t.quit <- true
 		<-t.quit
@@ -65,7 +64,7 @@ func (t *JSONFileWorker) Stop() {
 	}
 }
 
-func (t JSONFileWorker) run() {
+func (t FileWorker) run() {
 	var queries []collector.Printable
 	var query collector.Printable
 	go func() {
@@ -92,7 +91,7 @@ func (t JSONFileWorker) run() {
 	}
 }
 
-func (t JSONFileWorker) writeData(data []collector.Printable) {
+func (t FileWorker) writeData(data []collector.Printable) {
 	if len(data) == 0 {
 		return
 	}
@@ -108,7 +107,7 @@ func (t JSONFileWorker) writeData(data []collector.Printable) {
 			t.log.Critical("JSON rotation marshal err:", err)
 			return
 		}
-		err = ioutil.WriteFile(filePath, out, 0644)
+		err = os.WriteFile(filePath, out, 0o644)
 		if err != nil {
 			t.log.Critical("JSON rotation write err:", err)
 		}
@@ -125,21 +124,20 @@ func (t JSONFileWorker) writeData(data []collector.Printable) {
 		}
 
 		if _, err := os.Stat(filePath); err == nil {
-			if f, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0600); err != nil {
-				t.log.Critical(err)
+			if f, err2 := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0o600); err2 != nil {
+				t.log.Critical(err2)
 			} else {
-				_, err = f.Write(dataToWrite)
-				if err != nil {
-					t.log.Critical(err)
+				_, err2 = f.Write(dataToWrite)
+				if err2 != nil {
+					t.log.Critical(err2)
 				}
-				err = f.Close()
-				if err != nil {
-					t.log.Critical(err)
-
+				err2 = f.Close()
+				if err2 != nil {
+					t.log.Critical(err2)
 				}
 			}
 		} else {
-			err = ioutil.WriteFile(filePath, dataToWrite, 0644)
+			err = os.WriteFile(filePath, dataToWrite, 0o644)
 			if err != nil {
 				t.log.Critical("JSON no rotation write err:", err)
 			}
@@ -147,7 +145,7 @@ func (t JSONFileWorker) writeData(data []collector.Printable) {
 	}
 }
 
-func (t JSONFileWorker) getFilename() string {
+func (t FileWorker) getFilename() string {
 	if t.rotation {
 		return path.Join(t.path, fmt.Sprintf("perfdata_%d", time.Now().Unix()))
 	}

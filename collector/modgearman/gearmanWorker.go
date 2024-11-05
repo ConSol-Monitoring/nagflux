@@ -1,4 +1,4 @@
-package modGearman
+package modgearman
 
 import (
 	"time"

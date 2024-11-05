@@ -46,9 +46,8 @@ func (connector Connector) connectToLivestatus(query string, result chan []strin
 		if err != nil {
 			if err == io.EOF {
 				break
-			} else {
-				connector.Log.Warn(err)
 			}
+			connector.Log.Warn(err)
 		}
 		length = len(message)
 		if length > 0 {

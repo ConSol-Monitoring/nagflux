@@ -2,7 +2,6 @@ package config
 
 import (
 	"bufio"
-	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -42,7 +41,7 @@ var configFileContent = `[main]
 	Address = "127.0.0.1:4730"
 	Queue = "perfdata"
 	# Leave Secret and SecretFile empty to disable encryption
-	# If both are filled the the Secret will be used
+	# If both are filled the Secret will be used
 	# Secret to encrypt the gearman jobs
 	Secret = ""
 	# Path to a file which holds the secret to encrypt the gearman jobs
@@ -85,7 +84,7 @@ var configFileContent = `[main]
 	Version = 2.1`
 
 func TestInitConfig(t *testing.T) {
-	file, err := ioutil.TempFile(os.TempDir(), "prefix")
+	file, err := os.CreateTemp("", "prefix")
 	if err != nil {
 		panic(err)
 	}

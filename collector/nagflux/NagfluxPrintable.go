@@ -21,13 +21,13 @@ func (p Printable) PrintForInfluxDB(version string) string {
 	if helper.VersionOrdinal(version) >= helper.VersionOrdinal("0.9") {
 		line := p.Table
 		if len(p.tags) > 0 {
-			line += fmt.Sprintf(`,%s`, helper.PrintMapAsString(p.tags, ",", "="))
+			line += `,` + helper.PrintMapAsString(p.tags, ",", "=")
 		}
 		line += " "
 		if len(p.fields) > 0 {
-			line += fmt.Sprintf(`%s`, helper.PrintMapAsString(p.fields, ",", "="))
+			line += helper.PrintMapAsString(p.fields, ",", "=")
 		}
-		return fmt.Sprintf("%s %s", line, p.Timestamp)
+		return line + ` ` + p.Timestamp
 	}
 	return ""
 }
@@ -36,7 +36,7 @@ func (p Printable) PrintForInfluxDB(version string) string {
 func (p Printable) PrintForElasticsearch(version, index string) string {
 	if helper.VersionOrdinal(version) >= helper.VersionOrdinal("2.0") {
 		head := fmt.Sprintf(`{"index":{"_index":"%s","_type":"%s"}}`, helper.GenIndex(index, p.Timestamp), p.Table) + "\n"
-		data := fmt.Sprintf(`{"timestamp":%s`, p.Timestamp)
+		data := `{"timestamp":` + p.Timestamp
 		data += helper.CreateJSONFromStringMap(p.tags)
 		data += helper.CreateJSONFromStringMap(p.fields)
 		data += "}\n"

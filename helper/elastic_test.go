@@ -83,7 +83,7 @@ const Config = `[main]
     Address = "127.0.0.1:4730"
     Queue = "perfdata"
     # Leave Secret and SecretFile empty to disable encryption
-    # If both are filled the the Secret will be used
+    # If both are filled the Secret will be used
     # Secret to encrypt the gearman jobs
     Secret = ""
     # Path to a file which holds the secret to encrypt the gearman jobs
@@ -125,7 +125,7 @@ const Config = `[main]
 
 func TestGenIndex(t *testing.T) {
 	config.InitConfigFromString(fmt.Sprintf(Config, "monthly"))
-	//Do 24. Mär 15:00:44 CET 2016 == 1458828043
+	// Do 24. Mär 15:00:44 CET 2016 == 1458828043
 	result := GenIndex("index", "1458828043000")
 	expected := "index-2016.03"
 	if result != expected {
@@ -141,7 +141,6 @@ func TestGenIndex(t *testing.T) {
 	if !didThisPanic(GenIndex, "index", "1458828043000") {
 		t.Error("The Config was invalid but did not panic!")
 	}
-
 }
 
 func didThisPanic(f func(string, string) string, arg1, arg2 string) (result bool) {

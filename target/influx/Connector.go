@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"regexp"
 	"time"
@@ -36,15 +36,16 @@ type Connector struct {
 	stopReadingDataIfDown     bool
 	clientTimeout             int
 	createDatabaseIfNotExists bool
-	healthUrl                 string
+	healthURL                 string
 }
 
 // ConnectorFactory Constructor which will create some workers if the connection is established.
 func ConnectorFactory(jobs chan collector.Printable, connectionHost, connectionArgs, dumpFile, version string,
-	workerAmount, maxWorkers int, createDatabaseIfNotExists, stopReadingDataIfDown bool, target data.Target, clientTimeout int, healthUrl string) *Connector {
+	workerAmount, maxWorkers int, createDatabaseIfNotExists, stopReadingDataIfDown bool, target data.Target, clientTimeout int, healthURL string,
+) *Connector {
 	parsedArgs := helper.StringToMap(connectionArgs, "&", "=")
 	var databaseName string
-	if db, found_db := parsedArgs["db"]; found_db {
+	if db, foundDB := parsedArgs["db"]; foundDB {
 		databaseName = db
 	}
 
@@ -55,7 +56,7 @@ func ConnectorFactory(jobs chan collector.Printable, connectionHost, connectionA
 		connectionHost: connectionHost, connectionArgs: connectionArgs, dumpFile: dumpFile,
 		workers: make([]*Worker, workerAmount), maxWorkers: maxWorkers, jobs: jobs, quit: make(chan bool),
 		log: logging.GetLogger(), version: version, isAlive: false, databaseExists: false, databaseName: databaseName,
-		httpClient: client, target: target, stopReadingDataIfDown: stopReadingDataIfDown, clientTimeout: clientTimeout, createDatabaseIfNotExists: createDatabaseIfNotExists, healthUrl: healthUrl,
+		httpClient: client, target: target, stopReadingDataIfDown: stopReadingDataIfDown, clientTimeout: clientTimeout, createDatabaseIfNotExists: createDatabaseIfNotExists, healthURL: healthURL,
 	}
 
 	if createDatabaseIfNotExists && databaseName == "" {
@@ -65,14 +66,14 @@ func ConnectorFactory(jobs chan collector.Printable, connectionHost, connectionA
 	}
 
 	// set external health check url "healthUrl":
-	matched, _ := regexp.MatchString("http.*://", healthUrl)
+	matched, _ := regexp.MatchString("http.*://", healthURL)
 	if matched == false {
-		if healthUrl != "" {
+		if healthURL != "" {
 			// make local uri global:
-			s.healthUrl = connectionHost + healthUrl
+			s.healthURL = connectionHost + healthURL
 		} else {
 			// default for influxDB:
-			s.healthUrl = connectionHost + "/ping"
+			s.healthURL = connectionHost + "/ping"
 		}
 	}
 
@@ -83,8 +84,8 @@ func ConnectorFactory(jobs chan collector.Printable, connectionHost, connectionA
 	}
 
 	loginData := ""
-	if pw, found_pw := parsedArgs["p"]; found_pw {
-		if login, found_login := parsedArgs["u"]; found_login {
+	if pw, foundPW := parsedArgs["p"]; foundPW {
+		if login, foundLogin := parsedArgs["u"]; foundLogin {
 			loginData = fmt.Sprintf("p=%s&u=%s", pw, login)
 		}
 	}
@@ -120,7 +121,7 @@ func ConnectorFactory(jobs chan collector.Printable, connectionHost, connectionA
 		}
 	}
 
-	for w := 0; w < workerAmount; w++ {
+	for w := range workerAmount {
 		s.workers[w] = gen(w)
 	}
 	go s.run()
@@ -199,7 +200,7 @@ func (connector *Connector) run() {
 
 // TestIfIsAlive test active if the database system is alive.
 func (connector *Connector) TestIfIsAlive(stopReadingDataIfDown bool) bool {
-	result := helper.RequestedReturnCodeIsOK(connector.httpClient, connector.healthUrl, "GET")
+	result := helper.RequestedReturnCodeIsOK(connector.httpClient, connector.healthURL, "GET")
 	connector.isAlive = result
 	connector.log.Infof("Is InfluxDB(%s) running: %t", connector.target.Name, result)
 	if stopReadingDataIfDown {
@@ -210,7 +211,6 @@ func (connector *Connector) TestIfIsAlive(stopReadingDataIfDown bool) bool {
 
 // TestDatabaseExists test active if the database exists.
 func (connector *Connector) TestDatabaseExists() bool {
-
 	if !connector.createDatabaseIfNotExists {
 		connector.log.Debug("Skipped TestDatabaseExists:" + connector.databaseName)
 		return true
@@ -220,7 +220,7 @@ func (connector *Connector) TestDatabaseExists() bool {
 		return false
 	}
 	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		var jsonResult ShowSeriesResult
@@ -255,5 +255,4 @@ func (connector *Connector) CreateDatabase(loginData string) bool {
 		connector.log.Warn("Could not create database:" + connector.databaseName)
 	}
 	return result
-
 }

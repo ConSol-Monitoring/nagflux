@@ -1,7 +1,7 @@
-package modGearman
+package modgearman
 
 import (
-	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -14,11 +14,11 @@ func GetSecret(secret, secretFile string) string {
 		return secret
 	}
 	if secretFile != "" {
-		if data, err := ioutil.ReadFile(secretFile); err != nil {
+		data, err := os.ReadFile(secretFile)
+		if err != nil {
 			panic(err)
-		} else {
-			return strings.TrimSpace(string(data))
 		}
+		return strings.TrimSpace(string(data))
 	}
 	return ""
 }

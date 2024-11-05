@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -63,74 +63,96 @@ func testResult(t []testData, result []influx.SeriesValue) bool {
 }
 
 var NagiosTestData1 = []testData{
-	//Nasty
-	{`DATATYPE::SERVICEPERFDATA	TIMET::1	HOSTNAME::h1	SERVICEDESC::s1	SERVICEPERFDATA::C: use=1;2;3;4;5	SERVICECHECKCOMMAND::usage
+	// Nasty
+	{
+		`DATATYPE::SERVICEPERFDATA	TIMET::1	HOSTNAME::h1	SERVICEDESC::s1	SERVICEPERFDATA::C: use=1;2;3;4;5	SERVICECHECKCOMMAND::usage
 `,
 		// [time command crit crit-fill host max min performanceLabel service value warn warn-fill]
 		// [1000 usage 3 none h1 5 <nil> 4 C: use s1 <nil> 1 2 none]
-		[]interface{}{1000.0, "usage", 3.0, "none", "h1", 5.0, nil, 4.0, `C: use`, "s1", nil, 1.0, 2.0, "none"}},
-	{`DATATYPE::SERVICEPERFDATA	TIMET::3	HOSTNAME::h1	SERVICEDESC::s1	SERVICEPERFDATA::D:\ use=1;2;3;4;5	SERVICECHECKCOMMAND::usage
+		[]interface{}{1000.0, "usage", 3.0, "none", "h1", 5.0, nil, 4.0, `C: use`, "s1", nil, 1.0, 2.0, "none"},
+	},
+	{
+		`DATATYPE::SERVICEPERFDATA	TIMET::3	HOSTNAME::h1	SERVICEDESC::s1	SERVICEPERFDATA::D:\ use=1;2;3;4;5	SERVICECHECKCOMMAND::usage
 `,
 		// [time command crit crit-fill host max min performanceLabel service value warn warn-fill]
 		// [3000 usage 3 none h1 5 <nil> 4 D:\ use s1 <nil> 1 2 none]
-		[]interface{}{3000.0, "usage", 3.0, "none", "h1", 5.0, nil, 4.0, `D:\ use`, "s1", nil, 1.0, 2.0, "none"}},
-	//Normal
-	{`DATATYPE::SERVICEPERFDATA	TIMET::2	HOSTNAME::h2	SERVICEDESC::s2	SERVICEPERFDATA::rta=2;3;4;5;6	SERVICECHECKCOMMAND::ping
+		[]interface{}{3000.0, "usage", 3.0, "none", "h1", 5.0, nil, 4.0, `D:\ use`, "s1", nil, 1.0, 2.0, "none"},
+	},
+	// Normal
+	{
+		`DATATYPE::SERVICEPERFDATA	TIMET::2	HOSTNAME::h2	SERVICEDESC::s2	SERVICEPERFDATA::rta=2;3;4;5;6	SERVICECHECKCOMMAND::ping
 `,
 		//[2000 ping 4 none h2 6 <nil> 5 rta s2 <nil> 2 3 none]
-		[]interface{}{2000.0, "ping", 4.0, "none", "h2", 6.0, nil, 5.0, "rta", "s2", nil, 2.0, 3.0, "none"}},
-	{`DATATYPE::SERVICEPERFDATA	TIMET::1490957788	HOSTNAME::müü	SERVICEDESC::möö	SERVICEPERFDATA::getItinerary_min=34385µs	SERVICECHECKCOMMAND::check_perfs	SERVICESTATE::0	SERVICESTATETYPE::1
+		[]interface{}{2000.0, "ping", 4.0, "none", "h2", 6.0, nil, 5.0, "rta", "s2", nil, 2.0, 3.0, "none"},
+	},
+	{
+		`DATATYPE::SERVICEPERFDATA	TIMET::1490957788	HOSTNAME::müü	SERVICEDESC::möö	SERVICEPERFDATA::getItinerary_min=34385µs	SERVICECHECKCOMMAND::check_perfs	SERVICESTATE::0	SERVICESTATETYPE::1
 `,
 		// [time command crit crit-fill host max min performanceLabel service value warn warn-fill]
 		// [1.490957788e+12 check_perfs <nil> <nil> müü <nil> <nil> <nil> getItinerary_min möö µs 34385 <nil> <nil>]
-		[]interface{}{1490957788000.0, "check_perfs", nil, nil, "müü", nil, nil, nil, "getItinerary_min", "möö", "µs", 34385.0, nil, nil}},
+		[]interface{}{1490957788000.0, "check_perfs", nil, nil, "müü", nil, nil, nil, "getItinerary_min", "möö", "µs", 34385.0, nil, nil},
+	},
 }
+
 var NagiosTestData21 = []testData{
-	//Database1
+	// Database1
 	{`DATATYPE::SERVICEPERFDATA	TIMET::4	HOSTNAME::h3	SERVICEDESC::s1	SERVICEPERFDATA::rta=2;3;4;5;6	SERVICECHECKCOMMAND::special	NAGFLUX:TARGET::` + database1 + `
 `, //[2000 ping 4 none h2 6 <nil> 5 rta s2 2 3 none]
 		[]interface{}{4000.0, "special", 4.0, "none", "h3", 6.0, nil, 5.0, "rta", "s1", nil, 2.0, 3.0, "none"}},
 }
+
 var NagiosTestData22 = []testData{
-	//Database2
+	// Database2
 	{`DATATYPE::SERVICEPERFDATA	TIMET::4	HOSTNAME::h3	SERVICEDESC::s2	SERVICEPERFDATA::rta=2;3;4;5;6	SERVICECHECKCOMMAND::special	NAGFLUX:TARGET::` + database2 + `
 `, //[2000 ping 4 none h2 6 <nil> 5 rta s2 2 3 none]
 		[]interface{}{4000.0, "special", 4.0, "none", "h3", 6.0, nil, 5.0, "rta", "s2", nil, 2.0, 3.0, "none"}},
 }
 
 var NagfluxTestData1 = []testData{
-	{`table&time&t_host&t_service&t_command&t_performanceLabel&f_value
+	{
+		`table&time&t_host&t_service&t_command&t_performanceLabel&f_value
 metrics&10&nagflux&service1&command1&perf&20
 `,
 		//[10 command1 <nil> <nil> nagflux <nil> <nil> <nil> perf service1 20 <nil> <nil>]
-		[]interface{}{10.0, "command1", nil, nil, "nagflux", nil, nil, nil, "perf", "service1", nil, 20.0, nil, nil}},
-	{`metrics&20&nagflux&service\ 1&command1&perf\ 1&30
+		[]interface{}{10.0, "command1", nil, nil, "nagflux", nil, nil, nil, "perf", "service1", nil, 20.0, nil, nil},
+	},
+	{
+		`metrics&20&nagflux&service\ 1&command1&perf\ 1&30
 `,
 		//[20 command1 <nil> <nil> nagflux <nil> <nil> <nil> perf\ 1 service\ 1 30 <nil> <nil>]
-		[]interface{}{20.0, "command1", nil, nil, "nagflux", nil, nil, nil, "perf 1", "service 1", nil, 30.0, nil, nil}},
+		[]interface{}{20.0, "command1", nil, nil, "nagflux", nil, nil, nil, "perf 1", "service 1", nil, 30.0, nil, nil},
+	},
 }
 
 var NagfluxTestData2 = []testData{
-	{`table&time&t_host&t_service&f_message
+	{
+		`table&time&t_host&t_service&f_message
 messages&100&nagflux&service1&"""Hallo World"""
 `,
 		//[100 <nil> <nil> <nil> nagflux <nil> Hallo World <nil> <nil> service1 <nil> <nil> <nil>]
-		[]interface{}{100.0, nil, nil, nil, "nagflux", nil, "Hallo World", nil, nil, "service1", nil, nil, nil, nil}},
-	{`messages&300&nagflux&service1&"""Hallo \\"""
+		[]interface{}{100.0, nil, nil, nil, "nagflux", nil, "Hallo World", nil, nil, "service1", nil, nil, nil, nil},
+	},
+	{
+		`messages&300&nagflux&service1&"""Hallo \\"""
 `,
 		//[300 <nil> <nil> <nil> nagflux <nil> Hallo \ <nil> <nil> service1 <nil> <nil> <nil>]
-		[]interface{}{300.0, nil, nil, nil, "nagflux", nil, `Hallo \`, nil, nil, "service1", nil, nil, nil, nil}},
+		[]interface{}{300.0, nil, nil, nil, "nagflux", nil, `Hallo \`, nil, nil, "service1", nil, nil, nil, nil},
+	},
 }
 
-var TestDataName = `metrics`
-var TestDataColumns = []string{"time", "command", "crit", "crit-fill", "host", "max", "message", "min", "performanceLabel", "service", "unit", "value", "warn", "warn-fill"}
-var influxParam string
-var livestatusParam string
-var save bool
-var finished chan bool
+var (
+	TestDataName    = `metrics`
+	TestDataColumns = []string{"time", "command", "crit", "crit-fill", "host", "max", "message", "min", "performanceLabel", "service", "unit", "value", "warn", "warn-fill"}
+	influxParam     string
+	livestatusParam string
+	save            bool
+	finished        chan bool
+)
 
-var database1 = databaseName + "_1"
-var database2 = databaseName + "_2"
+var (
+	database1 = databaseName + "_1"
+	database2 = databaseName + "_2"
+)
 
 func init() {
 	finished = make(chan bool)
@@ -191,14 +213,14 @@ func TestEverything(t *testing.T) {
 }
 
 func createTestData(folder, file string, data []testData) {
-	if err := os.MkdirAll(folder, 0700); err != nil {
+	if err := os.MkdirAll(folder, 0o700); err != nil {
 		panic(err)
 	}
 	fileData := []byte{}
 	for _, data := range data {
 		fileData = append(fileData, []byte(data.input)...)
 	}
-	if err := ioutil.WriteFile(folder+file, fileData, 0644); err != nil {
+	if err := os.WriteFile(folder+file, fileData, 0o644); err != nil {
 		panic(err)
 	}
 	fmt.Println(string(fileData))
@@ -269,7 +291,7 @@ func getEverything(database string) (*influx.ShowSeriesResult, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
+	body, _ := io.ReadAll(resp.Body)
 
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		var jsonResult influx.ShowSeriesResult
@@ -339,7 +361,7 @@ func createConfig() {
 	MinutesToWait = 0
 
 `, database1, influxParam, database1, database2, influxParam, database2, livestatusParam))
-	if err := ioutil.WriteFile(filename, config, 0644); err != nil {
+	if err := os.WriteFile(filename, config, 0o644); err != nil {
 		panic(err)
 	}
 }

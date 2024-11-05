@@ -1,10 +1,10 @@
 package helper
 
 import (
-	"bytes"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"strings"
 )
 
 // RequestedReturnCodeIsOK makes an HEAD or GET request. If the returncode is 2XX it will return true.
@@ -31,7 +31,7 @@ func SentReturnCodeIsOK(client http.Client, url, function string, data string) (
 	var resp *http.Response
 	var err error
 
-	req, err = http.NewRequest(function, url, bytes.NewBuffer([]byte(data)))
+	req, err = http.NewRequest(function, url, strings.NewReader(data))
 	req.Header.Set("User-Agent", "Nagflux")
 	if err != nil {
 		return false, err.Error()
@@ -55,7 +55,7 @@ func isReturnCodeOK(resp *http.Response) bool {
 
 func getBody(resp *http.Response) string {
 	if resp != nil {
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err == nil {
 			return string(body)
 		}

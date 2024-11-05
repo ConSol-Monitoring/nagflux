@@ -1,7 +1,6 @@
 package livestatus
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -21,23 +20,23 @@ type CacheBuilder struct {
 }
 
 const (
-	//Updateinterval on livestatus data.
+	// Updateinterval on livestatus data.
 	intervalToCheckLivestatusCache = time.Duration(30) * time.Second
-	//QueryForServicesInDowntime livestatusquery for services in downtime.
+	// QueryForServicesInDowntime livestatusquery for services in downtime.
 	QueryForServicesInDowntime = `GET services
 Columns: downtimes host_name display_name
 Filter: scheduled_downtime_depth > 0
 OutputFormat: csv
 
 `
-	//QueryForHostsInDowntime livestatusquery for hosts in downtime
+	// QueryForHostsInDowntime livestatusquery for hosts in downtime
 	QueryForHostsInDowntime = `GET hosts
 Columns: downtimes name
 Filter: scheduled_downtime_depth > 0
 OutputFormat: csv
 
 `
-	//QueryForDowntimeid livestatusquery for downtime start/end
+	// QueryForDowntimeid livestatusquery for downtime start/end
 	QueryForDowntimeid = `GET downtimes
 Columns: id start_time entry_time
 OutputFormat: csv
@@ -91,7 +90,7 @@ func (builder CacheBuilder) createLivestatusCache() Cache {
 	go builder.livestatusConnector.connectToLivestatus(QueryForServicesInDowntime, hostServiceCsv, finished)
 
 	jobsFinished := 0
-	//contains id to starttime
+	// contains id to starttime
 	downtimes := map[string]string{}
 	for jobsFinished < 2 {
 		select {
@@ -107,7 +106,7 @@ func (builder CacheBuilder) createLivestatusCache() Cache {
 				latestTime = entryTime
 			}
 			for _, id := range strings.Split(downtimesLine[0], ",") {
-				downtimes[id] = fmt.Sprint(latestTime)
+				downtimes[id] = strconv.Itoa(latestTime)
 			}
 		case <-finishedDowntime:
 			for jobsFinished < 2 {

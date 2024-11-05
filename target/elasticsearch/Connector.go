@@ -34,9 +34,11 @@ func ConnectorFactory(jobs chan collector.Printable, connectionHost, index, dump
 	if connectionHost[len(connectionHost)-1] != '/' {
 		connectionHost += "/"
 	}
-	s := &Connector{connectionHost, index, dumpFile, make([]*Worker, workerAmount), maxWorkers,
+	s := &Connector{
+		connectionHost, index, dumpFile, make([]*Worker, workerAmount), maxWorkers,
 		jobs, make(chan bool), logging.GetLogger(), version,
-		false, false, http.Client{Timeout: time.Duration(5 * time.Second)},
+		false, false,
+		http.Client{Timeout: time.Duration(5 * time.Second)},
 	}
 
 	gen := WorkerGenerator(jobs, connectionHost+"_bulk", index, dumpFile, version, s)
@@ -61,7 +63,7 @@ func ConnectorFactory(jobs chan collector.Printable, connectionHost, index, dump
 		s.log.Panic("Template does not exists and was not able to created")
 	}
 
-	for w := 0; w < workerAmount; w++ {
+	for w := range workerAmount {
 		s.workers[w] = gen(w)
 	}
 	go s.run()

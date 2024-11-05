@@ -34,7 +34,7 @@ func (notification NotificationData) PrintForInfluxDB(version string) string {
 		value := fmt.Sprintf("%s:<br> %s", strings.TrimSpace(notification.notificationLevel), notification.comment)
 		return notification.genInfluxLineWithValue(tags, value)
 	}
-	logging.GetLogger().Criticalf("This influxversion [%f] given in the config is not supported", version)
+	logging.GetLogger().Criticalf("This influxversion [%s] given in the config is not supported", version)
 	panic("")
 }
 
@@ -45,7 +45,7 @@ func (notification NotificationData) PrintForElasticsearch(version, index string
 		value := fmt.Sprintf("%s:<br> %s", strings.TrimSpace(notification.notificationLevel), notification.comment)
 		return notification.genElasticLineWithValue(index, text, value, notification.entryTime)
 	}
-	logging.GetLogger().Criticalf("This elasticsearchversion [%f] given in the config is not supported", version)
+	logging.GetLogger().Criticalf("This elasticsearchversion [%s] given in the config is not supported", version)
 	panic("")
 }
 

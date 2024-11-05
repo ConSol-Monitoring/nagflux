@@ -2,7 +2,6 @@ package helper
 
 import (
 	"bytes"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -71,7 +70,7 @@ func VersionOrdinal(version string) string {
 	const maxByte = 1<<8 - 1
 	vo := make([]byte, 0, len(version)+8)
 	j := -1
-	for i := 0; i < len(version); i++ {
+	for i := range len(version) {
 		b := version[i]
 		if '0' > b || b > '9' {
 			vo = append(vo, b)
@@ -99,7 +98,7 @@ func SPrintStringSlice(slice []string) string {
 	var buffer bytes.Buffer
 	for index, value := range slice {
 		buffer.WriteString("`")
-		buffer.WriteString(fmt.Sprint(value))
+		buffer.WriteString(value)
 		buffer.WriteString("`")
 		if index < (len(slice) - 1) {
 			buffer.WriteString(",")

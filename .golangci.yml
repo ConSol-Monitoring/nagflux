@@ -1,4 +1,9 @@
 linters-settings:
+  gocritic:
+    enabled-tags:
+      - performance
+      - style
+      - experimental
   gocyclo:
     min-complexity: 20
   goconst:
@@ -6,61 +11,81 @@ linters-settings:
     min-occurrences: 12
   lll:
     line-length: 120
-  gocritic:
-    enabled-tags:
-      - performance
-      - style
-      - experimental
-    disabled-checks:
-      - emptyFallthrough
-      - paramTypeCombine
-      - unnamedResult
-      - exitAfterDefer
-    settings:
-      rangeValCopy:
-        sizeThreshold: 32
   funlen:
-    lines: 150
+    lines: 170
     statements: 120
+  gomoddirectives:
+    replace-local: true
   gocognit:
     min-complexity: 35
   exhaustive:
     default-signifies-exhaustive: true
+  asasalint:
+    exclude:
+      - append
+  govet:
+    enable-all: true
+    settings:
+      printf:
+        funcs:
+          - Tracef
+          - Infof
+          - Warnf
+          - Errorf
+          - Fatalf
+          - Criticalf
+          - Panicf
 linters:
   enable-all: true
-  disable:
-    - wsl
-    - lll
-    - gofumpt
-    - gochecknoglobals
-    - testpackage
-    - nlreturn
-    - gomnd
-    - noctx
-    - stylecheck
-    - goerr113
-    - nestif
-    - prealloc
-    - maligned
-    - interfacer
-    - unconvert
-    - whitespace
-    - misspell
-    - golint
-    - ineffassign
-    - godox
-    - gosimple
-    - godot
-    - gosec
-    - gocyclo
-    - gocritic
-    - bodyclose
-    - errcheck
-    - gocognit
-    - gochecknoinits
   fast: false
+  disable:
+    - bodyclose
+    - cyclop
+    - depguard
+    - err113
+    - errcheck
+    - errname
+    - errorlint
+    - exhaustruct
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - gocritic
+    - gocyclo
+    - godot
+    - godox
+    - gofumpt
+    - gosec
+    - gosimple
+    - inamedparam
+    - ineffassign
+    - lll
+    - misspell
+    - mnd
+    - musttag
+    - nestif
+    - nlreturn
+    - noctx
+    - nonamedreturns
+    - paralleltest
+    - prealloc
+    - promlinter
+    - stylecheck
+    - tagliatelle
+    - testpackage
+    - unconvert
+    - varnamelen
+    - wastedassign
+    - whitespace
+    - wrapcheck
+    - wsl
+    # deprecated
+    - execinquery
+    - exportloopref
+    - gomnd
 issues:
   max-same-issues: 0
+  max-issues-per-linter: 0
   exclude-use-default: true
   exclude:
     - 'Magic number: 1\D '
@@ -68,8 +93,14 @@ issues:
     - 'Magic number: 10\D '
     - 'Magic number: 100\D '
     - 'Magic number: 500\D '
+    - 'fieldalignment:'
   exclude-rules:
     # Exclude some linters from running on tests files.
     - path: _test\.go
       linters:
         - gomnd
+        - forbidigo
+        - forcetypeassert
+    - path: nagflux.go
+      linters:
+        - forbidigo

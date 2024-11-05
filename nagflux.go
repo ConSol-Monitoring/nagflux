@@ -11,7 +11,7 @@ import (
 
 	"github.com/ConSol-Monitoring/nagflux/collector"
 	"github.com/ConSol-Monitoring/nagflux/collector/livestatus"
-	"github.com/ConSol-Monitoring/nagflux/collector/modGearman"
+	"github.com/ConSol-Monitoring/nagflux/collector/modgearman"
 	"github.com/ConSol-Monitoring/nagflux/collector/nagflux"
 	"github.com/ConSol-Monitoring/nagflux/collector/spoolfile"
 	"github.com/ConSol-Monitoring/nagflux/config"
@@ -32,11 +32,13 @@ type Stoppable interface {
 // nagfluxVersion contains the current Github-Release
 const nagfluxVersion string = "v0.5.1"
 
-var log *factorlog.FactorLog
-var quit = make(chan bool)
+var (
+	log  *factorlog.FactorLog
+	quit = make(chan bool)
+)
 
 func Nagflux(Build string) {
-	//Parse Args
+	// Parse Args
 	var configPath string
 	var printver bool
 	flag.Usage = func() {
@@ -53,13 +55,13 @@ For further informations / bugs reportes: https://github.com/ConSol-Monitoring/n
 	flag.BoolVar(&printver, "V", false, "print version and exit")
 	flag.Parse()
 
-	//Print version and exit
+	// Print version and exit
 	if printver {
 		fmt.Printf("%s (Build: %s, %s)\n", nagfluxVersion, Build, runtime.Version())
 		os.Exit(0)
 	}
 
-	//Load config
+	// Load config
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		fmt.Printf("Can not find config file: '%s'.\n\nHelp:\n", configPath)
 		flag.Usage()
@@ -68,7 +70,7 @@ For further informations / bugs reportes: https://github.com/ConSol-Monitoring/n
 	config.InitConfig(configPath)
 	cfg := config.GetConfig()
 
-	//Create Logger
+	// Create Logger
 	logging.InitLogger(cfg.Log.LogFile, cfg.Log.MinSeverity)
 	log = logging.GetLogger()
 	log.Info(`Started Nagflux `, nagfluxVersion)
@@ -94,7 +96,7 @@ For further informations / bugs reportes: https://github.com/ConSol-Monitoring/n
 			resultQueues[target],
 			influxConfig.Address, influxConfig.Arguments, cfg.Main.DumpFile, influxConfig.Version,
 			cfg.Main.InfluxWorker, cfg.Main.MaxInfluxWorker, cfg.InfluxDBGlobal.CreateDatabaseIfNotExists,
-			influxConfig.StopPullingDataIfDown, target, cfg.InfluxDBGlobal.ClientTimeout, influxConfig.HealthUrl,
+			influxConfig.StopPullingDataIfDown, target, cfg.InfluxDBGlobal.ClientTimeout, influxConfig.HealthURL,
 		)
 		stoppables = append(stoppables, influx)
 		influxDumpFileCollector := nagflux.NewDumpfileCollector(resultQueues[target], cfg.Main.DumpFile, target, cfg.Main.FileBufferSize)
@@ -147,9 +149,9 @@ For further informations / bugs reportes: https://github.com/ConSol-Monitoring/n
 			continue
 		}
 		log.Infof("Mod_Gearman: %s - %s [%s]", name, data.Address, data.Queue)
-		secret := modGearman.GetSecret(data.Secret, data.SecretFile)
-		for i := 0; i < data.Worker; i++ {
-			gearmanWorker := modGearman.NewGearmanWorker(data.Address,
+		secret := modgearman.GetSecret(data.Secret, data.SecretFile)
+		for range data.Worker {
+			gearmanWorker := modgearman.NewGearmanWorker(data.Address,
 				data.Queue,
 				secret,
 				resultQueues,
