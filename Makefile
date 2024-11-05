@@ -90,7 +90,7 @@ test: dump vendor
 
 # test with filter
 testf: vendor
-	$(GO) test -short -v $(TEST_FLAGS) pkg/* -run "$(filter-out $@,$(MAKECMDGOALS))" 2>&1 | grep -v "no test files" | grep -v "no tests to run" | grep -v "^PASS"
+	$(GO) test -short -v $(TEST_FLAGS) pkg/... -run "$(filter-out $@,$(MAKECMDGOALS))" 2>&1 | grep -v "no test files" | grep -v "no tests to run" | grep -v "^PASS"
 
 longtest: vendor
 	$(GO) test -v $(TEST_FLAGS) pkg/...
@@ -135,18 +135,18 @@ citest: tools vendor
 	#
 
 benchmark:
-	$(GO) test $(TEST_FLAGS) -v -bench=B\* -run=^$$ -benchmem ./pkg/...
+	$(GO) test $(TEST_FLAGS) -v -bench=B\* -run=^$$ -benchmem pkg/...
 
 racetest:
-	$(GO) test -race -short $(TEST_FLAGS) -coverprofile=coverage.txt -covermode=atomic -gcflags "-d=checkptr=0" ./pkg/...
+	$(GO) test -race -short $(TEST_FLAGS) -coverprofile=coverage.txt -covermode=atomic -gcflags "-d=checkptr=0" pkg/...
 
 covertest:
-	$(GO) test -v $(TEST_FLAGS) -coverprofile=cover.out ./pkg/...
+	$(GO) test -v $(TEST_FLAGS) -coverprofile=cover.out pkg/...
 	$(GO) tool cover -func=cover.out
 	$(GO) tool cover -html=cover.out -o coverage.html
 
 coverweb:
-	$(GO) test -v $(TEST_FLAGS) -coverprofile=cover.out ./pkg/...
+	$(GO) test -v $(TEST_FLAGS) -coverprofile=cover.out pkg/...
 	$(GO) tool cover -html=cover.out
 
 clean:
