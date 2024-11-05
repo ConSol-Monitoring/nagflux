@@ -40,7 +40,8 @@ var (
 	checkMulitRegex       = regexp.MustCompile(`^(.*::)(.*)`)
 	rangeRegex            = regexp.MustCompile(`[\d\.\-]+`)
 	regexPerformancelable = regexp.MustCompile(`([^=]+)=(U|[\d\.,\-]+)([\pL\/%]*);?([\d\.,\-:~@]*)?;?([\d\.,\-:~@]*)?;?([\d\.,\-]*)?;?([\d\.,\-]*)?;?\s*`)
-	regexAltCommand       = regexp.MustCompile(`.*\[(.*)\]\s?$`)
+	regexAltCommand       = regexp.MustCompile(`.*\[([a-zA-Z_\-. ]+)\]\s?$`)
+	regexStripErrors      = regexp.MustCompile(`\[[^\*]*\]`)
 )
 
 // NagiosSpoolfileWorker parses the given spoolfiles and adds the extraced perfdata to the queue.
@@ -171,7 +172,9 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 	}
 
 	go func() {
-		perfSlice := regexPerformancelable.FindAllStringSubmatch(input[typ+"PERFDATA"], -1)
+		raw := input[typ+"PERFDATA"]
+		cleaned := regexStripErrors.ReplaceAllString(raw, "")
+		perfSlice := regexPerformancelable.FindAllStringSubmatch(cleaned, -1)
 		currentCheckMultiLabel := ""
 		// try to find a check_multi prefix
 		if len(perfSlice) > 0 && len(perfSlice[0]) > 1 {

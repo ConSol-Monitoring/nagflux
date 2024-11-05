@@ -337,6 +337,20 @@ var TestPerformanceData = []struct {
 			Filterable:       collector.AllFilterable,
 		}},
 	},
+	{
+		"DATATYPE::SERVICEPERFDATA	TIMET::1490957788	HOSTNAME::test	SERVICEDESC::test	SERVICEPERFDATA::sessions=10% [si signo=11] [si_errno=0] [si_code=1]	SERVICECHECKCOMMAND::check_test	SERVICESTATE::0	SERVICESTATETYPE::1",
+		[]PerformanceData{{
+			Hostname:         "test",
+			Service:          "test",
+			Command:          "check_test",
+			Time:             "1490957788000",
+			PerformanceLabel: "sessions",
+			Unit:             "%",
+			Tags:             map[string]string{},
+			Fields:           map[string]string{"value": "10.0"},
+			Filterable:       collector.AllFilterable,
+		}},
+	},
 }
 
 func TestNagiosSpoolfileWorker_PerformanceDataIterator(t *testing.T) {
