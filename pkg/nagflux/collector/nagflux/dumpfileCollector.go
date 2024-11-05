@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"time"
-
 	"pkg/nagflux/collector"
 	"pkg/nagflux/data"
 	"pkg/nagflux/logging"
+	"time"
 
 	"github.com/kdar/factorlog"
 )
@@ -108,7 +107,7 @@ func (dump *DumpfileCollector) run() {
 					return
 				case dump.jobs <- collector.SimplePrintable{
 					Filterable: collector.AllFilterable,
-					Text:       string(buffer.Bytes()),
+					Text:       buffer.String(),
 					Datatype:   dump.target.Datatype,
 				}:
 					os.Remove(dump.dumpFile)

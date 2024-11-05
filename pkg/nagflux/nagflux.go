@@ -5,10 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"runtime"
-	"syscall"
-	"time"
-
 	"pkg/nagflux/collector"
 	"pkg/nagflux/collector/livestatus"
 	"pkg/nagflux/collector/modgearman"
@@ -21,6 +17,9 @@ import (
 	"pkg/nagflux/target/elasticsearch"
 	"pkg/nagflux/target/file/json"
 	"pkg/nagflux/target/influx"
+	"runtime"
+	"syscall"
+	"time"
 
 	"github.com/kdar/factorlog"
 )
@@ -49,7 +48,7 @@ Commandline Parameter:
 -V Print version and exit
 
 Original author: Philip Griesbacher
-For further informations / bugs reportes: https://github.com/ConSol-Monitoring/nagflux
+For further informations / bugs reports: https://github.com/ConSol-Monitoring/nagflux
 `, nagfluxVersion, Build, runtime.Version())
 	}
 	flag.StringVar(&configPath, "configPath", "config.gcfg", "path to the config file")

@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"sync"
-	"time"
-
 	"pkg/nagflux/collector"
 	"pkg/nagflux/logging"
+	"sync"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -135,7 +134,7 @@ func (s PrometheusServer) WatchResultQueueLength(channels collector.ResultQueues
 			for k, c := range channels {
 				s.bufferLength.WithLabelValues(fmt.Sprint(k)).Set(float64(len(c)))
 			}
-			time.Sleep(time.Duration(100 * time.Millisecond))
+			time.Sleep(100 * time.Millisecond)
 		}
 	}()
 }

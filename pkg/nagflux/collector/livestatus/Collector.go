@@ -2,15 +2,14 @@ package livestatus
 
 import (
 	"fmt"
-	"regexp"
-	"strings"
-	"time"
-
 	"pkg/nagflux/collector"
 	"pkg/nagflux/config"
 	"pkg/nagflux/data"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
+	"regexp"
+	"strings"
+	"time"
 
 	"github.com/kdar/factorlog"
 )
@@ -100,7 +99,7 @@ func NewLivestatusCollector(jobs collector.ResultQueues, livestatusConnector *Co
 		case "Naemon":
 			live.log.Info("Setting Livestatus version to: Naemon")
 		default:
-			live.log.Info("Given Livestatusversion is unkown, using Nagios")
+			live.log.Info("Given Livestatusversion is unknown, using Nagios")
 		}
 	}
 	go live.run()

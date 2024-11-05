@@ -20,9 +20,6 @@ linters-settings:
     min-complexity: 35
   exhaustive:
     default-signifies-exhaustive: true
-  asasalint:
-    exclude:
-      - append
   govet:
     enable-all: true
     settings:
@@ -39,7 +36,6 @@ linters:
   enable-all: true
   fast: false
   disable:
-    - bodyclose
     - cyclop
     - depguard
     - err113
@@ -54,14 +50,10 @@ linters:
     - gocritic
     - gocyclo
     - godot
-    - godox
     - gofumpt
     - gosec
-    - gosimple
     - inamedparam
-    - ineffassign
     - lll
-    - misspell
     - mnd
     - musttag
     - nestif
@@ -69,15 +61,11 @@ linters:
     - noctx
     - nonamedreturns
     - paralleltest
-    - prealloc
     - promlinter
     - stylecheck
     - tagliatelle
     - testpackage
-    - unconvert
     - varnamelen
-    - wastedassign
-    - whitespace
     - wrapcheck
     - wsl
     # deprecated
@@ -99,6 +87,7 @@ issues:
     # Exclude some linters from running on tests files.
     - path: _test\.go
       linters:
+        - bodyclose
         - gomnd
         - forbidigo
         - forcetypeassert

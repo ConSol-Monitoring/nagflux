@@ -3,13 +3,12 @@ package elasticsearch
 import (
 	"fmt"
 	"net/http"
-	"strings"
-	"time"
-
 	"pkg/nagflux/collector"
 	"pkg/nagflux/config"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
+	"strings"
+	"time"
 
 	"github.com/kdar/factorlog"
 )
@@ -39,7 +38,7 @@ func ConnectorFactory(jobs chan collector.Printable, connectionHost, index, dump
 		connectionHost, index, dumpFile, make([]*Worker, workerAmount), maxWorkers,
 		jobs, make(chan bool), logging.GetLogger(), version,
 		false, false,
-		http.Client{Timeout: time.Duration(5 * time.Second)},
+		http.Client{Timeout: 5 * time.Second},
 	}
 
 	gen := WorkerGenerator(jobs, connectionHost+"_bulk", index, dumpFile, version, s)
@@ -123,7 +122,7 @@ func (connector *Connector) run() {
 				go worker.Stop()
 			}
 			for len(connector.workers) > 0 {
-				for connector.workers[0].IsRunning == true {
+				for connector.workers[0].IsRunning {
 					time.Sleep(time.Duration(100) * time.Millisecond)
 				}
 				if len(connector.workers) > 1 {
@@ -164,10 +163,8 @@ func (connector *Connector) createTemplate() bool {
 		config.GetConfig().ElasticsearchGlobal.NumberOfReplicas,
 	)
 	createIndex, _ := helper.SentReturnCodeIsOK(connector.httpClient, connector.connectionHost+"_template/"+connector.index, "PUT", mapping)
-	if !createIndex {
-		return false
-	}
-	return true
+
+	return createIndex
 }
 
 // NagfluxTemplate creates a template for settings and mapping for nagflux indices.

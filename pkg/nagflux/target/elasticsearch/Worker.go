@@ -8,14 +8,13 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
-	"sync"
-	"time"
-
 	"pkg/nagflux/collector"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
 	"pkg/nagflux/statistics"
+	"strings"
+	"sync"
+	"time"
 
 	"github.com/kdar/factorlog"
 )
@@ -146,7 +145,7 @@ func (worker Worker) sendBuffer(queries []collector.Printable) {
 	}
 
 	startTime := time.Now()
-	sendErr := worker.sendData([]byte(dataToSend), true)
+	sendErr := worker.sendData(dataToSend, true)
 	if sendErr != nil {
 		for range 3 {
 			switch sendErr {
@@ -168,17 +167,15 @@ func (worker Worker) sendBuffer(queries []collector.Printable) {
 				if err := worker.waitForQuitOrGoOn(); err != nil {
 					// No error handling, because it's time to terminate
 					worker.dumpRemainingQueries(lineQueries)
-					sendErr = nil
 				}
 				// Resend Data
-				sendErr = worker.sendData([]byte(dataToSend), true)
+				sendErr = worker.sendData(dataToSend, true)
 			}
 		}
 		if sendErr != nil {
 			// if there is still an error dump the queries and go on
 			worker.dumpErrorQueries("\n\n"+sendErr.Error()+"\n", lineQueries)
 		}
-
 	}
 	worker.promServer.BytesSend.WithLabelValues("Elasticsearch").Add(float64(len(lineQueries)))
 	worker.promServer.SendDuration.WithLabelValues("Elasticsearch").Add(float64(time.Since(startTime).Seconds() * 1000))

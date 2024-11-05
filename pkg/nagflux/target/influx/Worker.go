@@ -7,16 +7,15 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strconv"
-	"sync"
-	"time"
-
 	"pkg/nagflux/collector"
 	"pkg/nagflux/collector/nagflux"
 	"pkg/nagflux/data"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
 	"pkg/nagflux/statistics"
+	"strconv"
+	"sync"
+	"time"
 
 	"github.com/kdar/factorlog"
 )
@@ -161,7 +160,7 @@ func (worker Worker) sendBuffer(queries []collector.Printable) {
 	}
 
 	startTime := time.Now()
-	sendErr := worker.sendData([]byte(dataToSend), true)
+	sendErr := worker.sendData(dataToSend, true)
 	if sendErr != nil {
 		worker.connector.TestIfIsAlive(worker.stopReadingDataIfDown)
 		worker.connector.TestDatabaseExists()
@@ -185,10 +184,9 @@ func (worker Worker) sendBuffer(queries []collector.Printable) {
 				if err := worker.waitForQuitOrGoOn(); err != nil {
 					// No error handling, because it's time to terminate
 					worker.dumpRemainingQueries(lineQueries)
-					sendErr = nil
 				}
 				// Resend Data
-				sendErr = worker.sendData([]byte(dataToSend), false)
+				sendErr = worker.sendData(dataToSend, false)
 			}
 		}
 		if sendErr != nil {
@@ -196,7 +194,6 @@ func (worker Worker) sendBuffer(queries []collector.Printable) {
 			worker.log.Infof("Dumping queries which couldn't be sent to: %s", worker.dumpFile)
 			worker.dumpQueries(worker.dumpFile, lineQueries)
 		}
-
 	}
 	worker.promServer.BytesSend.WithLabelValues("InfluxDB").Add(float64(len(lineQueries)))
 	timeDiff := float64(time.Since(startTime).Seconds() * 1000)

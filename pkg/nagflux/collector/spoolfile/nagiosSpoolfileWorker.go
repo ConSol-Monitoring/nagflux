@@ -6,16 +6,15 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
-	"strconv"
-	"strings"
-	"time"
-
 	"pkg/nagflux/collector"
 	"pkg/nagflux/collector/livestatus"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
 	"pkg/nagflux/statistics"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
 )
 
 const (
@@ -244,7 +243,6 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 						if len(rangeHits) == 1 {
 							perf.Tags[fillLabel] = "none"
 							perf.Fields[performanceType] = helper.StringIntToStringFloat(rangeHits[0][0])
-
 						} else if len(rangeHits) == 2 {
 							// If there is a range with no infinity as border, create two points
 							if strings.Contains(data, "@") {
@@ -260,7 +258,6 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 						} else {
 							logging.GetLogger().Warnf("Could not parse warn/crit value. Host: %v, Service: %v, Element: %v, Wholedata: %v", perf.Hostname, perf.Service, data, value)
 						}
-
 					} else {
 						if data == "U" {
 							perf.Fields["unknown"] = "true"
@@ -270,7 +267,6 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 							continue item
 						}
 						perf.Fields[performanceType] = helper.StringIntToStringFloat(data)
-
 					}
 				}
 			}

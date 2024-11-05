@@ -14,8 +14,14 @@ func RequestedReturnCodeIsOK(client http.Client, url, function string) bool {
 	switch function {
 	case "HEAD":
 		resp, err = client.Head(url)
+		if err == nil {
+			resp.Body.Close()
+		}
 	case "GET":
 		resp, err = client.Get(url)
+		if err == nil {
+			resp.Body.Close()
+		}
 	default:
 		err = errors.New("Unknown Function")
 	}

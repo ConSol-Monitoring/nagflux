@@ -6,14 +6,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"regexp"
-	"time"
-
 	"pkg/nagflux/collector"
 	"pkg/nagflux/config"
 	"pkg/nagflux/data"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
+	"regexp"
+	"time"
 
 	"github.com/kdar/factorlog"
 )
@@ -50,7 +49,7 @@ func ConnectorFactory(jobs chan collector.Printable, connectionHost, connectionA
 		databaseName = db
 	}
 
-	timeout := time.Duration(time.Duration(clientTimeout) * time.Second)
+	timeout := time.Duration(clientTimeout) * time.Second
 	transport := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
 	client := http.Client{Timeout: timeout, Transport: transport}
 	s := &Connector{
@@ -68,7 +67,7 @@ func ConnectorFactory(jobs chan collector.Printable, connectionHost, connectionA
 
 	// set external health check url "healthUrl":
 	matched, _ := regexp.MatchString("http.*://", healthURL)
-	if matched == false {
+	if !matched {
 		if healthURL != "" {
 			// make local uri global:
 			s.healthURL = connectionHost + healthURL
@@ -80,7 +79,7 @@ func ConnectorFactory(jobs chan collector.Printable, connectionHost, connectionA
 
 	// if  createDatabaseIfNotExists is false, set flag databaseExists flag to true!
 	if !createDatabaseIfNotExists {
-		s.log.Info("InfluxDB(" + target.Name + ") createDatabaseIfNotExists false > databaseExists set permanantly to true")
+		s.log.Info("InfluxDB(" + target.Name + ") createDatabaseIfNotExists false > databaseExists set permanently to true")
 		s.databaseExists = true
 	}
 
@@ -184,7 +183,7 @@ func (connector *Connector) run() {
 				go worker.Stop()
 			}
 			for len(connector.workers) > 0 {
-				for connector.workers[0].IsRunning == true {
+				for connector.workers[0].IsRunning {
 					time.Sleep(time.Duration(100) * time.Millisecond)
 				}
 				if len(connector.workers) > 1 {
