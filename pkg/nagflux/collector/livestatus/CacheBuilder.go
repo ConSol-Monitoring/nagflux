@@ -83,7 +83,7 @@ func (builder *CacheBuilder) run(checkInterval time.Duration) {
 }
 
 // Builds host/service map which are in downtime
-func (builder CacheBuilder) createLivestatusCache() Cache {
+func (builder *CacheBuilder) createLivestatusCache() Cache {
 	result := Cache{downtime: make(map[string]map[string]string)}
 	downtimeCsv := make(chan []string)
 	finishedDowntime := make(chan bool)
@@ -139,7 +139,7 @@ func (builder CacheBuilder) createLivestatusCache() Cache {
 }
 
 // IsServiceInDowntime returns true if the host/service is in downtime
-func (builder CacheBuilder) IsServiceInDowntime(host, service, time string) bool {
+func (builder *CacheBuilder) IsServiceInDowntime(host, service, time string) bool {
 	result := false
 	builder.mutex.Lock()
 	if _, hostExists := builder.downtimeCache.downtime[host]; hostExists {

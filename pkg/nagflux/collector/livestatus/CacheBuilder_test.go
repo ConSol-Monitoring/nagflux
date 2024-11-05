@@ -10,6 +10,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func init() {
+	intervalToCheckLivestatusCache = 2 * time.Second
+}
+
 func TestNewCacheBuilder(t *testing.T) {
 	logging.InitTestLogger()
 	connector := &Connector{logging.GetLogger(), "localhost:6558", "tcp"}
@@ -27,7 +31,6 @@ func TestDisabledServiceInDowntime(t *testing.T) {
 	go livestatus.StartMockLivestatus()
 	connector := &Connector{logging.GetLogger(), livestatus.LivestatusAddress, livestatus.ConnectionType}
 
-	intervalToCheckLivestatusCache = 2 * time.Second
 	cacheBuilder := NewLivestatusCacheBuilder(connector)
 
 	// wait 10 seconds till cache matches
