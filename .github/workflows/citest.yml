@@ -1,0 +1,24 @@
+name: citest
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '30 4 * * 1'
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        go-version:
+          - 1.22.x
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.go-version }}
+    - uses: actions/checkout@v4
+    - run: make clean
+    - run: make citest
+    - run: make
