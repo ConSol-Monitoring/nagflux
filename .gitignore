@@ -7,9 +7,13 @@ nagflux.dump-errors
 cover.out
 nagflux.dump.influx-errors
 *.swp
-.vscode/
+.vscode
+.vstags
+coverage.txt
 .benchmarks/
 vendor/
 tools/
 /nagflux
 test/
+go.work
+go.work.sum

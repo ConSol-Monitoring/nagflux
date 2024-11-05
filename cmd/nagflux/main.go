@@ -1,7 +1,7 @@
 package main
 
 import (
-	nagflux "github.com/ConSol-Monitoring/nagflux"
+	"pkg/nagflux"
 )
 
 // Build contains the current git commit id

@@ -47,6 +47,7 @@ linters:
     - errname
     - errorlint
     - exhaustruct
+    - gci
     - gochecknoglobals
     - gochecknoinits
     - gocognit
