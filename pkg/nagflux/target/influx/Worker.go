@@ -7,15 +7,16 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
+	"sync"
+	"time"
+
 	"pkg/nagflux/collector"
 	"pkg/nagflux/collector/nagflux"
 	"pkg/nagflux/data"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
 	"pkg/nagflux/statistics"
-	"strconv"
-	"sync"
-	"time"
 
 	"github.com/kdar/factorlog"
 )

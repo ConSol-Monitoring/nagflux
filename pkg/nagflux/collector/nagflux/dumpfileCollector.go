@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
+
 	"pkg/nagflux/collector"
 	"pkg/nagflux/data"
 	"pkg/nagflux/logging"
-	"time"
 
 	"github.com/kdar/factorlog"
 )

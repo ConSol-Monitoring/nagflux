@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"pkg/nagflux/collector"
-	"pkg/nagflux/logging"
 	"sync"
 	"time"
+
+	"pkg/nagflux/collector"
+	"pkg/nagflux/logging"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

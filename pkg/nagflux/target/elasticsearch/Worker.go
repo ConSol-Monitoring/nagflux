@@ -8,13 +8,14 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
+	"sync"
+	"time"
+
 	"pkg/nagflux/collector"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
 	"pkg/nagflux/statistics"
-	"strings"
-	"sync"
-	"time"
 
 	"github.com/kdar/factorlog"
 )

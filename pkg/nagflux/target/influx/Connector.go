@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
+	"time"
+
 	"pkg/nagflux/collector"
 	"pkg/nagflux/config"
 	"pkg/nagflux/data"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
-	"regexp"
-	"time"
 
 	"github.com/kdar/factorlog"
 )
@@ -176,26 +177,21 @@ func (connector *Connector) Stop() {
 
 // Waits just for the end.
 func (connector *Connector) run() {
-	for {
-		select {
-		case <-connector.quit:
-			for _, worker := range connector.workers {
-				go worker.Stop()
-			}
-			for len(connector.workers) > 0 {
-				for connector.workers[0].IsRunning {
-					time.Sleep(time.Duration(100) * time.Millisecond)
-				}
-				if len(connector.workers) > 1 {
-					connector.workers = connector.workers[1:]
-				} else {
-					connector.workers = connector.workers[:0]
-				}
-			}
-			connector.quit <- true
-			return
+	<-connector.quit
+	for _, worker := range connector.workers {
+		go worker.Stop()
+	}
+	for len(connector.workers) > 0 {
+		for connector.workers[0].IsRunning {
+			time.Sleep(time.Duration(100) * time.Millisecond)
+		}
+		if len(connector.workers) > 1 {
+			connector.workers = connector.workers[1:]
+		} else {
+			connector.workers = connector.workers[:0]
 		}
 	}
+	connector.quit <- true
 }
 
 // TestIfIsAlive test active if the database system is alive.

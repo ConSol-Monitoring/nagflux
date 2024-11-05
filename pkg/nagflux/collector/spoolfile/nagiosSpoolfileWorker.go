@@ -6,15 +6,16 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
+
 	"pkg/nagflux/collector"
 	"pkg/nagflux/collector/livestatus"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
 	"pkg/nagflux/statistics"
-	"regexp"
-	"strconv"
-	"strings"
-	"time"
 )
 
 const (

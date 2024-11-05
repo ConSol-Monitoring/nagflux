@@ -2,14 +2,15 @@ package livestatus
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
+	"time"
+
 	"pkg/nagflux/collector"
 	"pkg/nagflux/config"
 	"pkg/nagflux/data"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
-	"regexp"
-	"strings"
-	"time"
 
 	"github.com/kdar/factorlog"
 )

@@ -70,11 +70,9 @@ func (t FileWorker) run() {
 	var query collector.Printable
 	go func() {
 		for t.IsRunning {
-			select {
-			case <-time.After(t.rotationDuration):
-				t.writeData(queries)
-				queries = queries[:0]
-			}
+			<-time.After(t.rotationDuration)
+			t.writeData(queries)
+			queries = queries[:0]
 		}
 	}()
 	for {

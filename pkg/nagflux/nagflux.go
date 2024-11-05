@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"runtime"
+	"syscall"
+	"time"
+
 	"pkg/nagflux/collector"
 	"pkg/nagflux/collector/livestatus"
 	"pkg/nagflux/collector/modgearman"
@@ -17,9 +21,6 @@ import (
 	"pkg/nagflux/target/elasticsearch"
 	"pkg/nagflux/target/file/json"
 	"pkg/nagflux/target/influx"
-	"runtime"
-	"syscall"
-	"time"
 
 	"github.com/kdar/factorlog"
 )
