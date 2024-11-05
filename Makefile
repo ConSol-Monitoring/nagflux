@@ -62,10 +62,14 @@ debugbuild: fmt dump vendor
 
 devbuild: debugbuild
 
-test: fmt dump vendor
+test: dump vendor
 	go test -short -v -timeout=1m ./...
 	if grep -rn TODO: *.go ./cmd/; then exit 1; fi
 	if grep -rn Dump *.go ./cmd/*/*.go | grep -v dump.go | grep -vi DumpFile; then exit 1; fi
+
+# test with filter
+testf: vendor
+	go test -short -v -timeout=1m ./... -run "$(filter-out $@,$(MAKECMDGOALS))" 2>&1 | grep -v "no test files" | grep -v "no tests to run" | grep -v "^PASS"
 
 longtest: fmt dump vendor
 	go test -v -timeout=1m ./...
