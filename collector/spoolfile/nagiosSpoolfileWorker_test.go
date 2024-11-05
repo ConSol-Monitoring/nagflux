@@ -394,7 +394,7 @@ func TestPerformanceDataParser_19(t *testing.T) {
 // test error output in brackets
 func TestPerformanceDataParser_20(t *testing.T) {
 	testPerformanceDataParser(t,
-		"DATATYPE::SERVICEPERFDATA	TIMET::1490957788	HOSTNAME::test	SERVICEDESC::test	SERVICEPERFDATA::sessions=10% [si signo=11] [si_errno=0] [si_code=1]	SERVICECHECKCOMMAND::check_test	SERVICESTATE::0	SERVICESTATETYPE::1",
+		"DATATYPE::SERVICEPERFDATA	TIMET::1490957788	HOSTNAME::test	SERVICEDESC::test	SERVICEPERFDATA::sessions=10% [si signo=11] 'valid[1]'=5 [si_errno=0] [si_code=1]	SERVICECHECKCOMMAND::check_test	SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "test",
 			Service:          "test",
@@ -404,6 +404,16 @@ func TestPerformanceDataParser_20(t *testing.T) {
 			Unit:             "%",
 			Tags:             map[string]string{},
 			Fields:           map[string]string{"value": "10.0"},
+			Filterable:       collector.AllFilterable,
+		}, {
+			Hostname:         "test",
+			Service:          "test",
+			Command:          "check_test",
+			Time:             "1490957788000",
+			PerformanceLabel: "'valid[1]'",
+			Unit:             "",
+			Tags:             map[string]string{},
+			Fields:           map[string]string{"value": "5.0"},
 			Filterable:       collector.AllFilterable,
 		}},
 	)

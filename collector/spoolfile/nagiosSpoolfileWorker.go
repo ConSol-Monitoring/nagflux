@@ -41,7 +41,7 @@ var (
 	rangeRegex            = regexp.MustCompile(`[\d\.\-]+`)
 	regexPerformancelable = regexp.MustCompile(`([^=]+)=(U|[\d\.,\-]+)([\pL\/%]*);?([\d\.,\-:~@]*)?;?([\d\.,\-:~@]*)?;?([\d\.,\-]*)?;?([\d\.,\-]*)?;?\s*`)
 	regexAltCommand       = regexp.MustCompile(`.*\[([a-zA-Z_\-. ]+)\]\s?$`)
-	regexStripErrors      = regexp.MustCompile(`\[[^\*]*\]`)
+	regexStripErrors      = regexp.MustCompile(`\[[^\]]*=[^\]]*\]`)
 )
 
 // NagiosSpoolfileWorker parses the given spoolfiles and adds the extraced perfdata to the queue.
