@@ -33,7 +33,7 @@ func TestDisabledServiceInDowntime(t *testing.T) {
 	// wait 10 seconds till cache matches
 	waitUntil := time.Now().Add(10 * time.Second)
 	for time.Now().Before(waitUntil) {
-		if cacheBuilder.IsServiceInDowntime("host1", "service1", "1") {
+		if cacheBuilder.IsServiceInDowntime("host1", "service1", "1") && cacheBuilder.IsServiceInDowntime("host1", "", "2") {
 			break
 		}
 		time.Sleep(100 * time.Millisecond)
