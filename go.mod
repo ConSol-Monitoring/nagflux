@@ -10,6 +10,7 @@ require (
 	github.com/kdar/factorlog v0.0.0-20140929220826-d5b6afb8b4fe
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/prometheus/client_golang v1.7.1
+	github.com/stretchr/testify v1.6.1
 	golang.org/x/tools v0.0.0-20200820180210-c8f393745106
 	gopkg.in/gcfg.v1 v1.2.3
 	gopkg.in/robfig/cron.v2 v2.0.0-20150107220207-be2e0b0deed5 // indirect

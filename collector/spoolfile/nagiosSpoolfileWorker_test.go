@@ -1,11 +1,11 @@
 package spoolfile
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/ConSol-Monitoring/nagflux/collector"
 	"github.com/ConSol-Monitoring/nagflux/helper"
+	"github.com/stretchr/testify/assert"
 )
 
 var TestPerformanceData = []struct {
@@ -271,20 +271,20 @@ var TestPerformanceData = []struct {
 			Service:          "web",
 			Command:          "check_http",
 			Time:             "1489572014000",
-			PerformanceLabel: "size",
-			Unit:             "B",
+			PerformanceLabel: "time",
+			Unit:             "s",
 			Tags:             map[string]string{},
-			Fields:           map[string]string{"value": "128766.0", "min": "0.0"},
+			Fields:           map[string]string{"value": "0.004118", "min": "0.000000"},
 			Filterable:       collector.AllFilterable,
 		}, {
 			Hostname:         "HOST_SERVER",
 			Service:          "web",
 			Command:          "check_http",
 			Time:             "1489572014000",
-			PerformanceLabel: "time",
-			Unit:             "s",
+			PerformanceLabel: "size",
+			Unit:             "B",
 			Tags:             map[string]string{},
-			Fields:           map[string]string{"value": "0.004118", "min": "0.000000"},
+			Fields:           map[string]string{"value": "128766.0", "min": "0.0"},
 			Filterable:       collector.AllFilterable,
 		}},
 	},
@@ -339,78 +339,14 @@ var TestPerformanceData = []struct {
 	},
 }
 
-func compareStringMap(m1, m2 map[string]string) bool {
-	if len(m1) != len(m2) {
-		return false
-	}
-	for k, v := range m1 {
-		if m2[k] != v {
-			return false
-		}
-	}
-	return true
-}
-
-func comparePerformanceData(p1, p2 PerformanceData) (bool, string) {
-	if p1.Hostname != p2.Hostname {
-		return false, "hostname:" + p1.Hostname + "!=" + p2.Hostname
-	}
-	if p1.Service != p2.Service {
-		return false, "service:" + p1.Service + "!=" + p2.Service
-	}
-	if p1.Command != p2.Command {
-		return false, "command:" + p1.Command + "!=" + p2.Command
-	}
-	if p1.Time != p2.Time {
-		return false, "time:" + p1.Time + "!=" + p2.Time
-	}
-	if p1.PerformanceLabel != p2.PerformanceLabel {
-		return false, "performanceLabel:" + p1.PerformanceLabel + "!=" + p2.PerformanceLabel
-	}
-	if p1.Unit != p2.Unit {
-		return false, "unit:" + p1.Unit + "!=" + p2.Unit
-	}
-	if !compareStringMap(p1.Tags, p2.Tags) {
-		return false, "tags:" + fmt.Sprint(p1.Tags) + "!=" + fmt.Sprint(p2.Tags)
-	}
-	if !compareStringMap(p1.Fields, p2.Fields) {
-		return false, "fields:" + fmt.Sprint(p1.Fields) + "!=" + fmt.Sprint(p2.Fields)
-	}
-	if !p1.Filterable.TestTargetFilterObj(p2.Filterable) {
-		return false, "filter:" + fmt.Sprint(p1.Filterable) + "!=" + fmt.Sprint(p2.Filterable)
-	}
-	return true, "equal"
-}
-
-var debug = true
-
 func TestNagiosSpoolfileWorker_PerformanceDataIterator(t *testing.T) {
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable)
 	for _, data := range TestPerformanceData {
 		splittedPerformanceData := helper.StringToMap(data.input, "\t", "::")
+		collectedPerfData := []PerformanceData{}
 		for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
-			found := false
-			for _, expectedPerfdata := range data.expected {
-				equal, _ := comparePerformanceData(singlePerfdata, expectedPerfdata)
-				if equal {
-					found = true
-					break
-				}
-			}
-			if !found && debug {
-				for _, expectedPerfdata := range data.expected {
-					equal, err := comparePerformanceData(singlePerfdata, expectedPerfdata)
-					if equal {
-						break
-					} else {
-						fmt.Println(err)
-					}
-
-				}
-			}
-			if !found {
-				t.Error("The expected perfdata was not found:", singlePerfdata, "\nRaw data:", data)
-			}
+			collectedPerfData = append(collectedPerfData, singlePerfdata)
 		}
+		assert.Equalf(t, data.expected, collectedPerfData, "performance data matches")
 	}
 }
