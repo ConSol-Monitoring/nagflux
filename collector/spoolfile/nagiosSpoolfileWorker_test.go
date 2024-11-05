@@ -8,11 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var TestPerformanceData = []struct {
-	input    string
-	expected []PerformanceData
-}{
-	{
+func TestPerformanceDataParser_01(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -25,8 +22,11 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "4.0"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
+	)
+}
+
+func TestPerformanceDataParser_02(t *testing.T) {
+	testPerformanceDataParser(t,
 		`DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4 'C:\ used %'=44%;89;94;0;100	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1`,
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -49,8 +49,11 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "44.0", "warn": "89.0", "crit": "94.0", "min": "0.0", "max": "100.0"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
+	)
+}
+
+func TestPerformanceDataParser_03(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791001	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4;2;10	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -63,8 +66,11 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "4.0", "warn": "2.0", "crit": "10.0"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
+	)
+}
+
+func TestPerformanceDataParser_04(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791002	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4;2;10;1;4	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -77,8 +83,11 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "4.0", "warn": "2.0", "crit": "10.0", "min": "1.0", "max": "4.0"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
+	)
+}
+
+func TestPerformanceDataParser_05(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791003	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4;2:4;8:10;1;4	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -91,8 +100,11 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "4.0", "warn-min": "2.0", "warn-max": "4.0", "crit-min": "8.0", "crit-max": "10.0", "min": "1.0", "max": "4.0"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
+	)
+}
+
+func TestPerformanceDataParser_06(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791004	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4;@2:4;@8:10;1;4	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -105,8 +117,11 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "4.0", "warn-min": "2.0", "warn-max": "4.0", "crit-min": "8.0", "crit-max": "10.0", "min": "1.0", "max": "4.0"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
+	)
+}
+
+func TestPerformanceDataParser_07(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791005	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4;2:;10:;1;4	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -119,8 +134,11 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "4.0", "warn": "2.0", "crit": "10.0", "min": "1.0", "max": "4.0"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
+	)
+}
+
+func TestPerformanceDataParser_08(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791006	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4;:2;:10;1;4	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -133,8 +151,11 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "4.0", "warn": "2.0", "crit": "10.0", "min": "1.0", "max": "4.0"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
+	)
+}
+
+func TestPerformanceDataParser_09(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791007	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4;~:2;10:~;1;4	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -147,9 +168,12 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "4.0", "warn": "2.0", "crit": "10.0", "min": "1.0", "max": "4.0"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
-		// test dot separated data
+	)
+}
+
+// test dot separated data
+func TestPerformanceDataParser_10(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4.5	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -162,9 +186,12 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "4.5"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
-		// test comma separated data
+	)
+}
+
+// test comma separated data
+func TestPerformanceDataParser_11(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::comma=4,5	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -177,9 +204,12 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "4.5"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
-		// test comma separated data
+	)
+}
+
+// test comma separated data II
+func TestPerformanceDataParser_12(t *testing.T) {
+	testPerformanceDataParser(t,
 		`DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4,6 'C:\ used %'=44,1%;89,2;94,3;0,4;100,5	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1`,
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -202,9 +232,12 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "44.1", "warn": "89.2", "crit": "94.3", "min": "0.4", "max": "100.5"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
-		// test tag
+	)
+}
+
+// test tag
+func TestPerformanceDataParser_13(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	NAGFLUX:TAG::foo=bar	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::tag=4.5	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -217,9 +250,12 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "4.5"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
-		// test empty tag
+	)
+}
+
+// test empty tag
+func TestPerformanceDataParser_14(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	NAGFLUX:TAG::	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::tag=4.5	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -232,9 +268,12 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "4.5"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
-		// test malformed tag
+	)
+}
+
+// test malformed tag
+func TestPerformanceDataParser_15(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	NAGFLUX:TAG::$_SERVICENAGFLUX_TAG$	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::tag=4.5	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -247,9 +286,12 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "4.5"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
-		// test filterable
+	)
+}
+
+// test filterable
+func TestPerformanceDataParser_16(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	NAGFLUX:TARGET::foo	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::tag=4.5	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -262,9 +304,12 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "4.5"},
 			Filterable:       collector.Filterable{Filter: "foo"},
 		}},
-	},
-	{
-		// github https://github.com/Griesbacher/nagflux/issues/19#issuecomment-286799167
+	)
+}
+
+// github https://github.com/Griesbacher/nagflux/issues/19#issuecomment-286799167
+func TestPerformanceDataParser_17(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1489572014	HOSTNAME::HOST_SERVER	SERVICEDESC::web	SERVICEPERFDATA::time=0,004118s;;;0,000000 size=128766B;;;0	SERVICECHECKCOMMAND::check_http!HOST_SERVER!80!/!20	HOSTSTATE::UP	HOSTSTATETYPE::HARD SERVICESTATE::OK	SERVICESTATETYPE::HARD	SERVICEOUTPUT::HTTP OK: HTTP/1.1 200 OK - 128766 bytes in 0,004 second response time",
 		[]PerformanceData{{
 			Hostname:         "HOST_SERVER",
@@ -287,9 +332,12 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "128766.0", "min": "0.0"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
-		// github https://github.com/Griesbacher/nagflux/issues/32
+	)
+}
+
+// github https://github.com/Griesbacher/nagflux/issues/32
+func TestPerformanceDataParser_18(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1490957788	HOSTNAME::müü	SERVICEDESC::möö	SERVICEPERFDATA::getItinerary_min=34385µs getItinerary_avg=130925µs getItinerary_max=267719µs	SERVICECHECKCOMMAND::check_perfs	SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "müü",
@@ -322,8 +370,12 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "267719.0"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
+	)
+}
+
+// test spaces in service name
+func TestPerformanceDataParser_19(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1490957788	HOSTNAME::test	SERVICEDESC::test space	SERVICEPERFDATA::'test rss'=35512320B;;;0;	SERVICECHECKCOMMAND::check_test	SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "test",
@@ -336,8 +388,12 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "35512320.0", "min": "0.0"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
-	{
+	)
+}
+
+// test error output in brackets
+func TestPerformanceDataParser_20(t *testing.T) {
+	testPerformanceDataParser(t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1490957788	HOSTNAME::test	SERVICEDESC::test	SERVICEPERFDATA::sessions=10% [si signo=11] [si_errno=0] [si_code=1]	SERVICECHECKCOMMAND::check_test	SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "test",
@@ -350,17 +406,18 @@ var TestPerformanceData = []struct {
 			Fields:           map[string]string{"value": "10.0"},
 			Filterable:       collector.AllFilterable,
 		}},
-	},
+	)
 }
 
-func TestNagiosSpoolfileWorker_PerformanceDataIterator(t *testing.T) {
+func testPerformanceDataParser(t *testing.T, input string, expect []PerformanceData) {
+	t.Helper()
+
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable)
-	for _, data := range TestPerformanceData {
-		splittedPerformanceData := helper.StringToMap(data.input, "\t", "::")
-		collectedPerfData := []PerformanceData{}
-		for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
-			collectedPerfData = append(collectedPerfData, singlePerfdata)
-		}
-		assert.Equalf(t, data.expected, collectedPerfData, "performance data matches")
+
+	splittedPerformanceData := helper.StringToMap(input, "\t", "::")
+	collectedPerfData := []PerformanceData{}
+	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
+		collectedPerfData = append(collectedPerfData, singlePerfdata)
 	}
+	assert.Equalf(t, expect, collectedPerfData, "performance data matches")
 }
