@@ -1,3 +1,7 @@
+## next
+### Changes
+- remove [error] output from performance data
+
 ## v0.5.1 - 04.10.2024
 ### Changes
 - changed git location to https://github.com/ConSol-Monitoring/nagflux
