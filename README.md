@@ -32,9 +32,6 @@ Nagflux only provides the timestamp in milliseconds.
 
 This typically installs a nagflux binary into `~/go/bin/nagflux`
 
-A x86-64 Linux binary will be added to the releases.
-Here the link to the latest [Release](https://github.com/ConSol-Monitoring/nagflux/releases/latest).
-
 ## Configuration
 
 Here are some of the important config-options:
