@@ -1,4 +1,4 @@
-## next
+## v0.5.2 - 13.11.2024
 ### Changes
 - remove [error] output from performance data
 - moved source into pkg/nagflux
