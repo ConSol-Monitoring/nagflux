@@ -2,6 +2,8 @@
 ### Changes
 - remove [error] output from performance data
 - moved source into pkg/nagflux
+### Feature
+- add influxdb v2 support
 
 ## v0.5.1 - 04.10.2024
 ### Changes
