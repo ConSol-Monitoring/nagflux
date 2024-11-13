@@ -43,6 +43,7 @@ type Config struct {
 		Version               string
 		StopPullingDataIfDown bool
 		HealthURL             string
+		AuthToken             string
 	}
 	Livestatus struct {
 		Type          string

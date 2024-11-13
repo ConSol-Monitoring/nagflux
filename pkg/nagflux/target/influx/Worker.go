@@ -234,6 +234,9 @@ func (worker *Worker) sendData(rawData []byte, log bool) error {
 		worker.log.Warn(err)
 	}
 	req.Header.Set("User-Agent", "Nagflux")
+	if worker.version == "2.0" {
+		req.Header.Set("Authorization", "Token "+worker.connector.authToken)
+	}
 	resp, err := worker.httpClient.Do(req)
 	if err != nil {
 		worker.log.Warn(err)

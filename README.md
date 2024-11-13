@@ -45,9 +45,10 @@ Here are some of the important config-options:
 |main|FieldSeperator|This char is used to separate the logical parts of the tablenames. This char has to be an char which is not allowed in one of those: host-, servicename, command, perfdata|
 |main|FileBufferSize|This is the size of the buffer which is used to read files from disk, if you have huge checks or a lot of them you maybe recive error messages that your buffer is too small and that's the point to change it|
 |Log|MinSeverity|INFO is default an enough for the most. DEBUG give you a lot more data but it's mostly just spamming|
-|InfluxDBGlobal|Version|Currentliy the only supported Version of InfluxDB is 0.9+|
+|Influx "name"|Version|**1.0** - for InfluxDB 0.9+ and 2.0 earlier versions<br>**2.0** - for InfluxDB 2.0 or later versions|
 |Influx "name"|Address|The URL of the InfluxDB-API|
-|Influx "name"|Arguments|Here you can set your user name and password as well as the database. **The precision has to be ms!**|
+|Influx "name"|Arguments|Here you can set your user name and password as well as the database. **The precision has to be ms!**<br> Organization & Bucket details required for InfluxDB 2.0 or later versions|
+|Influx "name"|AuthToken|InfluxDB API Token with required permissions|
 |Influx "name"|NastyString/NastyStringToReplace|These keys are to avoid a bug in InfluxDB and should disappear when the bug is fixed|
 |Influx "name"|StopPullingDataIfDown|This is used to tell Nagflux, if this Influxdb is down to stop reading new data. That's useful if you're using spoolfiles. But if you're using gearman set this always to false because by default gearman will not buffer the data endlessly|
 
