@@ -8,6 +8,7 @@ require pkg/nagflux v0.0.0-00010101000000-000000000000
 
 require (
 	github.com/appscode/g2 v0.0.0-20190123131438-388ba74fd273 // indirect
+	github.com/appscode/go v0.0.0-20201105063637-5613f3b8169f // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/golang/glog v1.2.1 // indirect
@@ -22,7 +23,7 @@ require (
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.60.1 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
-	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/sys v0.27.0 // indirect
 	google.golang.org/protobuf v1.35.1 // indirect
 	gopkg.in/gcfg.v1 v1.2.3 // indirect
 	gopkg.in/robfig/cron.v2 v2.0.0-20150107220207-be2e0b0deed5 // indirect
