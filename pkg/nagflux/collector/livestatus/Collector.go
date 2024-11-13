@@ -115,7 +115,7 @@ func (live *Collector) Stop() {
 }
 
 // Loop which checks livestats for data or waits to quit.
-func (live Collector) run() {
+func (live *Collector) run() {
 	live.queryData()
 	for {
 		select {
@@ -129,7 +129,7 @@ func (live Collector) run() {
 }
 
 // Queries livestatus and returns the data to the gobal queue
-func (live Collector) queryData() {
+func (live *Collector) queryData() {
 	printables := make(chan collector.Printable)
 	finished := make(chan bool)
 	go live.requestPrintablesFromLivestatus(live.logQuery, true, printables, finished)
@@ -150,7 +150,7 @@ func (live Collector) queryData() {
 	}
 }
 
-func (live Collector) requestPrintablesFromLivestatus(query string, addTimestampToQuery bool, printables chan collector.Printable, outerFinish chan bool) {
+func (live *Collector) requestPrintablesFromLivestatus(query string, addTimestampToQuery bool, printables chan collector.Printable, outerFinish chan bool) {
 	queryWithTimestamp := query
 	if addTimestampToQuery {
 		queryWithTimestamp = addTimestampToLivestatusQuery(query)
@@ -174,19 +174,19 @@ func (live Collector) requestPrintablesFromLivestatus(query string, addTimestamp
 				}
 			case QueryForComments:
 				if len(line) == 6 {
-					printables <- CommentData{collector.AllFilterable, Data{line[0], line[1], line[2], line[3], line[4]}, line[5]}
+					printables <- &CommentData{collector.AllFilterable, Data{line[0], line[1], line[2], line[3], line[4]}, line[5]}
 				} else {
 					live.log.Warn("QueryForComments out of range", line)
 				}
 			case QueryForDowntimes:
 				if len(line) == 6 {
-					printables <- DowntimeData{collector.AllFilterable, Data{line[0], line[1], line[2], line[3], line[4]}, line[5]}
+					printables <- &DowntimeData{collector.AllFilterable, Data{line[0], line[1], line[2], line[3], line[4]}, line[5]}
 				} else {
 					live.log.Warn("QueryForDowntimes out of range", line)
 				}
 			case QueryLivestatusVersion:
 				if len(line) == 1 {
-					printables <- collector.SimplePrintable{Filterable: collector.AllFilterable, Text: line[0], Datatype: data.InfluxDB}
+					printables <- &collector.SimplePrintable{Filterable: collector.AllFilterable, Text: line[0], Datatype: data.InfluxDB}
 				} else {
 					live.log.Warn("QueryLivestatusVersion out of range", line)
 				}
@@ -206,7 +206,7 @@ func addTimestampToLivestatusQuery(query string) string {
 	return fmt.Sprintf(query, time.Now().Add(intervalToCheckLivestatus/100*-150).Unix())
 }
 
-func (live Collector) handleQueryForNotifications(line []string) *NotificationData {
+func (live *Collector) handleQueryForNotifications(line []string) *NotificationData {
 	switch line[0] {
 	case "HOST NOTIFICATION":
 		if len(line) == 10 {

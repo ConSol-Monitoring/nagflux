@@ -428,7 +428,7 @@ func testPerformanceDataParser(t *testing.T, input string, expect []PerformanceD
 	splittedPerformanceData := helper.StringToMap(input, "\t", "::")
 	collectedPerfData := []PerformanceData{}
 	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
-		collectedPerfData = append(collectedPerfData, singlePerfdata)
+		collectedPerfData = append(collectedPerfData, *singlePerfdata)
 	}
 	assert.Equalf(t, expect, collectedPerfData, "performance data matches")
 }

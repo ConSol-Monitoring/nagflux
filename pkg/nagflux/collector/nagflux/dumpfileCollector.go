@@ -73,7 +73,7 @@ func (dump *DumpfileCollector) run() {
 					case <-dump.quit:
 						dump.quit <- true
 						return
-					case dump.jobs <- collector.SimplePrintable{
+					case dump.jobs <- &collector.SimplePrintable{
 						Filterable: collector.AllFilterable,
 						Text:       string(line),
 						Datatype:   dump.target.Datatype,
@@ -106,7 +106,7 @@ func (dump *DumpfileCollector) run() {
 				case <-dump.quit:
 					dump.quit <- true
 					return
-				case dump.jobs <- collector.SimplePrintable{
+				case dump.jobs <- &collector.SimplePrintable{
 					Filterable: collector.AllFilterable,
 					Text:       buffer.String(),
 					Datatype:   dump.target.Datatype,

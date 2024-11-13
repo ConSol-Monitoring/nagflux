@@ -19,7 +19,7 @@ type Connector struct {
 }
 
 // Queries livestatus and returns an list of list outer list are lines inner elements within the line.
-func (connector Connector) connectToLivestatus(query string, result chan []string, outerFinish chan bool) {
+func (connector *Connector) connectToLivestatus(query string, result chan []string, outerFinish chan bool) {
 	var conn net.Conn
 	switch connector.ConnectionType {
 	case "tcp":

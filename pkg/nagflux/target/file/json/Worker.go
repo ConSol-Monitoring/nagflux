@@ -65,7 +65,7 @@ func (t *FileWorker) Stop() {
 	}
 }
 
-func (t FileWorker) run() {
+func (t *FileWorker) run() {
 	var queries []collector.Printable
 	var query collector.Printable
 	go func() {
@@ -90,7 +90,7 @@ func (t FileWorker) run() {
 	}
 }
 
-func (t FileWorker) writeData(data []collector.Printable) {
+func (t *FileWorker) writeData(data []collector.Printable) {
 	if len(data) == 0 {
 		return
 	}
@@ -144,7 +144,7 @@ func (t FileWorker) writeData(data []collector.Printable) {
 	}
 }
 
-func (t FileWorker) getFilename() string {
+func (t *FileWorker) getFilename() string {
 	if t.rotation {
 		return path.Join(t.path, fmt.Sprintf("perfdata_%d", time.Now().Unix()))
 	}

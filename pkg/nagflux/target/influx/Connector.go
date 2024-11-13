@@ -154,17 +154,17 @@ func (connector *Connector) RemoveWorker() {
 }
 
 // AmountWorkers current amount of workers.
-func (connector Connector) AmountWorkers() int {
+func (connector *Connector) AmountWorkers() int {
 	return len(connector.workers)
 }
 
 // IsAlive is the database system alive.
-func (connector Connector) IsAlive() bool {
+func (connector *Connector) IsAlive() bool {
 	return connector.isAlive
 }
 
 // DatabaseExists does the database exist.
-func (connector Connector) DatabaseExists() bool {
+func (connector *Connector) DatabaseExists() bool {
 	return connector.databaseExists
 }
 

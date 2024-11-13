@@ -87,7 +87,7 @@ func (worker *Worker) Stop() {
 }
 
 // Tries to send data all the time.
-func (worker Worker) run() {
+func (worker *Worker) run() {
 	var queries []collector.Printable
 	var query collector.Printable
 	for {
@@ -142,7 +142,7 @@ func (worker Worker) run() {
 }
 
 // Sends the given queries to the influxdb.
-func (worker Worker) sendBuffer(queries []collector.Printable) {
+func (worker *Worker) sendBuffer(queries []collector.Printable) {
 	if len(queries) == 0 {
 		return
 	}
@@ -204,7 +204,7 @@ func (worker Worker) sendBuffer(queries []collector.Printable) {
 }
 
 // Reads the queries from the global queue and returns them as string.
-func (worker Worker) readQueriesFromQueue() []string {
+func (worker *Worker) readQueriesFromQueue() []string {
 	var queries []string
 	var query collector.Printable
 	stop := false
@@ -225,7 +225,7 @@ func (worker Worker) readQueriesFromQueue() []string {
 }
 
 // sends the raw data to influxdb and returns an err if given.
-func (worker Worker) sendData(rawData []byte, log bool) error {
+func (worker *Worker) sendData(rawData []byte, log bool) error {
 	if log {
 		worker.log.Debug("sendData (" + worker.target.Name + ")\n" + string(rawData))
 	}
@@ -265,13 +265,13 @@ func (worker Worker) sendData(rawData []byte, log bool) error {
 }
 
 // Logs a http response to warn.
-func (worker Worker) logHTTPResponse(resp *http.Response) {
+func (worker *Worker) logHTTPResponse(resp *http.Response) {
 	body, _ := io.ReadAll(resp.Body)
 	worker.log.Warnf("Influx status: %s - %s", resp.Status, string(body))
 }
 
 // Waits on an internal quit signal.
-func (worker Worker) waitForQuitOrGoOn() error {
+func (worker *Worker) waitForQuitOrGoOn() error {
 	select {
 	// Got stop signal
 	case <-worker.quitInternal:
@@ -285,7 +285,7 @@ func (worker Worker) waitForQuitOrGoOn() error {
 }
 
 // Writes the bad queries to a dumpfile.
-func (worker Worker) dumpErrorQueries(messageForLog string, errorQueries []string) {
+func (worker *Worker) dumpErrorQueries(messageForLog string, errorQueries []string) {
 	errorFile := worker.dumpFile + "-errors"
 	worker.log.Warnf("Dumping queries with errors to: %s", errorFile)
 	errorQueries = append([]string{messageForLog}, errorQueries...)
@@ -293,7 +293,7 @@ func (worker Worker) dumpErrorQueries(messageForLog string, errorQueries []strin
 }
 
 // Dumps the remaining queries if a quit signal arises.
-func (worker Worker) dumpRemainingQueries(remainingQueries []string) {
+func (worker *Worker) dumpRemainingQueries(remainingQueries []string) {
 	worker.log.Debugf("Global queue %d own queue %d", len(worker.jobs), len(remainingQueries))
 	if len(worker.jobs) != 0 || len(remainingQueries) != 0 {
 		worker.log.Debug("Saving queries to disk")
@@ -304,7 +304,7 @@ func (worker Worker) dumpRemainingQueries(remainingQueries []string) {
 }
 
 // Writes queries to a dumpfile.
-func (worker Worker) dumpQueries(filename string, queries []string) {
+func (worker *Worker) dumpQueries(filename string, queries []string) {
 	mutex.Lock()
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		if _, err := os.Create(filename); err != nil {
@@ -325,7 +325,7 @@ func (worker Worker) dumpQueries(filename string, queries []string) {
 }
 
 // Converts an collector.Printable to a string.
-func (worker Worker) castJobToString(job collector.Printable) (string, error) {
+func (worker *Worker) castJobToString(job collector.Printable) (string, error) {
 	var result string
 	var err error
 

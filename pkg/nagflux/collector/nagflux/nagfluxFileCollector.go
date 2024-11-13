@@ -54,7 +54,7 @@ func (nfc *FileCollector) Stop() {
 }
 
 // Checks if the files are old enough, if so they will be added in the queue
-func (nfc FileCollector) run() {
+func (nfc *FileCollector) run() {
 	for {
 		select {
 		case <-nfc.quit:
@@ -74,7 +74,7 @@ func (nfc FileCollector) run() {
 						case <-nfc.quit:
 							nfc.quit <- true
 							return
-						case r <- p:
+						case r <- &p:
 						case <-time.After(time.Duration(1) * time.Minute):
 							nfc.log.Warn("NagfluxFileCollector: Could not write to buffer")
 						}
@@ -89,7 +89,7 @@ func (nfc FileCollector) run() {
 	}
 }
 
-func (nfc FileCollector) parseFile(filename string) []Printable {
+func (nfc *FileCollector) parseFile(filename string) []Printable {
 	result := []Printable{}
 	csvfile, err := os.Open(filename)
 	if err != nil {

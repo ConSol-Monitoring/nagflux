@@ -153,8 +153,8 @@ func (w *NagiosSpoolfileWorker) run() {
 }
 
 // PerformanceDataIterator returns an iterator to loop over generated perf data.
-func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string) <-chan PerformanceData {
-	ch := make(chan PerformanceData)
+func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string) <-chan *PerformanceData {
+	ch := make(chan *PerformanceData)
 	typ := findType(input)
 	if typ == "" {
 		if len(input) > 1 {
@@ -199,7 +199,7 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 				target = collector.AllFilterable
 			}
 
-			perf := PerformanceData{
+			perf := &PerformanceData{
 				Hostname:         input[hostname],
 				Service:          currentService,
 				Command:          currentCommand,

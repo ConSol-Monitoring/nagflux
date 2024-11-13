@@ -24,9 +24,9 @@ func (notification *NotificationData) sanitizeValues() {
 }
 
 // PrintForInfluxDB prints the data in influxdb lineformat
-func (notification NotificationData) PrintForInfluxDB(version string) string {
-	notification.sanitizeValues()
+func (notification *NotificationData) PrintForInfluxDB(version string) string {
 	if helper.VersionOrdinal(version) >= helper.VersionOrdinal("0.9") {
+		notification.sanitizeValues()
 		var tags string
 		if text := notificationToText(notification.notificationType); text != "" {
 			tags = ",type=" + text
@@ -39,7 +39,7 @@ func (notification NotificationData) PrintForInfluxDB(version string) string {
 }
 
 // PrintForElasticsearch prints in the elasticsearch json format
-func (notification NotificationData) PrintForElasticsearch(version, index string) string {
+func (notification *NotificationData) PrintForElasticsearch(version, index string) string {
 	if helper.VersionOrdinal(version) >= helper.VersionOrdinal("2.0") {
 		text := notificationToText(notification.notificationType)
 		value := fmt.Sprintf("%s:<br> %s", strings.TrimSpace(notification.notificationLevel), notification.comment)

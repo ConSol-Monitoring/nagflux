@@ -5,20 +5,20 @@ import (
 
 	"pkg/nagflux/config"
 	"pkg/nagflux/logging"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSanitizeValuesDowntime(t *testing.T) {
 	t.Parallel()
-	down := DowntimeData{Data: Data{hostName: "host 1", serviceDisplayName: "service 1", author: "philip"}, endTime: "123"}
+	down := &DowntimeData{Data: Data{hostName: "host 1", serviceDisplayName: "service 1", author: "philip"}, endTime: "123"}
 	down.sanitizeValues()
-	if down.Data.hostName != `host\ 1` {
-		t.Errorf("The notificationType should be escaped. Expected: %s Got: %s", `host\ 1`, down.Data.hostName)
-	}
+	assert.Equalf(t, `host\ 1`, down.Data.hostName, "The notificationType should be escaped.")
 }
 
 func TestPrintInfluxdbDowntime(t *testing.T) {
 	logging.InitTestLogger()
-	down := DowntimeData{Data: Data{hostName: "host 1", serviceDisplayName: "service 1", author: "philip"}, endTime: "123"}
+	down := &DowntimeData{Data: Data{hostName: "host 1", serviceDisplayName: "service 1", author: "philip"}, endTime: "123"}
 	if !didThisPanic(down.PrintForInfluxDB, "0.8") {
 		t.Errorf("This should panic, due to unsuported influxdb version")
 	}
@@ -26,15 +26,13 @@ func TestPrintInfluxdbDowntime(t *testing.T) {
 	result := down.PrintForInfluxDB("0.9")
 	expected := `messages,host=host\ 1,service=service\ 1,type=downtime,author=philip message="Downtime start: <br>" 000
 messages,host=host\ 1,service=service\ 1,type=downtime,author=philip message="Downtime end: <br>" 123000`
-	if result != expected {
-		t.Errorf("The result did not match the expected. Result:\n%s \nExpected:\n%s", result, expected)
-	}
+	assert.Equalf(t, expected, result, "The result did not match the expected")
 }
 
 func TestPrintElasticsearchDowntime(t *testing.T) {
 	logging.InitTestLogger()
 	config.InitConfigFromString(Config)
-	down := DowntimeData{Data: Data{hostName: "host 1", serviceDisplayName: "service 1", author: "philip", entryTime: "1458988932000"}, endTime: "123"}
+	down := &DowntimeData{Data: Data{hostName: "host 1", serviceDisplayName: "service 1", author: "philip", entryTime: "1458988932000"}, endTime: "123"}
 	if !didThatPanic(down.PrintForElasticsearch, "1.0", "index") {
 		t.Errorf("This should panic, due to unsuported elasticsearch version")
 	}
@@ -46,7 +44,5 @@ func TestPrintElasticsearchDowntime(t *testing.T) {
 {"index":{"_index":"index-1970.01","_type":"messages"}}
 {"timestamp":123000,"message":"Downtime end: <br>","author":"philip","host":"host 1","service":"service 1","type":"downtime"}
 `
-	if result != expected {
-		t.Errorf("The result did not match the expected. Result: %sExpected: %s", result, expected)
-	}
+	assert.Equalf(t, expected, result, "The result did not match the expected")
 }

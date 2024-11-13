@@ -17,7 +17,7 @@ type Printable struct {
 }
 
 // PrintForInfluxDB prints the data in influxdb lineformat
-func (p Printable) PrintForInfluxDB(version string) string {
+func (p *Printable) PrintForInfluxDB(version string) string {
 	if helper.VersionOrdinal(version) >= helper.VersionOrdinal("0.9") {
 		line := p.Table
 		if len(p.tags) > 0 {
@@ -33,7 +33,7 @@ func (p Printable) PrintForInfluxDB(version string) string {
 }
 
 // PrintForElasticsearch prints in the elasticsearch json format
-func (p Printable) PrintForElasticsearch(version, index string) string {
+func (p *Printable) PrintForElasticsearch(version, index string) string {
 	if helper.VersionOrdinal(version) >= helper.VersionOrdinal("2.0") {
 		head := fmt.Sprintf(`{"index":{"_index":"%s","_type":"%s"}}`, helper.GenIndex(index, p.Timestamp), p.Table) + "\n"
 		data := `{"timestamp":` + p.Timestamp

@@ -22,7 +22,7 @@ type PerformanceData struct {
 }
 
 // PrintForInfluxDB prints the data in influxdb lineformat
-func (p PerformanceData) PrintForInfluxDB(version string) string {
+func (p *PerformanceData) PrintForInfluxDB(version string) string {
 	if helper.VersionOrdinal(version) >= helper.VersionOrdinal("0.9") {
 		tableName := `metrics,host=` + helper.SanitizeInfluxInput(p.Hostname)
 		if p.Service == "" {
@@ -47,7 +47,7 @@ func (p PerformanceData) PrintForInfluxDB(version string) string {
 }
 
 // PrintForElasticsearch prints in the elasticsearch json format
-func (p PerformanceData) PrintForElasticsearch(version, index string) string {
+func (p *PerformanceData) PrintForElasticsearch(version, index string) string {
 	if helper.VersionOrdinal(version) >= helper.VersionOrdinal("2.0") {
 		if p.Service == "" {
 			p.Service = config.GetConfig().InfluxDBGlobal.HostcheckAlias

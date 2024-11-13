@@ -22,20 +22,20 @@ func (downtime *DowntimeData) sanitizeValues() {
 }
 
 // PrintForInfluxDB prints the data in influxdb lineformat
-func (downtime DowntimeData) PrintForInfluxDB(version string) string {
-	downtime.sanitizeValues()
+func (downtime *DowntimeData) PrintForInfluxDB(version string) string {
 	if helper.VersionOrdinal(version) >= helper.VersionOrdinal("0.9") {
+		downtime.sanitizeValues()
 		tags := ",type=downtime,author=" + downtime.author
 		start := fmt.Sprintf("%s%s message=\"%s\" %s", downtime.getTablename(), tags, strings.TrimSpace("Downtime start: <br>"+downtime.comment), helper.CastStringTimeFromSToMs(downtime.entryTime))
 		end := fmt.Sprintf("%s%s message=\"%s\" %s", downtime.getTablename(), tags, strings.TrimSpace("Downtime end: <br>"+downtime.comment), helper.CastStringTimeFromSToMs(downtime.endTime))
 		return start + "\n" + end
 	}
 	logging.GetLogger().Criticalf("This influxversion [%s] given in the config is not supported", version)
-	panic("")
+	panic("influxdb version not supported")
 }
 
 // PrintForElasticsearch prints in the elasticsearch json format
-func (downtime DowntimeData) PrintForElasticsearch(version, index string) string {
+func (downtime *DowntimeData) PrintForElasticsearch(version, index string) string {
 	if helper.VersionOrdinal(version) >= helper.VersionOrdinal("2.0") {
 		typ := `downtime`
 		start := downtime.genElasticLineWithValue(index, typ, strings.TrimSpace("Downtime start: <br>"+downtime.comment), downtime.entryTime)
@@ -43,5 +43,5 @@ func (downtime DowntimeData) PrintForElasticsearch(version, index string) string
 		return start + "\n" + end
 	}
 	logging.GetLogger().Criticalf("This elasticsearchversion [%s] given in the config is not supported", version)
-	panic("")
+	panic("elasticsearch version not supported")
 }
