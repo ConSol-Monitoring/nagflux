@@ -28,9 +28,11 @@ Nagflux only provides the timestamp in milliseconds.
 
 ## Install
 
-    go install github.com/ConSol-Monitoring/nagflux/cmd/nagflux@latest
+    %> git clone https://github.com/ConSol-Monitoring/nagflux
+    %> cd nagflux
+    %> make
 
-This typically installs a nagflux binary into `~/go/bin/nagflux`
+There should result in a nagflux binary.
 
 ## Configuration
 
