@@ -14,9 +14,10 @@ import (
 
 const (
 	// MinFileAge is the duration to wait, before the files are parsed
-	MinFileAge = time.Duration(10) * time.Second
+	MinFileAge = 3 * time.Second
+
 	// IntervalToCheckDirectory the interval to check if there are new files
-	IntervalToCheckDirectory = time.Duration(5) * time.Second
+	IntervalToCheckDirectory = 1500 * time.Millisecond
 )
 
 // NagiosSpoolfileCollector scans the nagios spoolfile folder and delegates the files to its workers.
@@ -74,14 +75,16 @@ func (s *NagiosSpoolfileCollector) run() {
 			}
 
 			logging.GetLogger().Debug("Reading Directory: ", s.spoolDirectory)
-			files, _ := os.ReadDir(s.spoolDirectory)
-			promServer.SpoolFilesOnDisk.Set(float64(len(files)))
-			for _, currentFile := range files {
+			oldFiles, totalFiles := FilesInDirectoryOlderThanX(s.spoolDirectory, MinFileAge)
+			promServer.SpoolFilesOnDisk.Set(float64(totalFiles))
+			for _, currentFile := range oldFiles {
+				logging.GetLogger().Debug("Reading file: ", currentFile)
+
 				select {
 				case <-s.quit:
 					s.quit <- true
 					return
-				case s.jobs <- path.Join(s.spoolDirectory, currentFile.Name()):
+				case s.jobs <- currentFile:
 				case <-time.After(time.Duration(1) * time.Minute):
 					logging.GetLogger().Warn("NagiosSpoolfileCollector: Could not write to buffer")
 				}
@@ -91,9 +94,8 @@ func (s *NagiosSpoolfileCollector) run() {
 }
 
 // FilesInDirectoryOlderThanX returns a list of file, of a folder, names which are older then a certain duration.
-func FilesInDirectoryOlderThanX(folder string, age time.Duration) []string {
+func FilesInDirectoryOlderThanX(folder string, age time.Duration) (oldFiles []string, totalFiles int) {
 	files, _ := os.ReadDir(folder)
-	var oldFiles []string
 	for _, currentFile := range files {
 		fsinfo, err := currentFile.Info()
 		if err != nil {
@@ -103,7 +105,7 @@ func FilesInDirectoryOlderThanX(folder string, age time.Duration) []string {
 			oldFiles = append(oldFiles, path.Join(folder, currentFile.Name()))
 		}
 	}
-	return oldFiles
+	return oldFiles, len(files)
 }
 
 // IsItTime checks if the timestamp plus duration is in the past.

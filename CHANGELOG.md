@@ -1,3 +1,7 @@
+## next
+### Fix
+- fix parsing spool files too early
+
 ## v0.5.2 - 13.11.2024
 ### Changes
 - remove [error] output from performance data

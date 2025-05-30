@@ -66,7 +66,8 @@ func (nfc *FileCollector) run() {
 				logging.GetLogger().Debugln("NagfluxFileCollector in pause")
 				continue
 			}
-			for _, currentFile := range spoolfile.FilesInDirectoryOlderThanX(nfc.folder, spoolfile.MinFileAge) {
+			oldFiles, _ := spoolfile.FilesInDirectoryOlderThanX(nfc.folder, spoolfile.MinFileAge)
+			for _, currentFile := range oldFiles {
 				logging.GetLogger().Debug("Reading file: ", currentFile)
 				for _, p := range nfc.parseFile(currentFile) {
 					for _, r := range nfc.results {
