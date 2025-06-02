@@ -84,7 +84,7 @@ var configFileContent = `[main]
 	Version = 2.1`
 
 func TestInitConfig(t *testing.T) {
-	file, err := os.CreateTemp("", "prefix")
+	file, err := os.CreateTemp(t.TempDir(), "prefix")
 	if err != nil {
 		panic(err)
 	}

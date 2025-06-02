@@ -216,18 +216,16 @@ func (live *Collector) handleQueryForNotifications(line []string) *NotificationD
 			return &NotificationData{collector.AllFilterable, Data{line[4], "", line[7], line[1], line[2]}, line[0], line[5]}
 		} else if len(line) == 8 {
 			return &NotificationData{collector.AllFilterable, Data{line[4], "", line[7], line[1], line[2]}, line[0], line[5]}
-		} else {
-			live.log.Warn("HOST NOTIFICATION, undefinded linelenght: ", len(line), " Line:", helper.SPrintStringSlice(line))
 		}
+		live.log.Warn("HOST NOTIFICATION, undefined line length: ", len(line), " Line:", helper.SPrintStringSlice(line))
 	case "SERVICE NOTIFICATION":
 		if len(line) == 11 {
 			// Custom
 			return &NotificationData{collector.AllFilterable, Data{line[4], line[5], line[10], line[1], line[9]}, line[0], line[6]}
 		} else if len(line) == 10 || len(line) == 9 {
 			return &NotificationData{collector.AllFilterable, Data{line[4], line[5], line[8], line[1], line[2]}, line[0], line[6]}
-		} else {
-			live.log.Warn("SERVICE NOTIFICATION, undefinded linelenght: ", len(line), " Line:", helper.SPrintStringSlice(line))
 		}
+		live.log.Warn("SERVICE NOTIFICATION, undefined line length: ", len(line), " Line:", helper.SPrintStringSlice(line))
 	default:
 		if strings.Contains(line[0], "NOTIFICATION SUPPRESSED") {
 			live.log.Debugf("Ignoring suppressed Notification: '%s', Line: %s", line[0], helper.SPrintStringSlice(line))
