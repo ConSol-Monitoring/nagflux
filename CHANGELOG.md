@@ -1,4 +1,4 @@
-## next
+## v0.5.3 - 02.06.2025
 ### Fix
 - fix parsing spool files too early
 
