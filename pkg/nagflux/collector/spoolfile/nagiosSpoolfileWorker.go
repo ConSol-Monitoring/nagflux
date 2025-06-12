@@ -13,6 +13,7 @@ import (
 
 	"pkg/nagflux/collector"
 	"pkg/nagflux/collector/livestatus"
+	"pkg/nagflux/filter"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
 	"pkg/nagflux/statistics"
@@ -42,6 +43,7 @@ var (
 	regexPerformancelable = regexp.MustCompile(`([^=]+)=(U|[\d\.,\-]+)([\pL\/%]*);?([\d\.,\-:~@]*)?;?([\d\.,\-:~@]*)?;?([\d\.,\-]*)?;?([\d\.,\-]*)?;?\s*`)
 	regexAltCommand       = regexp.MustCompile(`.*\[([a-zA-Z_\-. ]+)\]\s?$`)
 	regexStripErrors      = regexp.MustCompile(`\[[^\]]*=[^\]]*\]`)
+	filterProcessor       = filter.NewFilter()
 )
 
 // NagiosSpoolfileWorker parses the given spoolfiles and adds the extraced perfdata to the queue.
@@ -103,6 +105,7 @@ func (w *NagiosSpoolfileWorker) run() {
 			promServer.SpoolFilesInQueue.Set(float64(len(w.jobs)))
 			startTime := time.Now()
 			logging.GetLogger().Debug("Reading file: ", file)
+
 			filehandle, err := os.OpenFile(file, os.O_RDONLY, os.ModePerm)
 			if err != nil {
 				logging.GetLogger().Warn("NagiosSpoolfileWorker: Opening file error: ", err)
@@ -113,6 +116,10 @@ func (w *NagiosSpoolfileWorker) run() {
 			line, isPrefix, err := reader.ReadLine()
 			for err == nil && !isPrefix {
 				splittedPerformanceData := helper.StringToMap(string(line), "\t", "::")
+				if skipSplitted := filterProcessor.FilterNagiosSpoolFileLineAndFields(line, splittedPerformanceData); skipSplitted {
+					logging.GetLogger().Info("Skipping Line because of filter")
+					continue
+				}
 				for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
 					for _, r := range w.results {
 						select {
