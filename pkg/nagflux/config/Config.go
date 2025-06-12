@@ -26,6 +26,12 @@ type Config struct {
 		LogFile     string
 		MinSeverity string
 	}
+	LineFilter struct {
+		Term []*string
+	}
+	FieldFilter map[string]*struct {
+		Term string
+	}
 	Monitoring struct {
 		PrometheusAddress string
 	}

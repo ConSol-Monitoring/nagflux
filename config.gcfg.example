@@ -20,6 +20,9 @@
     # List of Severities https://godoc.org/github.com/kdar/factorlog#Severity
     MinSeverity = "INFO"
 
+[Filter]
+    Filter = TEST
+
 [Monitoring]
     # leave empty to disable
     # PrometheusAddress = ":8080"
