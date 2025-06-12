@@ -23,6 +23,15 @@ var configFileContent = `[main]
 	# List of Severities https://godoc.org/github.com/kdar/factorlog#Severity
 	MinSeverity = "INFO"
 
+[LineFilter]
+	Term = VAL
+
+[FieldFilter "FieldName"]
+	Term = FilterForFieldValue
+
+[FieldFilter "FieldName2"]
+	Term = FilterForFieldValue2
+
 [Monitoring]
 	# leave empty to disable
 	# PrometheusAddress = ":8080"
