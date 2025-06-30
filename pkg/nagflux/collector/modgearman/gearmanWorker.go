@@ -1,6 +1,7 @@
 package modgearman
 
 import (
+	"nagflux/filter"
 	"time"
 
 	"pkg/nagflux/collector"
@@ -27,6 +28,7 @@ type GearmanWorker struct {
 	log                   *factorlog.FactorLog
 	jobQueue              string
 	address               string
+	filterProcessor       filter.Processor
 }
 
 // NewGearmanWorker generates a new GearmanWorker.
@@ -54,6 +56,7 @@ func NewGearmanWorker(address, queue, key string, results collector.ResultQueues
 		address:         address,
 		log:             logging.GetLogger(),
 		jobQueue:        queue,
+		filterProcessor: filter.NewFilter(),
 	}
 	go worker.run()
 	go worker.handleLoad()
@@ -179,6 +182,11 @@ func (g *GearmanWorker) handelJob(job libworker.Job) ([]byte, error) {
 	splittedPerformanceData := helper.StringToMap(string(secret), "\t", "::")
 	g.log.Debug("[ModGearman] ", string(job.Data()))
 	g.log.Debug("[ModGearman] ", splittedPerformanceData)
+
+	if ok := g.filterProcessor.FilterNagiosSpoolFileLineAndFields(secret, splittedPerformanceData); !ok {
+		return job.Data(), nil
+	}
+
 	for singlePerfdata := range g.nagiosSpoolfileWorker.PerformanceDataIterator(splittedPerformanceData) {
 		for _, r := range g.results {
 			select {

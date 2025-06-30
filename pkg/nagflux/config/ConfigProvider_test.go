@@ -23,15 +23,6 @@ var configFileContent = `[main]
 	# List of Severities https://godoc.org/github.com/kdar/factorlog#Severity
 	MinSeverity = "INFO"
 
-[LineFilter]
-	Term = VAL
-
-[FieldFilter "FieldName"]
-	Term = FilterForFieldValue
-
-[FieldFilter "FieldName2"]
-	Term = FilterForFieldValue2
-
 [Monitoring]
 	# leave empty to disable
 	# PrometheusAddress = ":8080"
@@ -90,7 +81,10 @@ var configFileContent = `[main]
 	Enabled = false
 	Address = "http://localhost:9200"
 	Index = "nagflux"
-	Version = 2.1`
+	Version = 2.1
+
+[LineFilter]
+    LivestatusLineTerms = "host_\\d+"`
 
 func TestInitConfig(t *testing.T) {
 	file, err := os.CreateTemp(t.TempDir(), "prefix")
