@@ -43,7 +43,6 @@ var (
 	regexPerformancelable = regexp.MustCompile(`([^=]+)=(U|[\d\.,\-]+)([\pL\/%]*);?([\d\.,\-:~@]*)?;?([\d\.,\-:~@]*)?;?([\d\.,\-]*)?;?([\d\.,\-]*)?;?\s*`)
 	regexAltCommand       = regexp.MustCompile(`.*\[([a-zA-Z_\-. ]+)\]\s?$`)
 	regexStripErrors      = regexp.MustCompile(`\[[^\]]*=[^\]]*\]`)
-	filterProcessor       = filter.NewFilter()
 )
 
 // NagiosSpoolfileWorker parses the given spoolfiles and adds the extraced perfdata to the queue.
@@ -55,6 +54,7 @@ type NagiosSpoolfileWorker struct {
 	livestatusCacheBuilder *livestatus.CacheBuilder
 	fileBufferSize         int
 	defaultTarget          collector.Filterable
+	filterProcessor        filter.Processor
 }
 
 // NewNagiosSpoolfileWorker returns a new NagiosSpoolfileWorker.
@@ -69,6 +69,7 @@ func NewNagiosSpoolfileWorker(workerID int, jobs chan string, results collector.
 		livestatusCacheBuilder: livestatusCacheBuilder,
 		fileBufferSize:         fileBufferSize,
 		defaultTarget:          defaultTarget,
+		filterProcessor:        filter.NewFilter(),
 	}
 }
 
@@ -116,8 +117,13 @@ func (w *NagiosSpoolfileWorker) run() {
 			line, isPrefix, err := reader.ReadLine()
 			for err == nil && !isPrefix {
 				splittedPerformanceData := helper.StringToMap(string(line), "\t", "::")
-				if skipSplitted := filterProcessor.FilterNagiosSpoolFileLineAndFields(line, splittedPerformanceData); skipSplitted {
-					logging.GetLogger().Info("Skipping Line because of filter")
+				if skipLine := w.filterProcessor.TestLine(line); !skipLine {
+					logging.GetLogger().Infof("Skipping Line %s", string(line))
+					continue
+				}
+				// TODO: decide if field filter is wanted or remove
+				if skipFields := w.filterProcessor.FilterPerformanceData(splittedPerformanceData); !skipFields {
+					logging.GetLogger().Info("Skipping Line because of Field filter")
 					continue
 				}
 				for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {

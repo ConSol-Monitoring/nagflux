@@ -27,10 +27,12 @@ type Config struct {
 		MinSeverity string
 	}
 	LineFilter struct {
-		Term []*string
+		SpoolFileLineTerms  []string
+		LivestatusLineTerms []string
 	}
+	// Remove Field Filtering?
 	FieldFilter map[string]*struct {
-		Term string
+		Term []string
 	}
 	Monitoring struct {
 		PrometheusAddress string
