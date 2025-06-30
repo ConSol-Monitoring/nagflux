@@ -81,7 +81,10 @@ var configFileContent = `[main]
 	Enabled = false
 	Address = "http://localhost:9200"
 	Index = "nagflux"
-	Version = 2.1`
+	Version = 2.1
+
+[LineFilter]
+    LivestatusLineTerms = "host_\\d+"`
 
 func TestInitConfig(t *testing.T) {
 	file, err := os.CreateTemp(t.TempDir(), "prefix")

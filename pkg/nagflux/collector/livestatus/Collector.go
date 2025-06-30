@@ -2,6 +2,7 @@ package livestatus
 
 import (
 	"fmt"
+	"nagflux/filter"
 	"regexp"
 	"strings"
 	"time"
@@ -22,6 +23,7 @@ type Collector struct {
 	livestatusConnector *Connector
 	log                 *factorlog.FactorLog
 	logQuery            string
+	filterProcessor     filter.Processor
 }
 
 const (
@@ -79,6 +81,7 @@ func NewLivestatusCollector(jobs collector.ResultQueues, livestatusConnector *Co
 		livestatusConnector: livestatusConnector,
 		log:                 logging.GetLogger(),
 		logQuery:            QueryNagiosForNotifications,
+		filterProcessor:     filter.NewFilter(),
 	}
 	if detectVersion == "" {
 		switch getLivestatusVersion(live) {
@@ -163,6 +166,9 @@ func (live *Collector) requestPrintablesFromLivestatus(query string, addTimestam
 	for {
 		select {
 		case line := <-csv:
+			if skipLine := live.filterProcessor.TestLine([]byte(strings.Join(line, config.GetConfig().Main.FieldSeparator))); !skipLine {
+				continue
+			}
 			switch query {
 			case QueryNagiosForNotifications:
 				if printable := live.handleQueryForNotifications(line); printable != nil {

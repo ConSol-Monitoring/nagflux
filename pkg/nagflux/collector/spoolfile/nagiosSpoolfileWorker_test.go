@@ -1,6 +1,7 @@
 package spoolfile
 
 import (
+	"pkg/nagflux/config"
 	"testing"
 
 	"pkg/nagflux/collector"
@@ -8,6 +9,19 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
+
+const configFileContent = `
+
+[LineFilter]
+	Term = check-host-alive
+
+[FieldFilter "HOSTNAME"]
+	Term = test*
+
+[FieldFilter "DATATYPE"]
+	Term = HOSTPERFDATA
+
+`
 
 func TestPerformanceDataParser_01(t *testing.T) {
 	testPerformanceDataParser(t,
@@ -422,6 +436,8 @@ func TestPerformanceDataParser_20(t *testing.T) {
 
 func testPerformanceDataParser(t *testing.T, input string, expect []PerformanceData) {
 	t.Helper()
+
+	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable)
 
