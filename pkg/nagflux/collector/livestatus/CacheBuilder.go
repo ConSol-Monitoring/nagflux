@@ -1,12 +1,11 @@
 package livestatus
 
 import (
+	"pkg/nagflux/logging"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
-
-	"pkg/nagflux/logging"
 
 	"github.com/kdar/factorlog"
 )
@@ -109,14 +108,14 @@ func (builder *CacheBuilder) createLivestatusCache() Cache {
 			if startTime < entryTime {
 				latestTime = entryTime
 			}
-			for _, id := range strings.Split(downtimesLine[0], ",") {
+			for id := range strings.SplitSeq(downtimesLine[0], ",") {
 				downtimes[id] = strconv.Itoa(latestTime)
 			}
 		case <-finishedDowntime:
 			for jobsFinished < 2 {
 				select {
 				case hostService := <-hostServiceCsv:
-					for _, id := range strings.Split(hostService[0], ",") {
+					for id := range strings.SplitSeq(hostService[0], ",") {
 						if len(hostService) == 2 {
 							result.addDowntime(hostService[1], "", downtimes[id])
 						} else if len(hostService) == 3 {

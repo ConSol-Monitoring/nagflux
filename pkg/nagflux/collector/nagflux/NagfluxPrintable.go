@@ -2,7 +2,6 @@ package nagflux
 
 import (
 	"fmt"
-
 	"pkg/nagflux/collector"
 	"pkg/nagflux/helper"
 )
@@ -10,6 +9,7 @@ import (
 // Printable converts from nagfluxfile format to X
 type Printable struct {
 	collector.Filterable
+
 	Table     string
 	Timestamp string
 	tags      map[string]string

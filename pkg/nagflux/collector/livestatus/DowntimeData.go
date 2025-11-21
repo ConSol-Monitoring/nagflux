@@ -2,17 +2,17 @@ package livestatus
 
 import (
 	"fmt"
-	"strings"
-
 	"pkg/nagflux/collector"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
+	"strings"
 )
 
 // DowntimeData adds Comments types to the livestatus data
 type DowntimeData struct {
 	collector.Filterable
 	Data
+
 	endTime string
 }
 

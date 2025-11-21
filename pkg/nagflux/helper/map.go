@@ -1,24 +1,23 @@
 package helper
 
 import (
+	"maps"
 	"strings"
 )
 
 // CopyMap creates a real copy of a string to string map.
 func CopyMap(old map[string]string) map[string]string {
 	newMap := map[string]string{}
-	for k, v := range old {
-		newMap[k] = v
-	}
+	maps.Copy(newMap, old)
 	return newMap
 }
 
 // PrintMapAsString prints a map in the influxdb tags format.
 func PrintMapAsString(toPrint map[string]string, fieldSeparator, assignmentSeparator string) string {
-	result := ""
+	str := strings.Builder{}
 	for key, value := range toPrint {
-		result += key + assignmentSeparator + value + fieldSeparator
+		str.WriteString(key + assignmentSeparator + value + fieldSeparator)
 	}
-	result = strings.Trim(result, fieldSeparator)
+	result := strings.Trim(str.String(), fieldSeparator)
 	return result
 }

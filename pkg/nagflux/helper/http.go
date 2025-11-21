@@ -23,7 +23,7 @@ func RequestedReturnCodeIsOK(client http.Client, url, function string) bool {
 			resp.Body.Close()
 		}
 	default:
-		err = errors.New("Unknown Function")
+		err = errors.New("unknown function")
 	}
 	if err == nil && isReturnCodeOK(resp) {
 		return true
@@ -86,7 +86,7 @@ func GetHeaders(client http.Client, url, function string) map[string]string {
 			defer resp.Body.Close()
 		}
 	default:
-		err = errors.New("Unknown Function")
+		err = errors.New("unknown function")
 	}
 	if err != nil {
 		return r

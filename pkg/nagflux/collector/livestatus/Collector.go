@@ -2,16 +2,15 @@ package livestatus
 
 import (
 	"fmt"
-	"regexp"
-	"strings"
-	"time"
-
 	"pkg/nagflux/collector"
 	"pkg/nagflux/config"
 	"pkg/nagflux/data"
 	"pkg/nagflux/filter"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
+	"regexp"
+	"strings"
+	"time"
 
 	"github.com/kdar/factorlog"
 )
@@ -65,12 +64,15 @@ Filter: entry_time > %d
 OutputFormat: csv
 
 `
+)
+
+const (
 	// Nagios nagioslike Livestatus
 	Nagios = iota
 	// Icinga2 icinga2like Livestatus
-	Icinga2 = iota
+	Icinga2
 	// Naemon naemonlike Livestatus
-	Naemon = iota
+	Naemon
 )
 
 // NewLivestatusCollector constructor, which also starts it immediately.

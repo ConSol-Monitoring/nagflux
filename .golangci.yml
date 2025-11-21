@@ -1,40 +1,6 @@
-linters-settings:
-  gocritic:
-    enabled-tags:
-      - performance
-      - style
-      - experimental
-  gocyclo:
-    min-complexity: 20
-  goconst:
-    min-len: 8
-    min-occurrences: 12
-  lll:
-    line-length: 120
-  funlen:
-    lines: 170
-    statements: 120
-  gomoddirectives:
-    replace-local: true
-  gocognit:
-    min-complexity: 35
-  exhaustive:
-    default-signifies-exhaustive: true
-  govet:
-    enable-all: true
-    settings:
-      printf:
-        funcs:
-          - Tracef
-          - Infof
-          - Warnf
-          - Errorf
-          - Fatalf
-          - Criticalf
-          - Panicf
+version: "2"
 linters:
-  enable-all: true
-  fast: false
+  default: all
   disable:
     - cyclop
     - depguard
@@ -43,14 +9,13 @@ linters:
     - errname
     - errorlint
     - exhaustruct
-    - gci
+    - funcorder
     - gochecknoglobals
     - gochecknoinits
     - gocognit
     - gocritic
     - gocyclo
     - godot
-    - gofumpt
     - gosec
     - inamedparam
     - lll
@@ -60,35 +25,100 @@ linters:
     - nlreturn
     - noctx
     - nonamedreturns
+    - noinlineerr
     - paralleltest
     - promlinter
-    - stylecheck
     - tagliatelle
     - testpackage
     - varnamelen
     - wrapcheck
     - wsl
-    # deprecated
-    - tenv
+    - wsl_v5
+  settings:
+    exhaustive:
+      default-signifies-exhaustive: true
+    funlen:
+      lines: 170
+      statements: 120
+    gocognit:
+      min-complexity: 35
+    goconst:
+      min-len: 8
+      min-occurrences: 12
+    gocritic:
+      enabled-tags:
+        - performance
+        - style
+        - experimental
+    gocyclo:
+      min-complexity: 20
+    gomoddirectives:
+      replace-local: true
+    govet:
+      enable-all: true
+      settings:
+        printf:
+          funcs:
+            - Tracef
+            - Infof
+            - Warnf
+            - Errorf
+            - Fatalf
+            - Criticalf
+            - Panicf
+    lll:
+      line-length: 120
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - bodyclose
+          - forbidigo
+          - forcetypeassert
+          - mnd
+        path: _test\.go
+      - linters:
+          - forbidigo
+        path: nagflux.go
+      - path: (.+)\.go$
+        text: 'Magic number: 1\D '
+      - path: (.+)\.go$
+        text: 'Magic number: 2\D '
+      - path: (.+)\.go$
+        text: 'Magic number: 10\D '
+      - path: (.+)\.go$
+        text: 'Magic number: 100\D '
+      - path: (.+)\.go$
+        text: 'Magic number: 500\D '
+      - path: (.+)\.go$
+        text: 'fieldalignment:'
+      - path: (.+)\.go$
+        text: 'fmtappendf:'
+      - path: (.+)\.go$
+        text: 'minmax:'
+      - path: (.+)_test\.go$
+        text: 'stringsbuilder:'
+      - path: (.+)_test\.go$
+        text: 'concat-loop:'
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 issues:
-  max-same-issues: 0
   max-issues-per-linter: 0
-  exclude-use-default: true
-  exclude:
-    - 'Magic number: 1\D '
-    - 'Magic number: 2\D '
-    - 'Magic number: 10\D '
-    - 'Magic number: 100\D '
-    - 'Magic number: 500\D '
-    - 'fieldalignment:'
-  exclude-rules:
-    # Exclude some linters from running on tests files.
-    - path: _test\.go
-      linters:
-        - bodyclose
-        - gomnd
-        - forbidigo
-        - forcetypeassert
-    - path: nagflux.go
-      linters:
-        - forbidigo
+  max-same-issues: 0
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

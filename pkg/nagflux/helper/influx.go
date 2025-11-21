@@ -1,9 +1,8 @@
 package helper
 
 import (
-	"strings"
-
 	"pkg/nagflux/config"
+	"strings"
 )
 
 // SanitizeInfluxInput adds backslashes to special chars.
@@ -15,16 +14,15 @@ func SanitizeInfluxInput(input string) string {
 		return input
 	}
 	if config.GetConfig().InfluxDBGlobal.NastyString != "" {
-		input = strings.Replace(
+		input = strings.ReplaceAll(
 			input,
 			config.GetConfig().InfluxDBGlobal.NastyString,
 			config.GetConfig().InfluxDBGlobal.NastyStringToReplace,
-			-1,
 		)
 	}
 	input = strings.Trim(input, `'`)
-	input = strings.Replace(input, " ", `\ `, -1)
-	input = strings.Replace(input, ",", `\,`, -1)
+	input = strings.ReplaceAll(input, " ", `\ `)
+	input = strings.ReplaceAll(input, ",", `\,`)
 
 	return input
 }

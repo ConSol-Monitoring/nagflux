@@ -1,10 +1,9 @@
 package livestatus
 
 import (
-	"testing"
-
 	"pkg/nagflux/config"
 	"pkg/nagflux/logging"
+	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -13,7 +12,7 @@ func TestSanitizeValuesDowntime(t *testing.T) {
 	t.Parallel()
 	down := &DowntimeData{Data: Data{hostName: "host 1", serviceDisplayName: "service 1", author: "philip"}, endTime: "123"}
 	down.sanitizeValues()
-	assert.Equalf(t, `host\ 1`, down.Data.hostName, "The notificationType should be escaped.")
+	assert.Equalf(t, `host\ 1`, down.hostName, "The notificationType should be escaped.")
 }
 
 func TestPrintInfluxdbDowntime(t *testing.T) {

@@ -10,6 +10,7 @@ import (
 type CommentData struct {
 	collector.Filterable
 	Data
+
 	entryType string
 }
 

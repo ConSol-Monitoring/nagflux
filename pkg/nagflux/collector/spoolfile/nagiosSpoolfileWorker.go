@@ -6,17 +6,16 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
-	"strconv"
-	"strings"
-	"time"
-
 	"pkg/nagflux/collector"
 	"pkg/nagflux/collector/livestatus"
 	"pkg/nagflux/filter"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
 	"pkg/nagflux/statistics"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
 )
 
 const (
@@ -237,7 +236,7 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 			}
 
 			for i, data := range value {
-				data = strings.Replace(data, ",", ".", -1)
+				data = strings.ReplaceAll(data, ",", ".")
 				if i > 1 && i != 3 && data != "" {
 					performanceType, err := indexToperformanceType(i)
 					if err != nil {

@@ -1,6 +1,9 @@
 package collector
 
-import "strings"
+import (
+	"slices"
+	"strings"
+)
 
 // Filterable allows to sort the data
 type Filterable struct {
@@ -31,10 +34,8 @@ func (f Filterable) TestTargetFilter(toTest string) bool {
 	splitSource := strings.Split(f.Filter, ",")
 	splitTarget := strings.Split(toTest, ",")
 	for _, s := range splitSource {
-		for _, t := range splitTarget {
-			if s == t {
-				return true
-			}
+		if slices.Contains(splitTarget, s) {
+			return true
 		}
 	}
 	return false

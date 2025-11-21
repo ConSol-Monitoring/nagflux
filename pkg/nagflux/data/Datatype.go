@@ -8,6 +8,6 @@ const (
 	InfluxDB Datatype = "influx"
 	// Elasticsearch enum
 	Elasticsearch Datatype = "elastic"
-	// TemplateFile enum
+	// JSONFile enum
 	JSONFile Datatype = "json"
 )

@@ -8,14 +8,13 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
-	"sync"
-	"time"
-
 	"pkg/nagflux/collector"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
 	"pkg/nagflux/statistics"
+	"strings"
+	"sync"
+	"time"
 
 	"github.com/kdar/factorlog"
 )
@@ -40,9 +39,9 @@ type Worker struct {
 const dataTimeout = time.Duration(20) * time.Second
 
 var (
-	errorInterrupted = errors.New("Got interrupted")
+	errorInterrupted = errors.New("got interrupted")
 	errorBadRequest  = errors.New("400 Bad Request")
-	errorHTTPClient  = errors.New("Http Client got an error")
+	errorHTTPClient  = errors.New("http client got an error")
 )
 
 // WorkerGenerator generates a new Worker and starts it.
@@ -259,7 +258,7 @@ func (worker *Worker) printErrors(result JSONResult, rawData []byte) {
 	errors := []map[int]string{{}}
 	for index, item := range result.Items {
 		if item.Create.Status != 201 {
-			errors = append(errors, map[int]string{index * 2: strings.Replace(item.Create.Error.CausedBy.Reason, "\n", "", -1) + "\n"})
+			errors = append(errors, map[int]string{index * 2: strings.ReplaceAll(item.Create.Error.CausedBy.Reason, "\n", "") + "\n"})
 		}
 	}
 

@@ -2,10 +2,9 @@ package livestatus
 
 import (
 	"fmt"
-	"strings"
-
 	"pkg/nagflux/config"
 	"pkg/nagflux/helper"
+	"strings"
 )
 
 // Data contains basic data extracted from livestatusqueries.
@@ -45,7 +44,7 @@ func (live *Data) genInfluxLineWithValue(tags, text string) string {
 }
 
 func (live *Data) genElasticLineWithValue(index, typ, value, timestamp string) string {
-	value = strings.Replace(value, `"`, `\"`, -1)
+	value = strings.ReplaceAll(value, `"`, `\"`)
 	if live.serviceDisplayName == "" {
 		live.serviceDisplayName = config.GetConfig().ElasticsearchGlobal.HostcheckAlias
 	}

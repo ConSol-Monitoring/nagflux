@@ -2,9 +2,8 @@ package helper
 
 import (
 	"fmt"
-	"testing"
-
 	"pkg/nagflux/config"
+	"testing"
 )
 
 var CreateJSONFromStringMapData = []struct {
@@ -21,7 +20,7 @@ func TestCreateJSONFromStringMap(t *testing.T) {
 	t.Parallel()
 	for _, data := range CreateJSONFromStringMapData {
 		actual := CreateJSONFromStringMap(data.input)
-		if !(actual == data.expected || actual == data.alternate) {
+		if actual != data.expected && actual != data.alternate {
 			t.Errorf("CreateJSONFromStringMap(%s): expected:%s or %s, actual:%s", data.input, data.expected, data.alternate, actual)
 		}
 	}

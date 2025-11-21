@@ -1,10 +1,9 @@
 package livestatus
 
 import (
-	"testing"
-
 	"pkg/nagflux/config"
 	"pkg/nagflux/logging"
+	"testing"
 )
 
 var PrintCommentData = []struct {
@@ -53,8 +52,8 @@ func TestSanitizeValuesComment(t *testing.T) {
 	t.Parallel()
 	comment := CommentData{Data: Data{hostName: "host 1", serviceDisplayName: "service 1", author: "philip"}, entryType: "1"}
 	comment.sanitizeValues()
-	if comment.Data.hostName != `host\ 1` {
-		t.Errorf("The notificationType should be escaped. Expected: %s Got: %s", `host\ 1`, comment.Data.hostName)
+	if comment.hostName != `host\ 1` {
+		t.Errorf("The notificationType should be escaped. Expected: %s Got: %s", `host\ 1`, comment.hostName)
 	}
 }
 

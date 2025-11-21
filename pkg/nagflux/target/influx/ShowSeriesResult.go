@@ -18,4 +18,4 @@ type SeriesStruct []struct {
 }
 
 // SeriesValue is list of values for a certain timestamp
-type SeriesValue []interface{}
+type SeriesValue []any

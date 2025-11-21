@@ -2,11 +2,10 @@ package helper
 
 import (
 	"bytes"
+	"pkg/nagflux/logging"
 	"strconv"
 	"strings"
 	"time"
-
-	"pkg/nagflux/logging"
 )
 
 // IsStringANumber returns true if the given string can be casted to int or float.
@@ -26,8 +25,8 @@ func StringToMap(input, entrySplitter, keyValueSplitter string) map[string]strin
 		return result
 	}
 
-	entry := strings.Split(input, entrySplitter)
-	for _, pair := range entry {
+	entry := strings.SplitSeq(input, entrySplitter)
+	for pair := range entry {
 		keyValue := strings.Split(strings.TrimSpace(pair), keyValueSplitter)
 		value := strings.Join(keyValue[1:], keyValueSplitter)
 		if value != "" && keyValue[0] != "" {

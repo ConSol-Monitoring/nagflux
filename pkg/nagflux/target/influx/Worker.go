@@ -7,16 +7,15 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strconv"
-	"sync"
-	"time"
-
 	"pkg/nagflux/collector"
 	"pkg/nagflux/collector/nagflux"
 	"pkg/nagflux/data"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
 	"pkg/nagflux/statistics"
+	"strconv"
+	"sync"
+	"time"
 
 	"github.com/kdar/factorlog"
 )
@@ -42,11 +41,11 @@ type Worker struct {
 const dataTimeout = time.Duration(5) * time.Second
 
 var (
-	errorInterrupted  = errors.New("Got interrupted")
+	errorInterrupted  = errors.New("got interrupted")
 	errorBadRequest   = errors.New("400 Bad Request")
-	errorHTTPClient   = errors.New("Http Client got an error")
-	errorFailedToSend = errors.New("Could not send data")
-	error500          = errors.New("Error 500")
+	errorHTTPClient   = errors.New("http Client got an error")
+	errorFailedToSend = errors.New("could not send data")
+	error500          = errors.New("error 500")
 )
 
 var mutex = &sync.Mutex{}

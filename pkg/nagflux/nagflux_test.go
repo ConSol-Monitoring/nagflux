@@ -8,11 +8,10 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"pkg/nagflux/target/influx"
 	"reflect"
 	"testing"
 	"time"
-
-	"pkg/nagflux/target/influx"
 )
 
 const (
@@ -69,28 +68,28 @@ var NagiosTestData1 = []testData{
 `,
 		// [time command crit crit-fill host max min performanceLabel service value warn warn-fill]
 		// [1000 usage 3 none h1 5 <nil> 4 C: use s1 <nil> 1 2 none]
-		[]interface{}{1000.0, "usage", 3.0, "none", "h1", 5.0, nil, 4.0, `C: use`, "s1", nil, 1.0, 2.0, "none"},
+		[]any{1000.0, "usage", 3.0, "none", "h1", 5.0, nil, 4.0, `C: use`, "s1", nil, 1.0, 2.0, "none"},
 	},
 	{
 		`DATATYPE::SERVICEPERFDATA	TIMET::3	HOSTNAME::h1	SERVICEDESC::s1	SERVICEPERFDATA::D:\ use=1;2;3;4;5	SERVICECHECKCOMMAND::usage
 `,
 		// [time command crit crit-fill host max min performanceLabel service value warn warn-fill]
 		// [3000 usage 3 none h1 5 <nil> 4 D:\ use s1 <nil> 1 2 none]
-		[]interface{}{3000.0, "usage", 3.0, "none", "h1", 5.0, nil, 4.0, `D:\ use`, "s1", nil, 1.0, 2.0, "none"},
+		[]any{3000.0, "usage", 3.0, "none", "h1", 5.0, nil, 4.0, `D:\ use`, "s1", nil, 1.0, 2.0, "none"},
 	},
 	// Normal
 	{
 		`DATATYPE::SERVICEPERFDATA	TIMET::2	HOSTNAME::h2	SERVICEDESC::s2	SERVICEPERFDATA::rta=2;3;4;5;6	SERVICECHECKCOMMAND::ping
 `,
 		//[2000 ping 4 none h2 6 <nil> 5 rta s2 <nil> 2 3 none]
-		[]interface{}{2000.0, "ping", 4.0, "none", "h2", 6.0, nil, 5.0, "rta", "s2", nil, 2.0, 3.0, "none"},
+		[]any{2000.0, "ping", 4.0, "none", "h2", 6.0, nil, 5.0, "rta", "s2", nil, 2.0, 3.0, "none"},
 	},
 	{
 		`DATATYPE::SERVICEPERFDATA	TIMET::1490957788	HOSTNAME::müü	SERVICEDESC::möö	SERVICEPERFDATA::getItinerary_min=34385µs	SERVICECHECKCOMMAND::check_perfs	SERVICESTATE::0	SERVICESTATETYPE::1
 `,
 		// [time command crit crit-fill host max min performanceLabel service value warn warn-fill]
 		// [1.490957788e+12 check_perfs <nil> <nil> müü <nil> <nil> <nil> getItinerary_min möö µs 34385 <nil> <nil>]
-		[]interface{}{1490957788000.0, "check_perfs", nil, nil, "müü", nil, nil, nil, "getItinerary_min", "möö", "µs", 34385.0, nil, nil},
+		[]any{1490957788000.0, "check_perfs", nil, nil, "müü", nil, nil, nil, "getItinerary_min", "möö", "µs", 34385.0, nil, nil},
 	},
 }
 
@@ -98,14 +97,14 @@ var NagiosTestData21 = []testData{
 	// Database1
 	{`DATATYPE::SERVICEPERFDATA	TIMET::4	HOSTNAME::h3	SERVICEDESC::s1	SERVICEPERFDATA::rta=2;3;4;5;6	SERVICECHECKCOMMAND::special	NAGFLUX:TARGET::` + database1 + `
 `, //[2000 ping 4 none h2 6 <nil> 5 rta s2 2 3 none]
-		[]interface{}{4000.0, "special", 4.0, "none", "h3", 6.0, nil, 5.0, "rta", "s1", nil, 2.0, 3.0, "none"}},
+		[]any{4000.0, "special", 4.0, "none", "h3", 6.0, nil, 5.0, "rta", "s1", nil, 2.0, 3.0, "none"}},
 }
 
 var NagiosTestData22 = []testData{
 	// Database2
 	{`DATATYPE::SERVICEPERFDATA	TIMET::4	HOSTNAME::h3	SERVICEDESC::s2	SERVICEPERFDATA::rta=2;3;4;5;6	SERVICECHECKCOMMAND::special	NAGFLUX:TARGET::` + database2 + `
 `, //[2000 ping 4 none h2 6 <nil> 5 rta s2 2 3 none]
-		[]interface{}{4000.0, "special", 4.0, "none", "h3", 6.0, nil, 5.0, "rta", "s2", nil, 2.0, 3.0, "none"}},
+		[]any{4000.0, "special", 4.0, "none", "h3", 6.0, nil, 5.0, "rta", "s2", nil, 2.0, 3.0, "none"}},
 }
 
 var NagfluxTestData1 = []testData{
@@ -114,13 +113,13 @@ var NagfluxTestData1 = []testData{
 metrics&10&nagflux&service1&command1&perf&20
 `,
 		//[10 command1 <nil> <nil> nagflux <nil> <nil> <nil> perf service1 20 <nil> <nil>]
-		[]interface{}{10.0, "command1", nil, nil, "nagflux", nil, nil, nil, "perf", "service1", nil, 20.0, nil, nil},
+		[]any{10.0, "command1", nil, nil, "nagflux", nil, nil, nil, "perf", "service1", nil, 20.0, nil, nil},
 	},
 	{
 		`metrics&20&nagflux&service\ 1&command1&perf\ 1&30
 `,
 		//[20 command1 <nil> <nil> nagflux <nil> <nil> <nil> perf\ 1 service\ 1 30 <nil> <nil>]
-		[]interface{}{20.0, "command1", nil, nil, "nagflux", nil, nil, nil, "perf 1", "service 1", nil, 30.0, nil, nil},
+		[]any{20.0, "command1", nil, nil, "nagflux", nil, nil, nil, "perf 1", "service 1", nil, 30.0, nil, nil},
 	},
 }
 
@@ -130,13 +129,13 @@ var NagfluxTestData2 = []testData{
 messages&100&nagflux&service1&"""Hallo World"""
 `,
 		//[100 <nil> <nil> <nil> nagflux <nil> Hallo World <nil> <nil> service1 <nil> <nil> <nil>]
-		[]interface{}{100.0, nil, nil, nil, "nagflux", nil, "Hallo World", nil, nil, "service1", nil, nil, nil, nil},
+		[]any{100.0, nil, nil, nil, "nagflux", nil, "Hallo World", nil, nil, "service1", nil, nil, nil, nil},
 	},
 	{
 		`messages&300&nagflux&service1&"""Hallo \\"""
 `,
 		//[300 <nil> <nil> <nil> nagflux <nil> Hallo \ <nil> <nil> service1 <nil> <nil> <nil>]
-		[]interface{}{300.0, nil, nil, nil, "nagflux", nil, `Hallo \`, nil, nil, "service1", nil, nil, nil, nil},
+		[]any{300.0, nil, nil, nil, "nagflux", nil, `Hallo \`, nil, nil, "service1", nil, nil, nil, nil},
 	},
 }
 

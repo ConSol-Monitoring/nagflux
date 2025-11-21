@@ -2,18 +2,17 @@ package helper
 
 import (
 	"fmt"
-	"strings"
-
 	"pkg/nagflux/config"
+	"strings"
 )
 
 // CreateJSONFromStringMap creates a part of a JSON object
 func CreateJSONFromStringMap(input map[string]string) string {
-	result := ""
+	str := strings.Builder{}
 	for k, v := range input {
-		result += fmt.Sprintf(`,%s:%s`, GenJSONValueString(k), GenJSONValueString(v))
+		str.WriteString(fmt.Sprintf(`,%s:%s`, GenJSONValueString(k), GenJSONValueString(v)))
 	}
-	return result
+	return str.String()
 }
 
 // GenJSONValueString quotes the string if it's not a number.
@@ -27,8 +26,8 @@ func GenJSONValueString(input string) string {
 // SanitizeElasicInput escapes backslashes and trims single ticks.
 func SanitizeElasicInput(input string) string {
 	input = strings.Trim(input, `'`)
-	input = strings.Replace(input, `\`, `\\`, -1)
-	input = strings.Replace(input, `"`, `\"`, -1)
+	input = strings.ReplaceAll(input, `\`, `\\`)
+	input = strings.ReplaceAll(input, `"`, `\"`)
 	return input
 }
 

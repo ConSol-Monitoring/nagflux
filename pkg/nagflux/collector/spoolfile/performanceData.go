@@ -2,7 +2,6 @@ package spoolfile
 
 import (
 	"fmt"
-
 	"pkg/nagflux/collector"
 	"pkg/nagflux/config"
 	"pkg/nagflux/helper"
@@ -11,6 +10,7 @@ import (
 // PerformanceData represents the nagios perfdata
 type PerformanceData struct {
 	collector.Filterable
+
 	Hostname         string
 	Service          string
 	Command          string

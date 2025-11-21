@@ -1,12 +1,11 @@
 package filter
 
 import (
+	"pkg/nagflux/config"
+	"pkg/nagflux/logging"
 	"regexp"
 	"strings"
 	"sync"
-
-	"pkg/nagflux/config"
-	"pkg/nagflux/logging"
 )
 
 type Processor struct {
@@ -17,11 +16,10 @@ type Processor struct {
 
 func NewFilter() Processor {
 	// TODO: should not compile regex for each call to NewFilter
-	logg := logging.GetLogger()
 	cfg := config.GetConfig()
 	lineFilterReg := make([]*regexp.Regexp, 0, 10)
 	fieldFilterReg := map[string]*regexp.Regexp{}
-	logg.Info("Try to compile these terms: %v", cfg.LineFilter.SpoolFileLineTerms)
+	logging.GetLogger().Info("Try to compile these terms: %v", cfg.LineFilter.SpoolFileLineTerms)
 	fp := Processor{
 		lineMut:        &sync.RWMutex{},
 		lineFilterReg:  lineFilterReg,
@@ -29,7 +27,7 @@ func NewFilter() Processor {
 	}
 	fp.lineMut.Lock()
 	for _, term := range cfg.LineFilter.SpoolFileLineTerms {
-		logg.Printf("Term is: %s", term)
+		logging.GetLogger().Printf("Term is: %s", term)
 		reg, err := regexp.Compile(term)
 		if err != nil {
 			logging.GetLogger().Warnf("could not compile your filter: %s", term)
