@@ -24,7 +24,7 @@ Nagflux only provides the timestamp in milliseconds.
 
 ## Dependencies
 
-    Golang 1.22+
+    Golang
 
 ## Install
 

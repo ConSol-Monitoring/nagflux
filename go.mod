@@ -1,6 +1,6 @@
 module github.com/ConSol-Monitoring/nagflux
 
-go 1.22
+go 1.24.10
 
 replace pkg/nagflux => ./pkg/nagflux
 
