@@ -1,11 +1,10 @@
 package filter
 
 import (
-	"fmt"
-	"pkg/nagflux/config"
-	"pkg/nagflux/helper"
-	"pkg/nagflux/logging"
 	"testing"
+
+	"pkg/nagflux/config"
+	"pkg/nagflux/logging"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -13,13 +12,7 @@ import (
 const configFileContent = `
 [LineFilter]
     SpoolFileLineTerms = "check_date|check_service|test-check-host-alive-parent|test-check-host-alive"
-
-[FieldFilter "HOSTNAME"]
-	Term = "test*"
-
-[FieldFilter "DATATYPE"]
-	Term = "HOSTPERFDATA"
-
+    SpoolFileLineTerms = "HOSTPERFDATA::"
 `
 
 const (
@@ -31,29 +24,11 @@ func TestFilterLine(t *testing.T) {
 	config.InitConfigFromString(configFileContent)
 	logging.InitTestLogger()
 	config := config.GetConfig()
-	fmt.Printf("config.GetConfig(): %v\n", config)
-	filter := NewFilter()
+	filter := NewFilter(config.LineFilter.SpoolFileLineTerms)
 
 	ok := filter.TestLine([]byte(spoolFilesLine))
 	assert.True(t, ok, "Line should be ok but wasn't")
-}
 
-func TestFilterLineRL(t *testing.T) {
-	config.InitConfigFromString(configFileContent)
-	logging.InitTestLogger()
-	filter := NewFilter()
-	ok := filter.TestLine([]byte(spoolFilesLine2))
-
-	assert.True(t, ok, "Line should be ok but wasn't")
-}
-
-func TestFilterField(t *testing.T) {
-	config.InitConfigFromString(configFileContent)
-	logging.InitTestLogger()
-
-	filter := NewFilter()
-	splittedPerformanceData := helper.StringToMap(string(spoolFilesLine), "\t", "::")
-	ok := filter.FilterPerformanceData(splittedPerformanceData)
-
+	ok = filter.TestLine([]byte(spoolFilesLine2))
 	assert.True(t, ok, "Line should be ok but wasn't")
 }

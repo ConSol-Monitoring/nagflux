@@ -21,7 +21,11 @@
     MinSeverity = "INFO"
 
 [LineFilter]
-    LivestatusLineTerms = "host_\\d+"
+    # apply filter on spool file lines (raw perfdata) if not empty. Can be used multiple times.
+    #SpoolFileLineTerms  = ""
+
+    # apply filter on livestatus log queries if not empty. Can be used multiple times.
+    #LivestatusLineTerms = ""
 
 [Monitoring]
     # leave empty to disable

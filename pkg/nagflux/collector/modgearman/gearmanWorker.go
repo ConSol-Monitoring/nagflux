@@ -34,6 +34,7 @@ type GearmanWorker struct {
 // NewGearmanWorker generates a new GearmanWorker.
 // leave the key empty to disable encryption, otherwise the gearmanpacketes are expected to be encrpyten with AES-ECB 128Bit and a 32 Byte Key.
 func NewGearmanWorker(address, queue, key string, results collector.ResultQueues, livestatusCacheBuilder *livestatus.CacheBuilder) *GearmanWorker {
+	cfg := config.GetConfig()
 	var decrypter *crypto.AESECBDecrypter
 	if key != "" {
 		byteKey := ShapeKey(key, DefaultModGearmanKeyLength)
@@ -56,7 +57,7 @@ func NewGearmanWorker(address, queue, key string, results collector.ResultQueues
 		address:         address,
 		log:             logging.GetLogger(),
 		jobQueue:        queue,
-		filterProcessor: filter.NewFilter(),
+		filterProcessor: filter.NewFilter(cfg.LineFilter.SpoolFileLineTerms),
 	}
 	go worker.run()
 	go worker.handleLoad()
@@ -183,7 +184,7 @@ func (g *GearmanWorker) handelJob(job libworker.Job) ([]byte, error) {
 	g.log.Debug("[ModGearman] ", string(job.Data()))
 	g.log.Debug("[ModGearman] ", splittedPerformanceData)
 
-	if ok := g.filterProcessor.FilterNagiosSpoolFileLineAndFields(secret, splittedPerformanceData); !ok {
+	if ok := g.filterProcessor.FilterNagiosSpoolFileLine(secret); !ok {
 		return job.Data(), nil
 	}
 

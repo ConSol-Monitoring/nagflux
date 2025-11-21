@@ -1,9 +1,10 @@
 package livestatus
 
 import (
+	"testing"
+
 	"pkg/nagflux/config"
 	"pkg/nagflux/logging"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 )

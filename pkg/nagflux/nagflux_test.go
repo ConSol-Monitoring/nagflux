@@ -8,10 +8,11 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"pkg/nagflux/target/influx"
 	"reflect"
 	"testing"
 	"time"
+
+	"pkg/nagflux/target/influx"
 )
 
 const (

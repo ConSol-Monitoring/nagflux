@@ -30,10 +30,6 @@ type Config struct {
 		SpoolFileLineTerms  []string
 		LivestatusLineTerms []string
 	}
-	// Remove Field Filtering?
-	FieldFilter map[string]*struct {
-		Term []string
-	}
 	Monitoring struct {
 		PrometheusAddress string
 	}

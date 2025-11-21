@@ -2,8 +2,9 @@ package helper
 
 import (
 	"fmt"
-	"pkg/nagflux/config"
 	"strings"
+
+	"pkg/nagflux/config"
 )
 
 // CreateJSONFromStringMap creates a part of a JSON object

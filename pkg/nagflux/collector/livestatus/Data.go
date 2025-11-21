@@ -2,9 +2,10 @@ package livestatus
 
 import (
 	"fmt"
+	"strings"
+
 	"pkg/nagflux/config"
 	"pkg/nagflux/helper"
-	"strings"
 )
 
 // Data contains basic data extracted from livestatusqueries.

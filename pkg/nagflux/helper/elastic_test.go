@@ -2,8 +2,9 @@ package helper
 
 import (
 	"fmt"
-	"pkg/nagflux/config"
 	"testing"
+
+	"pkg/nagflux/config"
 )
 
 var CreateJSONFromStringMapData = []struct {

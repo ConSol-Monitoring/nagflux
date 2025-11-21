@@ -2,10 +2,11 @@ package helper
 
 import (
 	"bytes"
-	"pkg/nagflux/logging"
 	"strconv"
 	"strings"
 	"time"
+
+	"pkg/nagflux/logging"
 )
 
 // IsStringANumber returns true if the given string can be casted to int or float.

@@ -2,10 +2,11 @@ package livestatus
 
 import (
 	"fmt"
+	"strings"
+
 	"pkg/nagflux/collector"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
-	"strings"
 )
 
 // NotificationData adds notification types to the livestatus data

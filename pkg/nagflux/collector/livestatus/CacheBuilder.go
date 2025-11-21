@@ -1,11 +1,12 @@
 package livestatus
 
 import (
-	"pkg/nagflux/logging"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"pkg/nagflux/logging"
 
 	"github.com/kdar/factorlog"
 )

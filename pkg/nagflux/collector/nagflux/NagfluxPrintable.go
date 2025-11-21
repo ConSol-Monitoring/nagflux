@@ -2,6 +2,7 @@ package nagflux
 
 import (
 	"fmt"
+
 	"pkg/nagflux/collector"
 	"pkg/nagflux/helper"
 )

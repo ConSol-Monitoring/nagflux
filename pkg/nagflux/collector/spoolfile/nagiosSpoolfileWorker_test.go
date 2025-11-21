@@ -13,14 +13,7 @@ import (
 const configFileContent = `
 
 [LineFilter]
-	Term = check-host-alive
-
-[FieldFilter "HOSTNAME"]
-	Term = test*
-
-[FieldFilter "DATATYPE"]
-	Term = HOSTPERFDATA
-
+	SpoolFileLineTerms = check-host-alive
 `
 
 func TestPerformanceDataParser_01(t *testing.T) {

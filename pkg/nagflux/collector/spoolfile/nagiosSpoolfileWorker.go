@@ -6,16 +6,18 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"pkg/nagflux/collector"
-	"pkg/nagflux/collector/livestatus"
-	"pkg/nagflux/filter"
-	"pkg/nagflux/helper"
-	"pkg/nagflux/logging"
-	"pkg/nagflux/statistics"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"pkg/nagflux/collector"
+	"pkg/nagflux/collector/livestatus"
+	"pkg/nagflux/config"
+	"pkg/nagflux/filter"
+	"pkg/nagflux/helper"
+	"pkg/nagflux/logging"
+	"pkg/nagflux/statistics"
 )
 
 const (
@@ -60,6 +62,7 @@ type NagiosSpoolfileWorker struct {
 func NewNagiosSpoolfileWorker(workerID int, jobs chan string, results collector.ResultQueues,
 	livestatusCacheBuilder *livestatus.CacheBuilder, fileBufferSize int, defaultTarget collector.Filterable,
 ) *NagiosSpoolfileWorker {
+	cfg := config.GetConfig()
 	return &NagiosSpoolfileWorker{
 		workerID:               workerID,
 		quit:                   make(chan bool),
@@ -68,7 +71,7 @@ func NewNagiosSpoolfileWorker(workerID int, jobs chan string, results collector.
 		livestatusCacheBuilder: livestatusCacheBuilder,
 		fileBufferSize:         fileBufferSize,
 		defaultTarget:          defaultTarget,
-		filterProcessor:        filter.NewFilter(),
+		filterProcessor:        filter.NewFilter(cfg.LineFilter.SpoolFileLineTerms),
 	}
 }
 
@@ -117,12 +120,9 @@ func (w *NagiosSpoolfileWorker) run() {
 			for err == nil && !isPrefix {
 				splittedPerformanceData := helper.StringToMap(string(line), "\t", "::")
 				if skipLine := w.filterProcessor.TestLine(line); !skipLine {
-					logging.GetLogger().Infof("Skipping Line %s", string(line))
-					continue
-				}
-				// TODO: decide if field filter is wanted or remove
-				if skipFields := w.filterProcessor.FilterPerformanceData(splittedPerformanceData); !skipFields {
-					logging.GetLogger().Info("Skipping Line because of Field filter")
+					logging.GetLogger().Debugf("skipping line %s", string(line))
+
+					line, isPrefix, err = reader.ReadLine()
 					continue
 				}
 				for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {

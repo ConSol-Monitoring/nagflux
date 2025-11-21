@@ -2,6 +2,7 @@ package spoolfile
 
 import (
 	"fmt"
+
 	"pkg/nagflux/collector"
 	"pkg/nagflux/config"
 	"pkg/nagflux/helper"

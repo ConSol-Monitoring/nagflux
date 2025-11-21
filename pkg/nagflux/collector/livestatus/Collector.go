@@ -2,15 +2,16 @@ package livestatus
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
+	"time"
+
 	"pkg/nagflux/collector"
 	"pkg/nagflux/config"
 	"pkg/nagflux/data"
 	"pkg/nagflux/filter"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
-	"regexp"
-	"strings"
-	"time"
 
 	"github.com/kdar/factorlog"
 )
@@ -33,7 +34,7 @@ Columns: livestatus_version
 OutputFormat: csv
 
 `
-	// QueryIcinga2ForNotifications livestatusquery for notifications with Icinga2 Livestatus.
+	// QueryIcinga2ForNotifications livestatus query for notifications with Icinga2 Livestatus.
 	QueryIcinga2ForNotifications = `GET log
 Columns: type time contact_name message
 Filter: type ~ .*NOTIFICATION
@@ -42,7 +43,7 @@ Negate:
 OutputFormat: csv
 
 `
-	// QueryNagiosForNotifications livestatusquery for notifications with nagioslike Livestatus.
+	// QueryNagiosForNotifications livestatus query for notifications with nagioslike Livestatus.
 	QueryNagiosForNotifications = `GET log
 Columns: type time contact_name message
 Filter: type ~ .*NOTIFICATION
@@ -50,14 +51,14 @@ Filter: time > %d
 OutputFormat: csv
 
 `
-	// QueryForComments livestatusquery for comments
+	// QueryForComments livestatus query for comments
 	QueryForComments = `GET comments
 Columns: host_name service_display_name comment entry_time author entry_type
 Filter: entry_time > %d
 OutputFormat: csv
 
 `
-	// QueryForDowntimes livestatusquery for downtimes
+	// QueryForDowntimes livestatus query for downtimes
 	QueryForDowntimes = `GET downtimes
 Columns: host_name service_display_name comment entry_time author end_time
 Filter: entry_time > %d
@@ -77,13 +78,14 @@ const (
 
 // NewLivestatusCollector constructor, which also starts it immediately.
 func NewLivestatusCollector(jobs collector.ResultQueues, livestatusConnector *Connector, detectVersion string) *Collector {
+	cfg := config.GetConfig()
 	live := &Collector{
 		quit:                make(chan bool, 2),
 		jobs:                jobs,
 		livestatusConnector: livestatusConnector,
 		log:                 logging.GetLogger(),
 		logQuery:            QueryNagiosForNotifications,
-		filterProcessor:     filter.NewFilter(),
+		filterProcessor:     filter.NewFilter(cfg.LineFilter.LivestatusLineTerms),
 	}
 	if detectVersion == "" {
 		switch getLivestatusVersion(live) {
@@ -280,9 +282,9 @@ Loop:
 		return Icinga2
 	} else if nagios, _ := regexp.MatchString(`^[\d\.]+p[\d\.]+$`, version); nagios {
 		return Nagios
-	} else if neamon, _ := regexp.MatchString(`^[\d\.]+(-naemon)?$`, version); neamon {
+	} else if naemon, _ := regexp.MatchString(`^[\d\.]+(source-naemon|-naemon)?$`, version); naemon {
 		return Naemon
 	}
-	live.log.Warn("Could not detect livestatus type, with version: ", version, ". Asuming Nagios")
+	live.log.Warn("Could not detect livestatus type, with version: ", version, ". Assuming Nagios")
 	return -1
 }
