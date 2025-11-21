@@ -2,7 +2,6 @@ package livestatus
 
 import (
 	"fmt"
-	"nagflux/filter"
 	"regexp"
 	"strings"
 	"time"
@@ -10,6 +9,7 @@ import (
 	"pkg/nagflux/collector"
 	"pkg/nagflux/config"
 	"pkg/nagflux/data"
+	"pkg/nagflux/filter"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
 

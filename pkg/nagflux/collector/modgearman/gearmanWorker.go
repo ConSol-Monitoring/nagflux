@@ -1,13 +1,13 @@
 package modgearman
 
 import (
-	"nagflux/filter"
 	"time"
 
 	"pkg/nagflux/collector"
 	"pkg/nagflux/collector/livestatus"
 	"pkg/nagflux/collector/spoolfile"
 	"pkg/nagflux/config"
+	"pkg/nagflux/filter"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/helper/crypto"
 	"pkg/nagflux/logging"

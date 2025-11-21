@@ -2,11 +2,11 @@ package filter
 
 import (
 	"fmt"
+	"testing"
+
 	"pkg/nagflux/config"
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
-
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -22,8 +22,11 @@ const configFileContent = `
 	Term = "HOSTPERFDATA"
 
 `
-const SpoolFilesLine = `DATATYPE::HOSTPERFDATA  TIMET::1749111379       HOSTNAME::dev_host_098 HOSTPERFDATA::rta=0.014ms;3000.000;5000.000;0; rtmax=0.045ms;;;; rtmin=0.000ms;;;; pl=0%;80;100;0;100 HOSTCHECKCOMMAND::check-host-alive      HOSTSTATE::UP   HOSTSTATETYPE::HARD`
-const FromTestSetup = `DATATYPE::SERVICEPERFDATA	TIMET::1750088084	HOSTNAME::testhost_0002	SERVICEDESC::check_date	SERVICEPERFDATA::	SERVICECHECKCOMMAND::check_date	HOSTSTATE::UP	HOSTSTATETYPE::HARD	SERVICESTATE::OK	SERVICESTATETYPE::HARD`
+
+const (
+	SpoolFilesLine = `DATATYPE::HOSTPERFDATA  TIMET::1749111379       HOSTNAME::dev_host_098 HOSTPERFDATA::rta=0.014ms;3000.000;5000.000;0; rtmax=0.045ms;;;; rtmin=0.000ms;;;; pl=0%;80;100;0;100 HOSTCHECKCOMMAND::check-host-alive      HOSTSTATE::UP   HOSTSTATETYPE::HARD`
+	FromTestSetup  = `DATATYPE::SERVICEPERFDATA	TIMET::1750088084	HOSTNAME::testhost_0002	SERVICEDESC::check_date	SERVICEPERFDATA::	SERVICECHECKCOMMAND::check_date	HOSTSTATE::UP	HOSTSTATETYPE::HARD	SERVICESTATE::OK	SERVICESTATETYPE::HARD`
+)
 
 const SpoolTest = `DATATYPE::SERVICEPERFDATA	TIMET::1750763389	HOSTNAME::dev_host_064	SERVICEDESC::check_date	SERVICEPERFDATA::	SERVICECHECKCOMMAND::check_date	HOSTSTATE::UP	HOSTSTATETYPE::HARD	SERVICESTATE::OK	SERVICESTATETYPE::HARD`
 
@@ -60,5 +63,4 @@ func TestFilterField(t *testing.T) {
 	ok := filter.FilterPerformanceData(splittedPerformanceData)
 
 	assert.True(t, ok, "Line should be ok but wasn't")
-
 }

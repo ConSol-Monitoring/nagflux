@@ -1,10 +1,10 @@
 package spoolfile
 
 import (
-	"pkg/nagflux/config"
 	"testing"
 
 	"pkg/nagflux/collector"
+	"pkg/nagflux/config"
 	"pkg/nagflux/helper"
 
 	"github.com/stretchr/testify/assert"

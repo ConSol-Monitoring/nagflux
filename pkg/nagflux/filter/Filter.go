@@ -1,11 +1,12 @@
 package filter
 
 import (
-	"pkg/nagflux/config"
-	"pkg/nagflux/logging"
 	"regexp"
 	"strings"
 	"sync"
+
+	"pkg/nagflux/config"
+	"pkg/nagflux/logging"
 )
 
 type Processor struct {
