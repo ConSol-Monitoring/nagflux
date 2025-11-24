@@ -1,3 +1,7 @@
+## v0.5.4 - 14.11.2025
+### Feature
+- add filtering to selectively process metrics
+
 ## v0.5.3 - 02.06.2025
 ### Fix
 - fix parsing spool files too early
