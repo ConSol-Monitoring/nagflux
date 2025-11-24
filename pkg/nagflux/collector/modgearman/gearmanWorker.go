@@ -57,7 +57,7 @@ func NewGearmanWorker(address, queue, key string, results collector.ResultQueues
 		address:         address,
 		log:             logging.GetLogger(),
 		jobQueue:        queue,
-		filterProcessor: filter.NewFilter(cfg.LineFilter.SpoolFileLineTerms),
+		filterProcessor: filter.NewFilter(cfg.Filter.SpoolFileLineTerms),
 	}
 	go worker.run()
 	go worker.handleLoad()
@@ -182,9 +182,12 @@ func (g *GearmanWorker) handelJob(job libworker.Job) ([]byte, error) {
 	}
 	splittedPerformanceData := helper.StringToMap(string(secret), "\t", "::")
 	g.log.Debug("[ModGearman] ", string(job.Data()))
+	g.log.Debug("[ModGearman] ", string(secret))
 	g.log.Debug("[ModGearman] ", splittedPerformanceData)
 
 	if ok := g.filterProcessor.FilterNagiosSpoolFileLine(secret); !ok {
+		logging.GetLogger().Debugf("skipping line %s", string(secret))
+
 		return job.Data(), nil
 	}
 

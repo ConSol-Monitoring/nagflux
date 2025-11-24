@@ -83,7 +83,7 @@ var configFileContent = `[main]
 	Index = "nagflux"
 	Version = 2.1
 
-[LineFilter]
+[Filter]
     LivestatusLineTerms = "host_\\d+"`
 
 func TestInitConfig(t *testing.T) {

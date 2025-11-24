@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"pkg/nagflux/config"
 	"pkg/nagflux/logging"
 
 	"github.com/kdar/factorlog"
@@ -89,9 +90,14 @@ func (builder *CacheBuilder) createLivestatusCache() Cache {
 	finishedDowntime := make(chan bool)
 	hostServiceCsv := make(chan []string)
 	finished := make(chan bool)
+
+	cfg := config.GetConfig()
+	hostsQuery := builder.livestatusConnector.buildQuery(QueryForHostsInDowntime, cfg.Filter.LivestatusHostsFilter)
+	servicesQuery := builder.livestatusConnector.buildQuery(QueryForServicesInDowntime, cfg.Filter.LivestatusServicesFilter)
+
 	go builder.livestatusConnector.connectToLivestatus(QueryForDowntimeid, downtimeCsv, finishedDowntime)
-	go builder.livestatusConnector.connectToLivestatus(QueryForHostsInDowntime, hostServiceCsv, finished)
-	go builder.livestatusConnector.connectToLivestatus(QueryForServicesInDowntime, hostServiceCsv, finished)
+	go builder.livestatusConnector.connectToLivestatus(hostsQuery, hostServiceCsv, finished)
+	go builder.livestatusConnector.connectToLivestatus(servicesQuery, hostServiceCsv, finished)
 
 	jobsFinished := 0
 	// contains id to starttime
@@ -100,9 +106,10 @@ func (builder *CacheBuilder) createLivestatusCache() Cache {
 		select {
 		case downtimesLine := <-downtimeCsv:
 			if len(downtimesLine) < 3 {
-				builder.log.Debug("downtimesLine", downtimesLine)
+				builder.log.Errorf("downtimesLine: %#v", downtimesLine)
 				break
 			}
+			builder.log.Debugf("downtimesLine: %#v", downtimesLine)
 			startTime, _ := strconv.Atoi(downtimesLine[1])
 			entryTime, _ := strconv.Atoi(downtimesLine[2])
 			latestTime := startTime
@@ -116,10 +123,13 @@ func (builder *CacheBuilder) createLivestatusCache() Cache {
 			for jobsFinished < 2 {
 				select {
 				case hostService := <-hostServiceCsv:
+					builder.log.Debugf("hostService: %#v", hostService)
 					for id := range strings.SplitSeq(hostService[0], ",") {
 						if len(hostService) == 2 {
+							builder.log.Debugf("adding host downtime: %#v", hostService)
 							result.addDowntime(hostService[1], "", downtimes[id])
 						} else if len(hostService) == 3 {
+							builder.log.Debugf("adding service downtime: %#v", hostService)
 							result.addDowntime(hostService[1], hostService[2], downtimes[id])
 						}
 					}

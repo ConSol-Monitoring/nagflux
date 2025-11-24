@@ -36,6 +36,8 @@ func (connector *Connector) connectToLivestatus(query string, result chan []stri
 		return
 	}
 
+	connector.Log.Debugf("livestatus query: %s", query)
+
 	defer conn.Close()
 	fmt.Fprint(conn, query)
 	reader := bufio.NewReader(conn)
@@ -64,4 +66,21 @@ func (connector *Connector) connectToLivestatus(query string, result chan []stri
 		}
 	}
 	outerFinish <- true
+}
+
+func (connector *Connector) buildQuery(baseQuery string, filter []string) string {
+	if len(filter) == 0 {
+		return baseQuery
+	}
+
+	filterStr := strings.Builder{}
+	for _, str := range filter {
+		str = strings.TrimSpace(str)
+		str = strings.ReplaceAll(str, `\\n`, "\n")
+
+		filterStr.WriteString("\n")
+		filterStr.WriteString(str)
+	}
+
+	return strings.TrimSpace(baseQuery) + "\n" + strings.TrimSpace(filterStr.String()) + "\n\n"
 }

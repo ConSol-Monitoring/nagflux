@@ -11,6 +11,8 @@ import (
 
 	"pkg/nagflux/helper"
 	"pkg/nagflux/logging"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type MockLivestatus struct {
@@ -116,4 +118,27 @@ func TestConnectToLivestatus(t *testing.T) {
 	if result := <-finished2; result {
 		t.Error("Expected an error with unknown connection type")
 	}
+}
+
+func TestConnectorQueryBuilder(t *testing.T) {
+	connector := Connector{}
+
+	query := `GET hosts
+Columns: name address
+
+`
+	result := connector.buildQuery(query, []string{})
+	assert.Equalf(t, query, result, "query builder returns expected query without filtering")
+
+	filter := []string{`Filter: state = 0`, `Filter: name ~ ^web`}
+
+	expected := `GET hosts
+Columns: name address
+Filter: state = 0
+Filter: name ~ ^web
+
+`
+
+	result = connector.buildQuery(query, filter)
+	assert.Equalf(t, expected, result, "query builder returns expected query when adding filtering")
 }

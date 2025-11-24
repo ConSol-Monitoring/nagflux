@@ -71,7 +71,7 @@ func NewNagiosSpoolfileWorker(workerID int, jobs chan string, results collector.
 		livestatusCacheBuilder: livestatusCacheBuilder,
 		fileBufferSize:         fileBufferSize,
 		defaultTarget:          defaultTarget,
-		filterProcessor:        filter.NewFilter(cfg.LineFilter.SpoolFileLineTerms),
+		filterProcessor:        filter.NewFilter(cfg.Filter.SpoolFileLineTerms),
 	}
 }
 

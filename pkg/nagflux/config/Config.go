@@ -26,9 +26,14 @@ type Config struct {
 		LogFile     string
 		MinSeverity string
 	}
-	LineFilter struct {
-		SpoolFileLineTerms  []string
-		LivestatusLineTerms []string
+	Filter struct {
+		SpoolFileLineTerms            []string
+		LivestatusLineTerms           []string
+		LivestatusCommentsFilter      []string
+		LivestatusDowntimesFilter     []string
+		LivestatusNotificationsFilter []string // filter used while querying notifications from log table
+		LivestatusHostsFilter         []string // filter used while querying active host downtimes
+		LivestatusServicesFilter      []string // filter used while querying active service downtimes
 	}
 	Monitoring struct {
 		PrometheusAddress string

@@ -10,7 +10,7 @@ import (
 )
 
 const configFileContent = `
-[LineFilter]
+[Filter]
     SpoolFileLineTerms = "check_date|check_service|test-check-host-alive-parent|test-check-host-alive"
     SpoolFileLineTerms = "HOSTPERFDATA::"
 `
@@ -24,7 +24,7 @@ func TestFilterLine(t *testing.T) {
 	config.InitConfigFromString(configFileContent)
 	logging.InitTestLogger()
 	config := config.GetConfig()
-	filter := NewFilter(config.LineFilter.SpoolFileLineTerms)
+	filter := NewFilter(config.Filter.SpoolFileLineTerms)
 
 	ok := filter.TestLine([]byte(spoolFilesLine))
 	assert.True(t, ok, "Line should be ok but wasn't")

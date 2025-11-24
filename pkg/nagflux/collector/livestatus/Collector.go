@@ -18,13 +18,24 @@ import (
 
 // Collector fetches data from livestatus.
 type Collector struct {
-	quit                chan bool
-	jobs                collector.ResultQueues
-	livestatusConnector *Connector
-	log                 *factorlog.FactorLog
-	logQuery            string
-	filterProcessor     filter.Processor
+	quit                  chan bool
+	jobs                  collector.ResultQueues
+	livestatusConnector   *Connector
+	log                   *factorlog.FactorLog
+	logNotificationsQuery string
+	commentsQuery         string
+	downtimesQuery        string
+	filterProcessor       filter.Processor
 }
+
+type queryType int
+
+const (
+	queryTypeNotification queryType = iota
+	queryTypeComments
+	queryTypeDowntimes
+	queryTypeStatus
+)
 
 const (
 	// Updateinterval on livestatus data for Icinga2.
@@ -84,16 +95,23 @@ func NewLivestatusCollector(jobs collector.ResultQueues, livestatusConnector *Co
 		jobs:                jobs,
 		livestatusConnector: livestatusConnector,
 		log:                 logging.GetLogger(),
-		logQuery:            QueryNagiosForNotifications,
-		filterProcessor:     filter.NewFilter(cfg.LineFilter.LivestatusLineTerms),
+		filterProcessor:     filter.NewFilter(cfg.Filter.LivestatusLineTerms),
 	}
+	live.logNotificationsQuery = livestatusConnector.buildQuery(QueryNagiosForNotifications, cfg.Filter.LivestatusNotificationsFilter)
+	live.commentsQuery = livestatusConnector.buildQuery(QueryForComments, cfg.Filter.LivestatusCommentsFilter)
+	live.downtimesQuery = livestatusConnector.buildQuery(QueryForDowntimes, cfg.Filter.LivestatusDowntimesFilter)
+
+	live.log.Debugf("query notifications: %s", live.logNotificationsQuery)
+	live.log.Debugf("query comments: %s", live.commentsQuery)
+	live.log.Debugf("query downtimes: %s", live.downtimesQuery)
+
 	if detectVersion == "" {
 		switch getLivestatusVersion(live) {
 		case Nagios:
 			live.log.Info("Livestatus type: Nagios")
 		case Icinga2:
 			live.log.Info("Livestatus type: Icinga2")
-			live.logQuery = QueryIcinga2ForNotifications
+			live.logNotificationsQuery = QueryIcinga2ForNotifications
 		case Naemon:
 			live.log.Info("Livestatus type: Naemon")
 		}
@@ -103,7 +121,7 @@ func NewLivestatusCollector(jobs collector.ResultQueues, livestatusConnector *Co
 			live.log.Info("Setting Livestatus version to: Nagios")
 		case "Icinga2":
 			live.log.Info("Setting Livestatus version to: Icinga2")
-			live.logQuery = QueryIcinga2ForNotifications
+			live.logNotificationsQuery = QueryIcinga2ForNotifications
 		case "Naemon":
 			live.log.Info("Setting Livestatus version to: Naemon")
 		default:
@@ -118,7 +136,7 @@ func NewLivestatusCollector(jobs collector.ResultQueues, livestatusConnector *Co
 func (live *Collector) Stop() {
 	live.quit <- true
 	<-live.quit
-	live.log.Debug("LivestatusCollector stoped")
+	live.log.Debug("LivestatusCollector stopped")
 }
 
 // Loop which checks livestats for data or waits to quit.
@@ -135,13 +153,13 @@ func (live *Collector) run() {
 	}
 }
 
-// Queries livestatus and returns the data to the gobal queue
+// Queries livestatus and returns the data to the global queue
 func (live *Collector) queryData() {
 	printables := make(chan collector.Printable)
 	finished := make(chan bool)
-	go live.requestPrintablesFromLivestatus(live.logQuery, true, printables, finished)
-	go live.requestPrintablesFromLivestatus(QueryForComments, true, printables, finished)
-	go live.requestPrintablesFromLivestatus(QueryForDowntimes, true, printables, finished)
+	go live.requestPrintablesFromLivestatus(queryTypeNotification, live.logNotificationsQuery, true, printables, finished)
+	go live.requestPrintablesFromLivestatus(queryTypeComments, live.commentsQuery, true, printables, finished)
+	go live.requestPrintablesFromLivestatus(queryTypeDowntimes, live.downtimesQuery, true, printables, finished)
 	jobsFinished := 0
 	for jobsFinished < 3 {
 		select {
@@ -157,7 +175,7 @@ func (live *Collector) queryData() {
 	}
 }
 
-func (live *Collector) requestPrintablesFromLivestatus(query string, addTimestampToQuery bool, printables chan collector.Printable, outerFinish chan bool) {
+func (live *Collector) requestPrintablesFromLivestatus(queryType queryType, query string, addTimestampToQuery bool, printables chan collector.Printable, outerFinish chan bool) {
 	queryWithTimestamp := query
 	if addTimestampToQuery {
 		queryWithTimestamp = addTimestampToLivestatusQuery(query)
@@ -170,31 +188,31 @@ func (live *Collector) requestPrintablesFromLivestatus(query string, addTimestam
 	for {
 		select {
 		case line := <-csv:
+			logging.GetLogger().Debugf("[%d] livestatus line %#v", queryType, line)
 			if skipLine := live.filterProcessor.TestLine([]byte(strings.Join(line, config.GetConfig().Main.FieldSeparator))); !skipLine {
+				logging.GetLogger().Debugf("skipping line %#v", line)
+
 				continue
 			}
-			switch query {
-			case QueryNagiosForNotifications:
+			switch queryType {
+			case queryTypeNotification:
 				if printable := live.handleQueryForNotifications(line); printable != nil {
 					printables <- printable
 				}
-			case QueryIcinga2ForNotifications:
-				if printable := live.handleQueryForNotifications(line); printable != nil {
-					printables <- printable
-				}
-			case QueryForComments:
+			case queryTypeComments:
 				if len(line) == 6 {
 					printables <- &CommentData{collector.AllFilterable, Data{line[0], line[1], line[2], line[3], line[4]}, line[5]}
 				} else {
 					live.log.Warn("QueryForComments out of range", line)
 				}
-			case QueryForDowntimes:
+			case queryTypeDowntimes:
 				if len(line) == 6 {
+					live.log.Debugf("adding downtime: %#v", line)
 					printables <- &DowntimeData{collector.AllFilterable, Data{line[0], line[1], line[2], line[3], line[4]}, line[5]}
 				} else {
 					live.log.Warn("QueryForDowntimes out of range", line)
 				}
-			case QueryLivestatusVersion:
+			case queryTypeStatus:
 				if len(line) == 1 {
 					printables <- &collector.SimplePrintable{Filterable: collector.AllFilterable, Text: line[0], Datatype: data.InfluxDB}
 				} else {
@@ -250,7 +268,7 @@ func getLivestatusVersion(live *Collector) int {
 	printables := make(chan collector.Printable, 1)
 	finished := make(chan bool, 1)
 	var version string
-	live.requestPrintablesFromLivestatus(QueryLivestatusVersion, false, printables, finished)
+	live.requestPrintablesFromLivestatus(queryTypeStatus, QueryLivestatusVersion, false, printables, finished)
 	i := 0
 	oneMinute := time.Duration(1) * time.Minute
 	roundsToWait := config.GetConfig().Livestatus.MinutesToWait
@@ -262,7 +280,7 @@ Loop:
 			break Loop
 		case <-time.After(oneMinute):
 			if i < roundsToWait {
-				go live.requestPrintablesFromLivestatus(QueryLivestatusVersion, false, printables, finished)
+				go live.requestPrintablesFromLivestatus(queryTypeStatus, QueryLivestatusVersion, false, printables, finished)
 			} else {
 				break Loop
 			}

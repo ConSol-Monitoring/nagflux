@@ -12,7 +12,7 @@ import (
 
 const configFileContent = `
 
-[LineFilter]
+[Filter]
 	SpoolFileLineTerms = check-host-alive
 `
 
