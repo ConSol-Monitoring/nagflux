@@ -216,6 +216,7 @@ func createTestData(folder, file string, data []testData) {
 	if err := os.MkdirAll(folder, 0o700); err != nil {
 		panic(err)
 	}
+	//nolint: prealloc // data.input string are connected to bytes, need to precalculate their size. not too trivial
 	fileData := []byte{}
 	for _, data := range data {
 		fileData = append(fileData, []byte(data.input)...)

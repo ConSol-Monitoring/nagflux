@@ -435,6 +435,7 @@ func testPerformanceDataParser(t *testing.T, input string, expect []PerformanceD
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable)
 
 	splittedPerformanceData := helper.StringToMap(input, "\t", "::")
+	//nolint:prealloc // do not know the size of the iterable
 	collectedPerfData := []PerformanceData{}
 	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
 		collectedPerfData = append(collectedPerfData, *singlePerfdata)
