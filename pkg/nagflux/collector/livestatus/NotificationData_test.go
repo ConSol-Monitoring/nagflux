@@ -43,7 +43,9 @@ func TestPrintNotification(t *testing.T) {
 }
 
 const Config = `[main]
+	# This option is deprecated, use NagiosSpoolfile.Folder when possible
 	NagiosSpoolfileFolder = "/var/spool/nagios"
+	# This option is deprecated, use NagiosSpoolfile.WorkerCount when possible
 	NagiosSpoolfileWorker = 1
 	InfluxWorker = 2
 	MaxInfluxWorker = 5
@@ -65,11 +67,24 @@ const Config = `[main]
 	PrometheusAddress = ""
 
 [Livestatus]
+	Enabled = true
 	# tcp or file
 	Type = "tcp"
 	# tcp: 127.0.0.1:6557 or file /var/run/live
 	Address = "127.0.0.1:6557"
 	MinutesToWait = 2
+
+[NagiosSpoolfile]
+    Enabled = true
+    # This option takes predence over main.NagiosSpoolfileFolder if set
+    Folder = "/var/spool/nagios"
+    # This option takes predence over main.NagiosSpoolfileWorker if set
+    WorkerCount = 1
+
+[NagfluxSpoolfile]
+    Enabled = true
+    # This option takes predence over main.NagfluxSpoolfileFolder if set
+    Folder = "/var/spool/nagflux"
 
 [InfluxDBGlobal]
 	CreateDatabaseIfNotExists = true
