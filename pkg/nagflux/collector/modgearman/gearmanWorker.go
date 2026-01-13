@@ -74,7 +74,7 @@ func (g *GearmanWorker) startGearmanWorker() error {
 	g.worker = libworker.New(libworker.OneByOne)
 	err := g.worker.AddServer("tcp4", g.address)
 	if err != nil {
-		return fmt.Errorf("Error when adding tcp4 gearman connection to address: %s , %w", g.address, err)
+		return fmt.Errorf("error when adding tcp4 gearman connection to address: %s , %w", g.address, err)
 	}
 	g.worker.ErrorHandler = func(err error) {
 		switch err.(type) {

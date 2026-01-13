@@ -12,7 +12,7 @@ func GetConfigValue(config any, primaryPath string, deprecatedPaths []string) (v
 	log := logging.GetLogger()
 
 	if value, found := getConfigValueByPath(config, primaryPath); found {
-		// report deprecated paths if you foudn the value in primary path
+		// report deprecated paths if you found the value in primary path
 		for _, deprecatedPath := range deprecatedPaths {
 			if _, found := getConfigValueByPath(config, deprecatedPath); found {
 				log.Infof("Warning: Config option '%s' is taken as it has predence over '%s'\n", primaryPath, deprecatedPath)
