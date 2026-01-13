@@ -134,10 +134,8 @@ func (worker *Worker) sendBuffer(queries []collector.Printable) {
 
 	var lineQueries []string
 	for _, query := range queries {
-		cast, castErr := worker.castJobToString(query)
-		if castErr == nil {
-			lineQueries = append(lineQueries, cast)
-		}
+		cast := worker.castJobToString(query)
+		lineQueries = append(lineQueries, cast)
 	}
 
 	var dataToSend []byte
@@ -215,10 +213,8 @@ func (worker *Worker) readQueriesFromQueue() []string {
 	for !stop {
 		select {
 		case query = <-worker.jobs:
-			cast, err := worker.castJobToString(query)
-			if err == nil {
-				queries = append(queries, cast)
-			}
+			cast := worker.castJobToString(query)
+			queries = append(queries, cast)
 		case <-time.After(time.Duration(200) * time.Millisecond):
 			stop = true
 		}
@@ -301,20 +297,18 @@ func (worker *Worker) dumpQueries(filename string, queries []string) {
 	}
 }
 
-// Converts an collector.Printable to a string.
-func (worker *Worker) castJobToString(job collector.Printable) (string, error) {
+// Converts an collector.Printable to a string. Can exit the program if Elasticsearch version is not supported
+func (worker *Worker) castJobToString(job collector.Printable) string {
 	var result string
-	var err error
 
 	if helper.VersionOrdinal(worker.version) >= helper.VersionOrdinal("2.0") {
 		result = job.PrintForElasticsearch(worker.version, worker.index)
 	} else {
 		worker.log.Fatalf("This elasticsearch version [%s] given in the config is not supported", worker.version)
-		err = errors.New("This elasticsearch version given in the config is not supported")
 	}
 
 	if len(result) > 1 && result[len(result)-1:] != "\n" {
 		result += "\n"
 	}
-	return result, err
+	return result
 }
