@@ -79,7 +79,7 @@ func (g *GearmanWorker) startGearmanWorker() error {
 		}
 		g.shutdownGearmanWorker()
 	}
-	g.worker.AddFunc(g.jobQueue, g.handelJob, libworker.Unlimited)
+	g.worker.AddFunc(g.jobQueue, g.handleJob, libworker.Unlimited)
 	if err := g.worker.Ready(); err != nil {
 		g.worker = nil
 		return err
@@ -170,7 +170,7 @@ func (g *GearmanWorker) handlePause() {
 	}
 }
 
-func (g *GearmanWorker) handelJob(job libworker.Job) ([]byte, error) {
+func (g *GearmanWorker) handleJob(job libworker.Job) ([]byte, error) {
 	secret := job.Data()
 	if g.aesECBDecrypter != nil {
 		var err error
