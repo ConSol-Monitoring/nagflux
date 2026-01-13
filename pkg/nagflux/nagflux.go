@@ -167,6 +167,7 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 		}
 		if !data.Enabled {
 			log.Warnf("Worker for mod_Gearman: %s - %s %s cannot be started, it is not enabled", name, data.Address, data.Queue)
+			continue
 		}
 		if livestatusCache == nil {
 			log.Warnf("Warning: %s - %s %s will start with a nil livestatusCache, will not process downtime data in perf", name, data.Address, data.Queue)
@@ -238,6 +239,8 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 		}
 	}
 
+	checkActiveModuleCount(stoppables)
+
 	// Listen for Interrupts
 	signalChannel := make(chan os.Signal, 1)
 	signal.Notify(signalChannel, syscall.SIGINT)
@@ -285,5 +288,19 @@ func cleanUp(itemsToStop []Stoppable, resultQueues collector.ResultQueues) {
 	}
 	for _, q := range resultQueues {
 		log.Debugf("Remaining queries %d", len(q))
+	}
+}
+
+// Depending on the configuration, we might not have added any active watchers.
+// Exit the program if that is the case
+func checkActiveModuleCount(stoppables []Stoppable) {
+	activeItemCount := 0
+	for _, stoppable := range stoppables {
+		if stoppable != nil {
+			activeItemCount++
+		}
+	}
+	if activeItemCount == 0 {
+		log.Fatalf("No active watcher/spooler/listeneder were constructed after processing the config file, enable at least an item.")
 	}
 }
