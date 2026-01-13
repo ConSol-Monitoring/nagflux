@@ -1,4 +1,4 @@
-package json
+package jsontarget
 
 import (
 	"encoding/json"

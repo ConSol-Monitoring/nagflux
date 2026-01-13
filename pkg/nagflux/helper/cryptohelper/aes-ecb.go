@@ -1,4 +1,4 @@
-package crypto
+package cryptohelper
 
 import (
 	"crypto/aes"

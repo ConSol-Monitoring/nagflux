@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"nagflux/target/file/jsontarget"
 	"pkg/nagflux/collector"
 	"pkg/nagflux/collector/livestatus"
 	"pkg/nagflux/collector/modgearman"
@@ -19,7 +20,6 @@ import (
 	"pkg/nagflux/logging"
 	"pkg/nagflux/statistics"
 	"pkg/nagflux/target/elasticsearch"
-	"pkg/nagflux/target/file/json"
 	"pkg/nagflux/target/influx"
 
 	"github.com/kdar/factorlog"
@@ -135,7 +135,7 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 		jsonFileConfig := (*value)
 		target := data.Target{Name: name, Datatype: data.JSONFile}
 		resultQueues[target] = make(chan collector.Printable, cfg.Main.BufferSize)
-		templateFile := json.NewJSONFileWorker(
+		templateFile := jsontarget.NewJSONFileWorker(
 			log, jsonFileConfig.AutomaticFileRotation,
 			resultQueues[target], target, jsonFileConfig.Path,
 		)

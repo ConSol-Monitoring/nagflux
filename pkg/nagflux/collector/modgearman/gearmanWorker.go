@@ -9,7 +9,7 @@ import (
 	"pkg/nagflux/config"
 	"pkg/nagflux/filter"
 	"pkg/nagflux/helper"
-	"pkg/nagflux/helper/crypto"
+	"pkg/nagflux/helper/cryptohelper"
 	"pkg/nagflux/logging"
 
 	libworker "github.com/appscode/g2/worker"
@@ -23,7 +23,7 @@ type GearmanWorker struct {
 	pauseQuit             chan bool
 	results               collector.ResultQueues
 	nagiosSpoolfileWorker *spoolfile.NagiosSpoolfileWorker
-	aesECBDecrypter       *crypto.AESECBDecrypter
+	aesECBDecrypter       *cryptohelper.AESECBDecrypter
 	worker                *libworker.Worker
 	log                   *factorlog.FactorLog
 	jobQueue              string
@@ -35,11 +35,11 @@ type GearmanWorker struct {
 // leave the key empty to disable encryption, otherwise the gearmanpacketes are expected to be encrpyten with AES-ECB 128Bit and a 32 Byte Key.
 func NewGearmanWorker(address, queue, key string, results collector.ResultQueues, livestatusCacheBuilder *livestatus.CacheBuilder) *GearmanWorker {
 	cfg := config.GetConfig()
-	var decrypter *crypto.AESECBDecrypter
+	var decrypter *cryptohelper.AESECBDecrypter
 	if key != "" {
 		byteKey := ShapeKey(key, DefaultModGearmanKeyLength)
 		var err error
-		decrypter, err = crypto.NewAESECBDecrypter(byteKey)
+		decrypter, err = cryptohelper.NewAESECBDecrypter(byteKey)
 		if err != nil {
 			panic(err)
 		}
