@@ -169,8 +169,7 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 			log.Warnf("Worker for mod_Gearman: %s - %s %s cannot be started, it is not enabled", name, data.Address, data.Queue)
 		}
 		if livestatusCache == nil {
-			log.Warnf("Worker for mod_Gearman: %s - %s %s cannot be started, livestatusCache is nil", name, data.Address, data.Queue)
-			continue
+			log.Warnf("Warning: %s - %s %s will start with a nil livestatusCache, will not process downtime data in perf", name, data.Address, data.Queue)
 		}
 		log.Infof("Mod_Gearman: %s - %s [%s]", name, data.Address, data.Queue)
 		secret := modgearman.GetSecret(data.Secret, data.SecretFile)
