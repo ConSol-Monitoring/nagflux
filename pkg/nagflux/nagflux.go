@@ -38,6 +38,7 @@ var (
 	quit = make(chan bool)
 )
 
+//nolint:funlen,maintidx
 func Nagflux(Build string) {
 	// Parse Args
 	var configPath string
