@@ -1,6 +1,7 @@
 package modgearman
 
 import (
+	"fmt"
 	"time"
 
 	"pkg/nagflux/collector"
@@ -9,7 +10,7 @@ import (
 	"pkg/nagflux/config"
 	"pkg/nagflux/filter"
 	"pkg/nagflux/helper"
-	"pkg/nagflux/helper/crypto"
+	"pkg/nagflux/helper/cryptohelper"
 	"pkg/nagflux/logging"
 
 	libworker "github.com/appscode/g2/worker"
@@ -23,23 +24,25 @@ type GearmanWorker struct {
 	pauseQuit             chan bool
 	results               collector.ResultQueues
 	nagiosSpoolfileWorker *spoolfile.NagiosSpoolfileWorker
-	aesECBDecrypter       *crypto.AESECBDecrypter
-	worker                *libworker.Worker
-	log                   *factorlog.FactorLog
-	jobQueue              string
-	address               string
-	filterProcessor       filter.Processor
+	aesECBDecrypter       *cryptohelper.AESECBDecrypter
+	// the gearman worker from external library.
+	worker          *libworker.Worker
+	log             *factorlog.FactorLog
+	jobQueue        string
+	address         string
+	filterProcessor filter.Processor
 }
 
 // NewGearmanWorker generates a new GearmanWorker.
 // leave the key empty to disable encryption, otherwise the gearmanpacketes are expected to be encrpyten with AES-ECB 128Bit and a 32 Byte Key.
+// livestatusCacheBuilder can be nil, which disables ????
 func NewGearmanWorker(address, queue, key string, results collector.ResultQueues, livestatusCacheBuilder *livestatus.CacheBuilder) *GearmanWorker {
 	cfg := config.GetConfig()
-	var decrypter *crypto.AESECBDecrypter
+	var decrypter *cryptohelper.AESECBDecrypter
 	if key != "" {
 		byteKey := ShapeKey(key, DefaultModGearmanKeyLength)
 		var err error
-		decrypter, err = crypto.NewAESECBDecrypter(byteKey)
+		decrypter, err = cryptohelper.NewAESECBDecrypter(byteKey)
 		if err != nil {
 			panic(err)
 		}
@@ -69,17 +72,20 @@ func NewGearmanWorker(address, queue, key string, results collector.ResultQueues
 func (g *GearmanWorker) startGearmanWorker() error {
 	g.shutdownGearmanWorker()
 	g.worker = libworker.New(libworker.OneByOne)
-	g.worker.AddServer("tcp4", g.address)
+	err := g.worker.AddServer("tcp4", g.address)
+	if err != nil {
+		return fmt.Errorf("error when adding tcp4 gearman connection to address: %s , %w", g.address, err)
+	}
 	g.worker.ErrorHandler = func(err error) {
 		switch err.(type) {
 		case *libworker.WorkerDisconnectError:
-			g.log.Warn("Gearmand did not response. Connection closed")
+			g.log.Warn("Gearmand did not response. Connection closed, %s", err.Error())
 		default:
 			g.log.Warn(err)
 		}
 		g.shutdownGearmanWorker()
 	}
-	g.worker.AddFunc(g.jobQueue, g.handelJob, libworker.Unlimited)
+	g.worker.AddFunc(g.jobQueue, g.handleJob, libworker.Unlimited)
 	if err := g.worker.Ready(); err != nil {
 		g.worker = nil
 		return err
@@ -170,7 +176,7 @@ func (g *GearmanWorker) handlePause() {
 	}
 }
 
-func (g *GearmanWorker) handelJob(job libworker.Job) ([]byte, error) {
+func (g *GearmanWorker) handleJob(job libworker.Job) ([]byte, error) {
 	secret := job.Data()
 	if g.aesECBDecrypter != nil {
 		var err error

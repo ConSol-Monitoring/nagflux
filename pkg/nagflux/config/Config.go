@@ -3,7 +3,9 @@ package config
 // Config Represents the config file.
 type Config struct {
 	Main struct {
-		NagiosSpoolfileFolder  string
+		// This option is deprecated, use NagiosSpoolfile.Folder when possible
+		NagiosSpoolfileFolder string
+		// This option is deprecated, use NagiosSpoolfile.WorkerCount when possible
 		NagiosSpoolfileWorker  int
 		InfluxWorker           int
 		MaxInfluxWorker        int
@@ -55,10 +57,23 @@ type Config struct {
 		AuthToken             string
 	}
 	Livestatus struct {
+		Enabled       bool
 		Type          string
 		Address       string
 		MinutesToWait int
 		Version       string
+	}
+	NagiosSpoolfile struct {
+		Enabled bool
+		// This option takes predence over main.NagiosSpoolfileFolder if set
+		Folder string
+		// This option takes predence over main.NagiosSpoolfileWorker if set
+		WorkerCount int
+	}
+	NagfluxSpoolfile struct {
+		Enabled bool
+		// This option takes predence over main.NagfluxSpoolfileFolder if set
+		Folder string
 	}
 	ElasticsearchGlobal struct {
 		HostcheckAlias   string

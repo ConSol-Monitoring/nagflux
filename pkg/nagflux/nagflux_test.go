@@ -155,6 +155,9 @@ var (
 )
 
 func init() {
+	// Set these for debugging
+	// os.Setenv("NAGFLUX_TEST_INFLUX", "http://127.0.0.1:8067")
+	// os.Setenv("NAGFLUX_TEST_LIVESTATUS", "127.0.0.1:6557")
 	finished = make(chan bool)
 	influxParam = os.Getenv(envInflux)
 	if influxParam == "" {
@@ -216,6 +219,7 @@ func createTestData(folder, file string, data []testData) {
 	if err := os.MkdirAll(folder, 0o700); err != nil {
 		panic(err)
 	}
+	//nolint: prealloc // data.input string are connected to bytes, need to precalculate their size. not too trivial
 	fileData := []byte{}
 	for _, data := range data {
 		fileData = append(fileData, []byte(data.input)...)
@@ -311,11 +315,14 @@ func dropDatabase() {
 func createConfig() {
 	config := []byte(fmt.Sprintf(`
 [main]
+	# This option is deprecated, use NagiosSpoolfile.Folder when possible
 	NagiosSpoolfileFolder = "test/nagios"
+	# This option is deprecated, use NagiosSpoolfile.WorkerCount when possible
 	NagiosSpoolfileWorker = 1
 	InfluxWorker = 2
 	MaxInfluxWorker = 5
 	DumpFile = "test/nagflux.dump"
+	# This option is deprecated, use NagfluxSpoolfile.Folder when possible
 	NagfluxSpoolfileFolder = "test/nagflux"
 	FieldSeparator = "&"
 	FileBufferSize = 65536
@@ -356,9 +363,22 @@ func createConfig() {
 	StopPullingDataIfDown = false
 
 [Livestatus]
+	Enabled = true
 	Type = "tcp"
 	Address = "%s"
 	MinutesToWait = 0
+
+[NagiosSpoolfile]
+    Enabled = true
+	# This option takes predence over main.NagiosSpoolfileFolder if set
+    Folder = "test/nagios"
+	# This option takes predence over main.NagiosSpoolfileWorker if set
+    WorkerCount = 1
+
+[NagfluxSpoolfile]
+    Enabled = true
+	# This option takes predence over main.NagfluxSpoolfileFolder if set
+    Folder = "test/nagflux"
 
 `, database1, influxParam, database1, database2, influxParam, database2, livestatusParam))
 	if err := os.WriteFile(filename, config, 0o644); err != nil {

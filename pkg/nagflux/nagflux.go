@@ -9,6 +9,8 @@ import (
 	"syscall"
 	"time"
 
+	"nagflux/helper"
+	"nagflux/target/file/jsontarget"
 	"pkg/nagflux/collector"
 	"pkg/nagflux/collector/livestatus"
 	"pkg/nagflux/collector/modgearman"
@@ -19,7 +21,6 @@ import (
 	"pkg/nagflux/logging"
 	"pkg/nagflux/statistics"
 	"pkg/nagflux/target/elasticsearch"
-	"pkg/nagflux/target/file/json"
 	"pkg/nagflux/target/influx"
 
 	"github.com/kdar/factorlog"
@@ -38,6 +39,7 @@ var (
 	quit = make(chan bool)
 )
 
+//nolint:funlen,maintidx
 func Nagflux(Build string) {
 	// Parse Args
 	var configPath string
@@ -135,7 +137,7 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 		jsonFileConfig := (*value)
 		target := data.Target{Name: name, Datatype: data.JSONFile}
 		resultQueues[target] = make(chan collector.Printable, cfg.Main.BufferSize)
-		templateFile := json.NewJSONFileWorker(
+		templateFile := jsontarget.NewJSONFileWorker(
 			log, jsonFileConfig.AutomaticFileRotation,
 			resultQueues[target], target, jsonFileConfig.Path,
 		)
@@ -145,13 +147,30 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 	// Some time for the dumpfile to fill the queue
 	time.Sleep(time.Duration(100) * time.Millisecond)
 
-	liveconnector := &livestatus.Connector{Log: log, LivestatusAddress: cfg.Livestatus.Address, ConnectionType: cfg.Livestatus.Type}
-	livestatusCollector := livestatus.NewLivestatusCollector(resultQueues, liveconnector, cfg.Livestatus.Version)
-	livestatusCache := livestatus.NewLivestatusCacheBuilder(liveconnector)
+	var livestatusConnector *livestatus.Connector
+	var livestatusCollector *livestatus.Collector
+	var livestatusCache *livestatus.CacheBuilder
+	// livestatus spoolfile collection is enabled by default
+	livestatusEnabled := true
+	if val, found := helper.GetConfigValue(cfg, "Livestatus.Enabled", []string{}); found {
+		livestatusEnabled, _ = val.(bool)
+	}
+	if livestatusEnabled {
+		livestatusConnector = &livestatus.Connector{Log: log, LivestatusAddress: cfg.Livestatus.Address, ConnectionType: cfg.Livestatus.Type}
+		livestatusCollector = livestatus.NewLivestatusCollector(resultQueues, livestatusConnector, cfg.Livestatus.Version)
+		livestatusCache = livestatus.NewLivestatusCacheBuilder(livestatusConnector)
+	}
 
 	for name, data := range cfg.ModGearman {
-		if data == nil || !data.Enabled {
+		if data == nil {
 			continue
+		}
+		if !data.Enabled {
+			log.Warnf("Worker for mod_Gearman: %s - %s %s cannot be started, it is not enabled", name, data.Address, data.Queue)
+			continue
+		}
+		if livestatusCache == nil {
+			log.Warnf("Warning: %s - %s %s will start with a nil livestatusCache, will not process downtime data in perf", name, data.Address, data.Queue)
 		}
 		log.Infof("Mod_Gearman: %s - %s [%s]", name, data.Address, data.Queue)
 		secret := modgearman.GetSecret(data.Secret, data.SecretFile)
@@ -166,18 +185,61 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 		}
 	}
 
-	log.Info("Nagios Spoolfile Folder: ", cfg.Main.NagiosSpoolfileFolder)
-	nagiosCollector := spoolfile.NagiosSpoolfileCollectorFactory(
-		cfg.Main.NagiosSpoolfileFolder,
-		cfg.Main.NagiosSpoolfileWorker,
-		resultQueues,
-		livestatusCache,
-		cfg.Main.FileBufferSize,
-		collector.Filterable{Filter: cfg.Main.DefaultTarget},
-	)
+	var nagiosCollector *spoolfile.NagiosSpoolfileCollector
+	// nagios spoolfile collection is enabled by default
+	nagiosSpoolFileCollectorEnabled := true
+	if val, found := helper.GetConfigValue(cfg, "NagiosSpoolfile.Enabled", []string{}); found {
+		nagiosSpoolFileCollectorEnabled, _ = val.(bool)
+	}
+	if nagiosSpoolFileCollectorEnabled {
+		spoolDirectory, found := helper.GetConfigValue(cfg, "NagiosSpoolfile.Folder", []string{"Main.NagiosSpoolfileFolder"})
+		if !found {
+			log.Criticalf("Could not find a config value for Nagios Spoolfile Folder")
+			<-quit
+		}
+		spoolDirectoryString, conv1 := spoolDirectory.(string)
 
-	log.Info("Nagflux Spoolfile Folder: ", cfg.Main.NagfluxSpoolfileFolder)
-	nagfluxCollector := nagflux.NewNagfluxFileCollector(resultQueues, cfg.Main.NagfluxSpoolfileFolder, fieldSeparator)
+		workerCount, found := helper.GetConfigValue(cfg, "NagiosSpoolfile.WorkerCount", []string{"Main.NagiosSpoolfileWorker"})
+		if !found {
+			log.Criticalf("Could not find a config value for Nagios Spoolfile Worker Count")
+			<-quit
+		}
+		workerCountInt, conv2 := workerCount.(int)
+
+		if conv1 && conv2 {
+			log.Info("Nagios Spoolfile Directory: ", spoolDirectoryString)
+			log.Info("Nagios Spoolfile Worker Count: ", workerCountInt)
+			nagiosCollector = spoolfile.NagiosSpoolfileCollectorFactory(
+				spoolDirectoryString,
+				workerCountInt,
+				resultQueues,
+				livestatusCache,
+				cfg.Main.FileBufferSize,
+				collector.Filterable{Filter: cfg.Main.DefaultTarget},
+			)
+		}
+	}
+
+	// nagflux spoolfile collection is enabled by default
+	var nagfluxCollector *nagflux.FileCollector
+	nagfluxCollectorEnabled := true
+	if val, found := helper.GetConfigValue(cfg, "NagfluxSpoolfile.Enabled", []string{}); found {
+		nagfluxCollectorEnabled, _ = val.(bool)
+	}
+	if nagfluxCollectorEnabled {
+		nagfluxCollectorFolder, found := helper.GetConfigValue(cfg, "NagfluxSpoolfile.Folder", []string{"Main.NagfluxSpoolfileFolder"})
+		if !found {
+			log.Criticalf("Could not find a config value for Nagflux Spoolfile Folder")
+		}
+		nagfluxCollectorFolderString, conv1 := nagfluxCollectorFolder.(string)
+
+		if conv1 {
+			log.Info("Nagflux Spoolfile Folder: ", nagfluxCollectorFolderString)
+			nagfluxCollector = nagflux.NewNagfluxFileCollector(resultQueues, nagfluxCollectorFolderString, fieldSeparator)
+		}
+	}
+
+	checkActiveModuleCount(stoppables)
 
 	// Listen for Interrupts
 	signalChannel := make(chan os.Signal, 1)
@@ -220,9 +282,25 @@ func waitForDumpfileCollector(dump *nagflux.DumpfileCollector) {
 func cleanUp(itemsToStop []Stoppable, resultQueues collector.ResultQueues) {
 	log.Info("Cleaning up...")
 	for i := len(itemsToStop) - 1; i >= 0; i-- {
-		itemsToStop[i].Stop()
+		if itemsToStop[i] != nil {
+			itemsToStop[i].Stop()
+		}
 	}
 	for _, q := range resultQueues {
 		log.Debugf("Remaining queries %d", len(q))
+	}
+}
+
+// Depending on the configuration, we might not have added any active watchers.
+// Exit the program if that is the case
+func checkActiveModuleCount(stoppables []Stoppable) {
+	activeItemCount := 0
+	for _, stoppable := range stoppables {
+		if stoppable != nil {
+			activeItemCount++
+		}
+	}
+	if activeItemCount == 0 {
+		log.Fatalf("No active watcher/spooler/listeneder were constructed after processing the config file, enable at least an item.")
 	}
 }

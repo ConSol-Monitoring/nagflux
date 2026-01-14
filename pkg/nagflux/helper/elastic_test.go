@@ -49,11 +49,14 @@ func TestSanitizeElasicInput(t *testing.T) {
 }
 
 const Config = `[main]
+	# This option is deprecated, use NagiosSpoolfile.Folder when possible
     NagiosSpoolfileFolder = "/var/spool/nagios"
+	# This option is deprecated, use NagiosSpoolfile.WorkerCount when possible
     NagiosSpoolfileWorker = 1
     InfluxWorker = 2
     MaxInfluxWorker = 5
     DumpFile = "nagflux.dump"
+	# This option is deprecated, use NagfluxSpoolfile.Folder when possible
     NagfluxSpoolfileFolder = "/var/spool/nagflux"
     FieldSeparator = "&"
     BufferSize = 10000
@@ -77,6 +80,18 @@ const Config = `[main]
     Address = "127.0.0.1:6557"
     # The amount to minutes to wait for livestatus to come up, if set to 0 the detection is disabled
     MinutesToWait = 2
+
+[NagiosSpoolfile]
+    Enabled = true
+	# This option takes predence over main.NagiosSpoolfileFolder if set
+    Folder = "/var/spool/nagios"
+	# This option takes predence over main.NagiosSpoolfileWorker if set
+    WorkerCount = 1
+
+[NagfluxSpoolfile]
+    Enabled = true
+	# This option takes predence over main.NagfluxSpoolfileFolder if set
+    Folder = "/var/spool/nagflux"
 
 [ModGearman "example"] #copy this block and rename it to add a second ModGearman queue
     Enabled = false

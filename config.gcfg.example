@@ -1,9 +1,12 @@
 [main]
+    # This option is deprecated, use NagiosSpoolfile.Folder when possible
     NagiosSpoolfileFolder = "/var/spool/nagios"
+    # This option is deprecated, use NagiosSpoolfile.WorkerCount when possible
     NagiosSpoolfileWorker = 1
     InfluxWorker = 2
     MaxInfluxWorker = 5
     DumpFile = "nagflux.dump"
+    # This option is deprecated, use NagfluxSpoolfile.Folder when possible
     NagfluxSpoolfileFolder = "/var/spool/nagflux"
     FieldSeparator = "&"
     BufferSize = 10000
@@ -48,6 +51,7 @@
     PrometheusAddress = ":8080"
 
 [Livestatus]
+    Enabled = true
     # tcp or file
     Type = "tcp"
     # tcp: 127.0.0.1:6557 or file /var/run/live
@@ -57,6 +61,18 @@
     # Set the Version of Livestatus. Allowed are Nagios, Icinga2, Naemon.
     # If left empty Nagflux will try to detect it on it's own, which will not always work.
     Version = ""
+
+[NagiosSpoolfile]
+    Enabled = true
+    # This option takes predence over main.NagiosSpoolfileFolder if set
+    Folder = "/var/spool/nagios"
+    # This option takes predence over main.NagiosSpoolfileWorker if set
+    WorkerCount = 1
+
+[NagfluxSpoolfile]
+    Enabled = true
+    # This option takes predence over main.NagfluxSpoolfileFolder if set
+    Folder = "/var/spool/nagflux"
 
 [ModGearman "example"] #copy this block and rename it to add a second ModGearman queue
     Enabled = false
