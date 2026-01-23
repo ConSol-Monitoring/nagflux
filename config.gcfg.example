@@ -64,14 +64,14 @@
 
 [NagiosSpoolfile]
     Enabled = true
-    # This option takes predence over main.NagiosSpoolfileFolder if set
+    # This option takes predence over Main.NagiosSpoolfileFolder if set
     Folder = "/var/spool/nagios"
-    # This option takes predence over main.NagiosSpoolfileWorker if set
+    # This option takes predence over Main.NagiosSpoolfileWorker if set
     WorkerCount = 1
 
 [NagfluxSpoolfile]
     Enabled = true
-    # This option takes predence over main.NagfluxSpoolfileFolder if set
+    # This option takes predence over Main.NagfluxSpoolfileFolder if set
     Folder = "/var/spool/nagflux"
 
 [ModGearman "example"] #copy this block and rename it to add a second ModGearman queue

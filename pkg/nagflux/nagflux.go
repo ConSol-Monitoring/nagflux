@@ -149,10 +149,11 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 	var livestatusConnector *livestatus.Connector
 	var livestatusCollector *livestatus.Collector
 	var livestatusCache *livestatus.CacheBuilder
+
 	// livestatus spoolfile collection is enabled by default
 	livestatusEnabled := true
-	if val, found := helper.GetConfigValue(cfg, "Livestatus.Enabled", []string{}); found {
-		livestatusEnabled, _ = val.(bool)
+	if val, found := helper.GetPreferredConfigValue(cfg, "Livestatus.Enabled", []string{}); found {
+		livestatusEnabled = *(val.(*bool))
 	}
 	if livestatusEnabled {
 		livestatusConnector = &livestatus.Connector{Log: log, LivestatusAddress: cfg.Livestatus.Address, ConnectionType: cfg.Livestatus.Type}
@@ -187,25 +188,25 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 	var nagiosCollector *spoolfile.NagiosSpoolfileCollector
 	// nagios spoolfile collection is enabled by default
 	nagiosSpoolFileCollectorEnabled := true
-	if val, found := helper.GetConfigValue(cfg, "NagiosSpoolfile.Enabled", []string{}); found {
-		nagiosSpoolFileCollectorEnabled, _ = val.(bool)
+	if val, found := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.Enabled", []string{}); found {
+		nagiosSpoolFileCollectorEnabled = *(val.(*bool))
 	}
 	if nagiosSpoolFileCollectorEnabled {
-		spoolDirectory, found := helper.GetConfigValue(cfg, "NagiosSpoolfile.Folder", []string{"Main.NagiosSpoolfileFolder"})
-		if !found {
+		spoolDirectory, spoolDirectoryFound := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.Folder", []string{"Main.NagiosSpoolfileFolder"})
+		if !spoolDirectoryFound {
 			log.Criticalf("Could not find a config value for Nagios Spoolfile Folder")
 			<-quit
 		}
-		spoolDirectoryString, conv1 := spoolDirectory.(string)
+		spoolDirectoryString := *(spoolDirectory.(*string))
 
-		workerCount, found := helper.GetConfigValue(cfg, "NagiosSpoolfile.WorkerCount", []string{"Main.NagiosSpoolfileWorker"})
-		if !found {
+		workerCount, workerCountFound := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.WorkerCount", []string{"Main.NagiosSpoolfileWorker"})
+		if !workerCountFound {
 			log.Criticalf("Could not find a config value for Nagios Spoolfile Worker Count")
 			<-quit
 		}
-		workerCountInt, conv2 := workerCount.(int)
+		workerCountInt := *(workerCount.(*int))
 
-		if conv1 && conv2 {
+		if spoolDirectoryFound && workerCountFound {
 			log.Info("Nagios Spoolfile Directory: ", spoolDirectoryString)
 			log.Info("Nagios Spoolfile Worker Count: ", workerCountInt)
 			nagiosCollector = spoolfile.NagiosSpoolfileCollectorFactory(
@@ -222,17 +223,18 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 	// nagflux spoolfile collection is enabled by default
 	var nagfluxCollector *nagflux.FileCollector
 	nagfluxCollectorEnabled := true
-	if val, found := helper.GetConfigValue(cfg, "NagfluxSpoolfile.Enabled", []string{}); found {
-		nagfluxCollectorEnabled, _ = val.(bool)
+	if val, found := helper.GetPreferredConfigValue(cfg, "NagfluxSpoolfile.Enabled", []string{}); found {
+		nagfluxCollectorEnabled = *(val.(*bool))
 	}
 	if nagfluxCollectorEnabled {
-		nagfluxCollectorFolder, found := helper.GetConfigValue(cfg, "NagfluxSpoolfile.Folder", []string{"Main.NagfluxSpoolfileFolder"})
+		nagfluxCollectorFolder, found := helper.GetPreferredConfigValue(cfg, "NagfluxSpoolfile.Folder", []string{"Main.NagfluxSpoolfileFolder"})
 		if !found {
 			log.Criticalf("Could not find a config value for Nagflux Spoolfile Folder")
+			<-quit
 		}
-		nagfluxCollectorFolderString, conv1 := nagfluxCollectorFolder.(string)
+		nagfluxCollectorFolderString := *(nagfluxCollectorFolder.(*string))
 
-		if conv1 {
+		if found {
 			log.Info("Nagflux Spoolfile Folder: ", nagfluxCollectorFolderString)
 			nagfluxCollector = nagflux.NewNagfluxFileCollector(resultQueues, nagfluxCollectorFolderString, fieldSeparator)
 		}

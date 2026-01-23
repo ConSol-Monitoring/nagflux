@@ -1,16 +1,18 @@
 package config
 
 // Config Represents the config file.
+// Optional arguments use pointers, if they are unspecified, they will be set to nil
 type Config struct {
 	Main struct {
 		// This option is deprecated, use NagiosSpoolfile.Folder when possible
-		NagiosSpoolfileFolder string
+		NagiosSpoolfileFolder *string
 		// This option is deprecated, use NagiosSpoolfile.WorkerCount when possible
-		NagiosSpoolfileWorker  int
-		InfluxWorker           int
-		MaxInfluxWorker        int
-		DumpFile               string
-		NagfluxSpoolfileFolder string
+		NagiosSpoolfileWorker *int
+		InfluxWorker          int
+		MaxInfluxWorker       int
+		DumpFile              string
+		// This option is deprecated, use NagfluxSpoolfile.Folder when possible
+		NagfluxSpoolfileFolder *string
 		FieldSeparator         string
 		BufferSize             int
 		FileBufferSize         int
@@ -57,23 +59,23 @@ type Config struct {
 		AuthToken             string
 	}
 	Livestatus struct {
-		Enabled       bool
+		Enabled       *bool
 		Type          string
 		Address       string
 		MinutesToWait int
 		Version       string
 	}
 	NagiosSpoolfile struct {
-		Enabled bool
-		// This option takes predence over main.NagiosSpoolfileFolder if set
-		Folder string
-		// This option takes predence over main.NagiosSpoolfileWorker if set
-		WorkerCount int
+		Enabled *bool
+		// This option takes predence over Main.NagiosSpoolfileFolder if set
+		Folder *string
+		// This option takes predence over Main.NagiosSpoolfileWorker if set
+		WorkerCount *int
 	}
 	NagfluxSpoolfile struct {
-		Enabled bool
-		// This option takes predence over main.NagfluxSpoolfileFolder if set
-		Folder string
+		Enabled *bool
+		// This option takes predence over Main.NagfluxSpoolfileFolder if set
+		Folder *string
 	}
 	ElasticsearchGlobal struct {
 		HostcheckAlias   string
