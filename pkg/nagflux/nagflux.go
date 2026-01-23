@@ -152,8 +152,13 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 
 	// livestatus spoolfile collection is enabled by default
 	livestatusEnabled := true
-	if val, found := helper.GetPreferredConfigValue(cfg, "Livestatus.Enabled", []string{}); found {
-		livestatusEnabled = *(val.(*bool))
+	if search, found := helper.GetPreferredConfigValue(cfg, "Livestatus.Enabled", []string{}); found {
+		ptr, ok := search.(*bool)
+		if ok {
+			livestatusEnabled = *(ptr)
+		} else {
+			log.Warnf("Expected a *bool value out of the config value for Livestatus Enablement")
+		}
 	}
 	if livestatusEnabled {
 		livestatusConnector = &livestatus.Connector{Log: log, LivestatusAddress: cfg.Livestatus.Address, ConnectionType: cfg.Livestatus.Type}
@@ -188,23 +193,40 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 	var nagiosCollector *spoolfile.NagiosSpoolfileCollector
 	// nagios spoolfile collection is enabled by default
 	nagiosSpoolFileCollectorEnabled := true
-	if val, found := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.Enabled", []string{}); found {
-		nagiosSpoolFileCollectorEnabled = *(val.(*bool))
+	if search, found := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.Enabled", []string{}); found {
+		ptr, ok := search.(*bool)
+		if ok {
+			nagiosSpoolFileCollectorEnabled = *(ptr)
+		} else {
+			log.Warnf("Expected a *bool value out of the config value for Nagios Spoolfile Collection Enablement")
+		}
 	}
 	if nagiosSpoolFileCollectorEnabled {
-		spoolDirectory, spoolDirectoryFound := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.Folder", []string{"Main.NagiosSpoolfileFolder"})
+		spoolDirectoryString := ""
+		spoolDirectorySearch, spoolDirectoryFound := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.Folder", []string{"Main.NagiosSpoolfileFolder"})
 		if !spoolDirectoryFound {
 			log.Criticalf("Could not find a config value for Nagios Spoolfile Folder")
 			<-quit
 		}
-		spoolDirectoryString := *(spoolDirectory.(*string))
+		spoolDirectoryPtr, ok := spoolDirectorySearch.(*string)
+		if ok {
+			spoolDirectoryString = *(spoolDirectoryPtr)
+		} else {
+			log.Warnf("Expected a *string value out of the config value for Nagios Spoolfile Folder")
+		}
 
-		workerCount, workerCountFound := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.WorkerCount", []string{"Main.NagiosSpoolfileWorker"})
+		workerCountInt := 0
+		workerCountSearch, workerCountFound := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.WorkerCount", []string{"Main.NagiosSpoolfileWorker"})
 		if !workerCountFound {
 			log.Criticalf("Could not find a config value for Nagios Spoolfile Worker Count")
 			<-quit
 		}
-		workerCountInt := *(workerCount.(*int))
+		workerCountPtr, ok := workerCountSearch.(*int)
+		if ok {
+			workerCountInt = *(workerCountPtr)
+		} else {
+			log.Warnf("Expected a *int value out of the config value for Nagios Spoolfile Worker Count")
+		}
 
 		if spoolDirectoryFound && workerCountFound {
 			log.Info("Nagios Spoolfile Directory: ", spoolDirectoryString)
@@ -224,15 +246,26 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 	var nagfluxCollector *nagflux.FileCollector
 	nagfluxCollectorEnabled := true
 	if val, found := helper.GetPreferredConfigValue(cfg, "NagfluxSpoolfile.Enabled", []string{}); found {
-		nagfluxCollectorEnabled = *(val.(*bool))
+		ptr, ok := val.(*bool)
+		if ok {
+			nagfluxCollectorEnabled = *(ptr)
+		} else {
+			log.Warnf("Expected a *bool value out of the config value for Nagflux Spoolfile Enablement")
+		}
 	}
 	if nagfluxCollectorEnabled {
-		nagfluxCollectorFolder, found := helper.GetPreferredConfigValue(cfg, "NagfluxSpoolfile.Folder", []string{"Main.NagfluxSpoolfileFolder"})
+		nagfluxCollectorFolderString := ""
+		nagfluxCollectorFolderSearch, found := helper.GetPreferredConfigValue(cfg, "NagfluxSpoolfile.Folder", []string{"Main.NagfluxSpoolfileFolder"})
 		if !found {
 			log.Criticalf("Could not find a config value for Nagflux Spoolfile Folder")
 			<-quit
 		}
-		nagfluxCollectorFolderString := *(nagfluxCollectorFolder.(*string))
+		nagfluxCollectionFolderPtr, ok := nagfluxCollectorFolderSearch.(*string)
+		if ok {
+			nagfluxCollectorFolderString = *(nagfluxCollectionFolderPtr)
+		} else {
+			log.Warnf("Expected a *string value out of the config value for Nagflux Spoolfile Folder")
+		}
 
 		if found {
 			log.Info("Nagflux Spoolfile Folder: ", nagfluxCollectorFolderString)
