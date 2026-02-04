@@ -25,7 +25,7 @@ func GetPreferredConfigValue(config any, primaryPath string, deprecatedPaths []s
 		// report deprecated paths if you found the value in primary path
 		for _, deprecatedPath := range deprecatedPaths {
 			if _, found := getConfigValueByPath(config, deprecatedPath); found {
-				log.Infof("Warning: Config option '%s' is taken instead of '%s' as it has predence", primaryPath, deprecatedPath)
+				log.Debugf("Config option '%s' is taken instead of '%s' as it has precedence", primaryPath, deprecatedPath)
 			}
 		}
 		return value, true
@@ -35,7 +35,7 @@ func GetPreferredConfigValue(config any, primaryPath string, deprecatedPaths []s
 	for _, deprecatedPath := range deprecatedPaths {
 		if value, found := getConfigValueByPath(config, deprecatedPath); found {
 			// Check if this deprecated value was explicitly set
-			log.Infof("Config option '%s' is deprecated, use '%s' instead", deprecatedPath, primaryPath)
+			log.Debugf("Config option '%s' is deprecated, use '%s' instead", deprecatedPath, primaryPath)
 			return value, true
 		}
 	}
