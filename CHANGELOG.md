@@ -1,3 +1,8 @@
+## v0.5.5 - 05.02.2026
+### Feature
+- add options to disable livestatus and spoolfolders
+
+
 ## v0.5.4 - 14.11.2025
 ### Feature
 - add filtering to selectively process metrics
