@@ -9,8 +9,8 @@ GOVERSION:=$(shell \
 )
 # also update go.mod files when changing minumum version
 # find . -name go.mod
-MINGOVERSION:=00010024
-MINGOVERSIONSTR:=1.24
+MINGOVERSION:=00010025
+MINGOVERSIONSTR:=1.25
 BUILD:=$(shell git rev-parse --short HEAD)
 # see https://github.com/go-modules-by-example/index/blob/master/010_tools/README.md
 # and https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module
