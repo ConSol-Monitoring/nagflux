@@ -330,7 +330,7 @@ func cleanUp(itemsToStop []Stoppable, resultQueues collector.ResultQueues) {
 	log.Info("Cleaning up...")
 	for i := len(itemsToStop) - 1; i >= 0; i-- {
 		// the type is Stoppable , which is an interface
-		// interface nil checks only work if both type and value are nil
+		// with golang, interface nil checks only work if both type and value are nil
 		if itemsToStop[i] != nil && !reflect.ValueOf(itemsToStop[i]).IsNil() {
 			itemsToStop[i].Stop()
 		}
