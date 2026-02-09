@@ -134,6 +134,11 @@ func NewLivestatusCollector(jobs collector.ResultQueues, livestatusConnector *Co
 
 // Stop signals the collector to stop.
 func (live *Collector) Stop() {
+	if live == nil {
+		log := logging.GetLogger()
+		log.Warnf("cannot stop Collector, as it is nil")
+		return
+	}
 	live.quit <- true
 	<-live.quit
 	live.log.Debug("LivestatusCollector stopped")

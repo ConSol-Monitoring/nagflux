@@ -51,6 +51,11 @@ func NagiosSpoolfileCollectorFactory(spoolDirectory string, workerAmount int, re
 
 // Stop stops his workers and itself.
 func (s *NagiosSpoolfileCollector) Stop() {
+	if s == nil {
+		log := logging.GetLogger()
+		log.Warnf("cannot stop Nagios File Collector, as it is nil")
+		return
+	}
 	s.quit <- true
 	<-s.quit
 	for _, worker := range s.workers {

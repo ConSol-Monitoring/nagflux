@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"reflect"
 	"runtime"
 	"syscall"
 	"time"
@@ -286,7 +287,18 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 			switch <-signalChannel {
 			case syscall.SIGINT, syscall.SIGTERM:
 				log.Warn("Got Interrupted")
-				stoppables = append(stoppables, []Stoppable{livestatusCollector, livestatusCache, nagiosCollector, nagfluxCollector}...)
+				if livestatusCollector != nil {
+					stoppables = append(stoppables, livestatusCollector)
+				}
+				if livestatusCache != nil {
+					stoppables = append(stoppables, livestatusCache)
+				}
+				if nagiosCollector != nil {
+					stoppables = append(stoppables, nagiosCollector)
+				}
+				if nagfluxCollector != nil {
+					stoppables = append(stoppables, nagfluxCollector)
+				}
 				cleanUp(stoppables, resultQueues)
 				quit <- true
 				return
@@ -317,7 +329,9 @@ func waitForDumpfileCollector(dump *nagflux.DumpfileCollector) {
 func cleanUp(itemsToStop []Stoppable, resultQueues collector.ResultQueues) {
 	log.Info("Cleaning up...")
 	for i := len(itemsToStop) - 1; i >= 0; i-- {
-		if itemsToStop[i] != nil {
+		// the type is Stoppable , which is an interface
+		// interface nil checks only work if both type and value are nil
+		if itemsToStop[i] != nil && !reflect.ValueOf(itemsToStop[i]).IsNil() {
 			itemsToStop[i].Stop()
 		}
 	}
@@ -331,7 +345,7 @@ func cleanUp(itemsToStop []Stoppable, resultQueues collector.ResultQueues) {
 func checkActiveModuleCount(stoppables []Stoppable) {
 	activeItemCount := 0
 	for _, stoppable := range stoppables {
-		if stoppable != nil {
+		if stoppable != nil && !reflect.ValueOf(stoppable).IsNil() {
 			activeItemCount++
 		}
 	}
