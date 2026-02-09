@@ -336,6 +336,6 @@ func checkActiveModuleCount(stoppables []Stoppable) {
 		}
 	}
 	if activeItemCount == 0 {
-		log.Fatalf("No active watcher/spooler/listeneder were constructed after processing the config file, enable at least an item.")
+		log.Fatalf("No active watcher/spooler/listener were constructed after processing the config file, enable at least an item.")
 	}
 }
