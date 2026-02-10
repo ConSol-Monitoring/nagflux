@@ -286,7 +286,18 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 			switch <-signalChannel {
 			case syscall.SIGINT, syscall.SIGTERM:
 				log.Warn("Got Interrupted")
-				stoppables = append(stoppables, []Stoppable{livestatusCollector, livestatusCache, nagiosCollector, nagfluxCollector}...)
+				if livestatusCollector != nil {
+					stoppables = append(stoppables, livestatusCollector)
+				}
+				if livestatusCache != nil {
+					stoppables = append(stoppables, livestatusCache)
+				}
+				if nagiosCollector != nil {
+					stoppables = append(stoppables, nagiosCollector)
+				}
+				if nagfluxCollector != nil {
+					stoppables = append(stoppables, nagfluxCollector)
+				}
 				cleanUp(stoppables, resultQueues)
 				quit <- true
 				return
@@ -317,9 +328,7 @@ func waitForDumpfileCollector(dump *nagflux.DumpfileCollector) {
 func cleanUp(itemsToStop []Stoppable, resultQueues collector.ResultQueues) {
 	log.Info("Cleaning up...")
 	for i := len(itemsToStop) - 1; i >= 0; i-- {
-		if itemsToStop[i] != nil {
-			itemsToStop[i].Stop()
-		}
+		itemsToStop[i].Stop()
 	}
 	for _, q := range resultQueues {
 		log.Debugf("Remaining queries %d", len(q))
@@ -329,13 +338,8 @@ func cleanUp(itemsToStop []Stoppable, resultQueues collector.ResultQueues) {
 // Depending on the configuration, we might not have added any active watchers.
 // Exit the program if that is the case
 func checkActiveModuleCount(stoppables []Stoppable) {
-	activeItemCount := 0
-	for _, stoppable := range stoppables {
-		if stoppable != nil {
-			activeItemCount++
-		}
-	}
+	activeItemCount := len(stoppables)
 	if activeItemCount == 0 {
-		log.Fatalf("No active watcher/spooler/listeneder were constructed after processing the config file, enable at least an item.")
+		log.Fatalf("No active watcher/spooler/listener were constructed after processing the config file, enable at least an item.")
 	}
 }
