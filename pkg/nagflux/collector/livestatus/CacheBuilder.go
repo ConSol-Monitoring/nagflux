@@ -58,11 +58,6 @@ func NewLivestatusCacheBuilder(livestatusConnector *Connector) *CacheBuilder {
 
 // Stop signals the cache to stop.
 func (builder *CacheBuilder) Stop() {
-	if builder == nil {
-		log := logging.GetLogger()
-		log.Warnf("cannot stop CacheBuilder, as it is nil")
-		return
-	}
 	builder.quit <- true
 	<-builder.quit
 	builder.log.Debug("LivestatusCacheBuilder stopped")

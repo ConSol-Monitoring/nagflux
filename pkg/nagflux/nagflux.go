@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"reflect"
 	"runtime"
 	"syscall"
 	"time"
@@ -329,11 +328,7 @@ func waitForDumpfileCollector(dump *nagflux.DumpfileCollector) {
 func cleanUp(itemsToStop []Stoppable, resultQueues collector.ResultQueues) {
 	log.Info("Cleaning up...")
 	for i := len(itemsToStop) - 1; i >= 0; i-- {
-		// the type is Stoppable , which is an interface
-		// with golang, interface nil checks only work if both type and value are nil
-		if itemsToStop[i] != nil && !reflect.ValueOf(itemsToStop[i]).IsNil() {
-			itemsToStop[i].Stop()
-		}
+		itemsToStop[i].Stop()
 	}
 	for _, q := range resultQueues {
 		log.Debugf("Remaining queries %d", len(q))
@@ -343,12 +338,7 @@ func cleanUp(itemsToStop []Stoppable, resultQueues collector.ResultQueues) {
 // Depending on the configuration, we might not have added any active watchers.
 // Exit the program if that is the case
 func checkActiveModuleCount(stoppables []Stoppable) {
-	activeItemCount := 0
-	for _, stoppable := range stoppables {
-		if stoppable != nil && !reflect.ValueOf(stoppable).IsNil() {
-			activeItemCount++
-		}
-	}
+	activeItemCount := len(stoppables)
 	if activeItemCount == 0 {
 		log.Fatalf("No active watcher/spooler/listener were constructed after processing the config file, enable at least an item.")
 	}

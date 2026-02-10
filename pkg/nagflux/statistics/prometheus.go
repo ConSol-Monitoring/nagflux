@@ -141,7 +141,6 @@ func (s PrometheusServer) WatchResultQueueLength(channels collector.ResultQueues
 }
 
 // Stop stops the Server
-// why is this not using pointer receiver ?
 func (s PrometheusServer) Stop() {
 	prometheusListener.Close()
 }

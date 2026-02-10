@@ -48,11 +48,6 @@ func NewNagfluxFileCollector(results collector.ResultQueues, folder string, fiel
 
 // Stop stops the Collector.
 func (nfc *FileCollector) Stop() {
-	if nfc == nil {
-		log := logging.GetLogger()
-		log.Warnf("cannot stop Nagflux File Collector, as it is nil")
-		return
-	}
 	nfc.quit <- true
 	<-nfc.quit
 	nfc.log.Debug("NagfluxFileCollector stoped")

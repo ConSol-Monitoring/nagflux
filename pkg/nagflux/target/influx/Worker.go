@@ -79,11 +79,6 @@ func WorkerGenerator(jobs chan collector.Printable, connection, dumpFile, versio
 
 // Stop stops the worker
 func (worker *Worker) Stop() {
-	if worker == nil {
-		log := logging.GetLogger()
-		log.Warnf("cannot stop Worker, as it is nil")
-		return
-	}
 	worker.quitInternal <- true
 	worker.quit <- true
 	<-worker.quit
