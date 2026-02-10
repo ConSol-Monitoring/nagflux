@@ -1,3 +1,8 @@
+## v0.5.6 - 10.02.2026
+### Fix
+- fix panic on shutdown
+
+
 ## v0.5.5 - 05.02.2026
 ### Feature
 - add options to disable livestatus and spoolfolders
@@ -7,9 +12,11 @@
 ### Feature
 - add filtering to selectively process metrics
 
+
 ## v0.5.3 - 02.06.2025
 ### Fix
 - fix parsing spool files too early
+
 
 ## v0.5.2 - 13.11.2024
 ### Changes
@@ -17,6 +24,7 @@
 - moved source into pkg/nagflux
 ### Feature
 - add influxdb v2 support
+
 
 ## v0.5.1 - 04.10.2024
 ### Changes
