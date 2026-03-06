@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"pkg/nagflux/logging"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/logging"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"strings"
 
-	"pkg/nagflux/logging"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/logging"
 )
 
 // Config parser tries to populate the Config struct with values from config file

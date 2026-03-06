@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"pkg/nagflux/logging"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/logging"
 )
 
 // IsStringANumber returns true if the given string can be casted to int or float.

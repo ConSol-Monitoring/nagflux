@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"pkg/nagflux/helper"
-	"pkg/nagflux/logging"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/helper"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/logging"
 
 	"github.com/stretchr/testify/assert"
 )

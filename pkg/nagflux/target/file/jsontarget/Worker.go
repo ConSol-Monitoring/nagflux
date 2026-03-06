@@ -7,8 +7,8 @@ import (
 	"path"
 	"time"
 
-	"pkg/nagflux/collector"
-	"pkg/nagflux/data"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/collector"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/data"
 
 	"github.com/kdar/factorlog"
 )

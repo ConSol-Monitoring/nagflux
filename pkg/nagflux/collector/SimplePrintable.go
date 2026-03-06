@@ -1,6 +1,6 @@
 package collector
 
-import "pkg/nagflux/data"
+import "github.com/ConSol-Monitoring/nagflux/pkg/nagflux/data"
 
 // SimplePrintable can be used to send strings as printable
 type SimplePrintable struct {

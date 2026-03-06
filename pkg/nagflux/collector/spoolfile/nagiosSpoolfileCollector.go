@@ -2,16 +2,16 @@ package spoolfile
 
 import (
 	"fmt"
-	"nagflux/helper"
 	"os"
 	"path"
 	"time"
 
-	"pkg/nagflux/collector"
-	"pkg/nagflux/collector/livestatus"
-	"pkg/nagflux/config"
-	"pkg/nagflux/logging"
-	"pkg/nagflux/statistics"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/collector"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/collector/livestatus"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/config"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/helper"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/logging"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/statistics"
 )
 
 const (

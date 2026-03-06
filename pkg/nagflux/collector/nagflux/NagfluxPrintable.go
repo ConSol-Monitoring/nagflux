@@ -3,8 +3,8 @@ package nagflux
 import (
 	"fmt"
 
-	"pkg/nagflux/collector"
-	"pkg/nagflux/helper"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/collector"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/helper"
 )
 
 // Printable converts from nagfluxfile format to X

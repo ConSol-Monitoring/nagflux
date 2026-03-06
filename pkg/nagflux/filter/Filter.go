@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"pkg/nagflux/logging"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/logging"
 )
 
 type Processor struct {

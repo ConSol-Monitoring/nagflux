@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"pkg/nagflux/config"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/config"
 )
 
 // CreateJSONFromStringMap creates a part of a JSON object

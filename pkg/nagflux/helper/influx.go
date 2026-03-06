@@ -3,7 +3,7 @@ package helper
 import (
 	"strings"
 
-	"pkg/nagflux/config"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/config"
 )
 
 // SanitizeInfluxInput adds backslashes to special chars.

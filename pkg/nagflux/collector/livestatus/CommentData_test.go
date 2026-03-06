@@ -3,8 +3,8 @@ package livestatus
 import (
 	"testing"
 
-	"pkg/nagflux/config"
-	"pkg/nagflux/logging"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/config"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/logging"
 )
 
 var PrintCommentData = []struct {

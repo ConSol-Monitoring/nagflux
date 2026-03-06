@@ -3,9 +3,9 @@ package spoolfile
 import (
 	"testing"
 
-	"pkg/nagflux/collector"
-	"pkg/nagflux/config"
-	"pkg/nagflux/helper"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/collector"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/config"
+	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/helper"
 
 	"github.com/stretchr/testify/assert"
 )
