@@ -53,8 +53,7 @@ func NewGearmanWorker(address, queue, key string, results collector.ResultQueues
 		pauseQuit: make(chan bool, 1),
 		results:   results,
 		nagiosSpoolfileWorker: spoolfile.NewNagiosSpoolfileWorker(
-			-1, make(chan string), make(collector.ResultQueues), livestatusCacheBuilder, 4096, collector.AllFilterable,
-		),
+			-1, make(chan string), make(collector.ResultQueues), livestatusCacheBuilder, 4096, collector.AllFilterable, spoolfile.PerfdataLabelMaxLengthDefault, spoolfile.PerfdataUOMMaxLengthDefault, spoolfile.PerfdataNumericValuesMaxLengthDefault, spoolfile.PerfdataThresholdsMaxLengthDefault),
 		aesECBDecrypter: decrypter,
 		worker:          nil,
 		address:         address,

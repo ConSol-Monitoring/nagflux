@@ -7,13 +7,14 @@ import (
 	"pkg/nagflux/logging"
 )
 
-// Config parser tries to populate the Config structy type with values from config file
-// If the Config has a field, but config file does not specify it, it will be default initialized
-// If the Config has a field that is a pointer to a type
+// Config parser tries to populate the Config struct with values from config file
+// If the Config struct has a field, but config file does not specify it, it will be default initialized
+// If the Config struct has a field that is a pointer to a type, there are two options
 // Option 1: Config file has it -> the pointer will point to an instance of that type
 // Option 2: Config file does not have it -> the pointer will be set to nil
-// This way we can determine if something is explicitly set in the config
-// But the type of that value has to be a pointer, like *bool or *string
+// This way we can determine if something is explicitly set in the config or unspecified
+// But the type of that value has to be a pointer, like *bool or *string.
+// It cant be a primitive non-pointer type like int. Those will be default initialized
 
 // GetPreferredConfigValue retrieves a value from a struct using a dot-separated path.
 // It takes a primaryPath and other deprecatedPaths. If a value is found on the mainPath, it notifies the user about deprecatedPaths

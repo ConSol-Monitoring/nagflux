@@ -70,7 +70,11 @@ type Config struct {
 		// This option takes predence over Main.NagiosSpoolfileFolder if set
 		Folder *string
 		// This option takes predence over Main.NagiosSpoolfileWorker if set
-		WorkerCount *int
+		WorkerCount                    *int
+		PerfdataLabelMaxLength         *int // Log errors and skip perfdata if perfdata label length is longer than this length
+		PerfdataUOMMaxLength           *int // Log errors and skip perfdata if perfdata Unit of Measurement length is longer than this length
+		PerfdataNumericValuesMaxLength *int // Log errors and skip perfdata if perfdata current value, min or max strings are longer than this length
+		PerfdataThresholdsMaxLength    *int // Log errors and skip perfdata if perfdata warn/crit threshold strings are longer than this length
 	}
 	NagfluxSpoolfile struct {
 		Enabled *bool

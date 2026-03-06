@@ -192,6 +192,7 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 	}
 
 	var nagiosCollector *spoolfile.NagiosSpoolfileCollector
+	var err error
 	// nagios spoolfile collection is enabled by default
 	nagiosSpoolFileCollectorEnabled := true
 	if search, found := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.Enabled", []string{}); found {
@@ -202,44 +203,19 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 			log.Warnf("Expected a *bool value out of the config value for Nagios Spoolfile Collection Enablement")
 		}
 	}
+
 	if nagiosSpoolFileCollectorEnabled {
-		spoolDirectoryString := ""
-		spoolDirectorySearch, spoolDirectoryFound := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.Folder", []string{"Main.NagiosSpoolfileFolder"})
-		if !spoolDirectoryFound {
-			log.Criticalf("Could not find a config value for Nagios Spoolfile Folder")
-			<-quit
-		}
-		spoolDirectoryPtr, ok := spoolDirectorySearch.(*string)
-		if ok {
-			spoolDirectoryString = *(spoolDirectoryPtr)
-		} else {
-			log.Warnf("Expected a *string value out of the config value for Nagios Spoolfile Folder")
-		}
+		nagiosCollector, err = spoolfile.NagiosSpoolfileCollectorFactory(
+			cfg,
+			resultQueues,
+			livestatusCache,
+			cfg.Main.FileBufferSize,
+			collector.Filterable{Filter: cfg.Main.DefaultTarget},
+		)
 
-		workerCountInt := 0
-		workerCountSearch, workerCountFound := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.WorkerCount", []string{"Main.NagiosSpoolfileWorker"})
-		if !workerCountFound {
-			log.Criticalf("Could not find a config value for Nagios Spoolfile Worker Count")
+		if err != nil {
+			log.Criticalf("Error when setting up NagiosSpoolfileCollectorFactory: %s", err.Error())
 			<-quit
-		}
-		workerCountPtr, ok := workerCountSearch.(*int)
-		if ok {
-			workerCountInt = *(workerCountPtr)
-		} else {
-			log.Warnf("Expected a *int value out of the config value for Nagios Spoolfile Worker Count")
-		}
-
-		if spoolDirectoryFound && workerCountFound {
-			log.Info("Nagios Spoolfile Directory: ", spoolDirectoryString)
-			log.Info("Nagios Spoolfile Worker Count: ", workerCountInt)
-			nagiosCollector = spoolfile.NagiosSpoolfileCollectorFactory(
-				spoolDirectoryString,
-				workerCountInt,
-				resultQueues,
-				livestatusCache,
-				cfg.Main.FileBufferSize,
-				collector.Filterable{Filter: cfg.Main.DefaultTarget},
-			)
 		}
 	}
 
