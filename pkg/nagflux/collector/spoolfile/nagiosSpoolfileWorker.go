@@ -277,7 +277,6 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 			currentCheckMultiLabel = getCheckMultiRegexMatch(perfdataStringMatches[0][1])
 		}
 
-	perfdataStringMatchLoop:
 		for _, perfdataStringMatch := range perfdataStringMatches {
 			// Allows to add tags and fields to spoolfileentries
 			tags := map[string]string{}
@@ -325,36 +324,31 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 				fieldType, err := indexToPerformanceDataSliceField(i)
 				if err != nil {
 					log.Warnf("Error when converting the index to a known field in performance data : %s", err.Error())
-					continue
+					goto perfdataStringMatchLoopEnd
 				}
 
 				switch fieldType {
 				case RawMatch:
-					continue
 				case Label:
 					if len(data) > w.perfdataLabelMaxSize {
 						log.Warnf("Perfdata Label: '%s' is too long with length: %s and longer than the limit: %s. Probably an anomally. Skipping this perfdata item, Host: %v , Service: %v, Perfdata fields: %v", data, len(data), w.perfdataLabelMaxSize, perf.Hostname, perf.Service, perfdataStringMatch)
-						goto perfdataStringMatchLoop
+						goto perfdataStringMatchLoopEnd
 					}
-					continue
 				case UOM:
 					if len(data) > w.perfdataUOMMaxLength {
 						log.Warnf("Perfdata UOM: '%s' is too long with length: %s and longer than the limit: %s. Probably an anomally. Host: %v , Service: %v, Perfdata fields: %v", data, len(data), w.perfdataUOMMaxLength, perf.Hostname, perf.Service, perfdataStringMatch)
-						goto perfdataStringMatchLoop
+						goto perfdataStringMatchLoopEnd
 					}
-					continue
 				case Value, Min, Max:
 					if len(data) > w.perfdataNumericValuesMaxLength {
 						log.Warnf("Perfdata field %s: '%s' is too long with length: %s and longer than the limit: %s. Probably an anomally. Host: %v , Service: %v, Perfdata fields: %v", fieldType.String(), data, len(data), w.perfdataNumericValuesMaxLength, perf.Hostname, perf.Service, perfdataStringMatch)
-						goto perfdataStringMatchLoop
+						goto perfdataStringMatchLoopEnd
 					}
-					continue
 				case Warn, Crit:
 					if len(data) > w.perfdataThresholdsMaxLength {
 						log.Warnf("Perfdata field %s: '%s' is too long with length: %s and longer than the limit: %s. Probably an anomally. Host: %v , Service: %v, Perfdata fields: %v", fieldType.String(), data, len(data), w.perfdataThresholdsMaxLength, perf.Hostname, perf.Service, perfdataStringMatch)
-						goto perfdataStringMatchLoop
+						goto perfdataStringMatchLoopEnd
 					}
-					continue
 				}
 
 				if data == "" {
@@ -386,13 +380,13 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 						} else {
 							perf.Tags[fillLabel] = "outer"
 						}
-
 						for i, tag := range []string{"min", "max"} {
-							tagKey := fmt.Sprintf("%s-%s", rangeRegex.String, tag)
+							tagKey := fmt.Sprintf("%s-%s", fieldType.String(), tag)
 							perf.Fields[tagKey] = helper.StringIntToStringFloat(rangeHits[i][0])
 						}
 					} else {
 						log.Warnf("String: '%s' in field '%s' could not be parsed. Host: %v, Service: %v, Perf Data Fields: %v", data, fieldType.String(), perf.Hostname, perf.Service, perfdataStringMatch)
+						goto perfdataStringMatchLoopEnd
 					}
 				case Value, Min, Max:
 					if data == "U" {
@@ -401,12 +395,16 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 					}
 					if !helper.IsStringANumber(data) {
 						log.Warnf("String: '%s' in field '%s' is not a number, should be one. Host: %v, Service: %v, Perf Data Fields: %v", data, fieldType.String(), perf.Hostname, perf.Service, perfdataStringMatch)
-						continue perfdataStringMatchLoop
+						goto perfdataStringMatchLoopEnd
 					}
 					perf.Fields[fieldType.String()] = helper.StringIntToStringFloat(data)
 				}
 			}
+
 			ch <- perf
+
+			// Skip item without sending it to the channel
+		perfdataStringMatchLoopEnd:
 		}
 		close(ch)
 	}()
@@ -479,6 +477,8 @@ func indexToPerformanceDataSliceField(index int) (PerformanceDataSliceFields, er
 		return Label, nil
 	case 2:
 		return Value, nil
+	case 3:
+		return UOM, nil
 	case 4:
 		return Warn, nil
 	case 5:
