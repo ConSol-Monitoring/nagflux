@@ -14,6 +14,12 @@ const configFileContent = `
 
 [Filter]
 	SpoolFileLineTerms = check-host-alive
+
+[NagiosSpoolfile]
+	PerfdataLabelMaxLength = 32
+    PerfdataUOMMaxLength = 16
+    PerfdataNumericValuesMaxLength = 32
+    PerfdataThresholdsMaxLength = 64
 `
 
 func TestPerformanceDataParser_01(t *testing.T) {
@@ -427,12 +433,162 @@ func TestPerformanceDataParser_20(t *testing.T) {
 	)
 }
 
+func TestPerformanceDataParser_LongPerformanceLabel(t *testing.T) {
+	t.Helper()
+
+	config.InitConfigFromString(configFileContent)
+
+	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
+
+	splittedPerformanceData := helper.StringToMap(
+		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::'i_am_a_very_long_performance_label_exceeding_the_default_limit_for_performance_labels_yeah'=35512320B;;;;	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
+		"\t", "::")
+
+	//nolint:prealloc // do not know the size of the iterable
+	collectedPerfData := []PerformanceData{}
+	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
+		collectedPerfData = append(collectedPerfData, *singlePerfdata)
+	}
+
+	assert.Emptyf(t, collectedPerfData, "Item should not be taken into the performance data due to long label, splittedPerformanceData: %v", splittedPerformanceData)
+}
+
+func TestPerformanceDataParser_LongValue(t *testing.T) {
+	t.Helper()
+
+	config.InitConfigFromString(configFileContent)
+
+	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
+
+	splittedPerformanceData := helper.StringToMap(
+		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::'label'=123456789123456789123456789123456789;;;;	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
+		"\t", "::")
+
+	//nolint:prealloc // do not know the size of the iterable
+	collectedPerfData := []PerformanceData{}
+	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
+		collectedPerfData = append(collectedPerfData, *singlePerfdata)
+	}
+
+	assert.Emptyf(t, collectedPerfData, "Item should not be taken into the performance data due to long length value, splittedPerformanceData: %v", splittedPerformanceData)
+}
+
+func TestPerformanceDataParser_LongUOM(t *testing.T) {
+	t.Helper()
+
+	config.InitConfigFromString(configFileContent)
+
+	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
+
+	// If you use underscores in the uom, it gets split out and only the first part is taken.
+	// UOM is deliberately written without underscores here
+	splittedPerformanceData := helper.StringToMap(
+		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::'label'=1iamaverylonguomthatshouldberejected;;;;	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
+		"\t", "::")
+
+	//nolint:prealloc // do not know the size of the iterable
+	collectedPerfData := []PerformanceData{}
+	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
+		collectedPerfData = append(collectedPerfData, *singlePerfdata)
+	}
+
+	assert.Emptyf(t, collectedPerfData, "Item should not be taken into the performance data due to long length unit of measurement, splittedPerformanceData: %v", splittedPerformanceData)
+}
+
+func TestPerformanceDataParser_LongWarnTrehsold(t *testing.T) {
+	t.Helper()
+
+	config.InitConfigFromString(configFileContent)
+
+	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
+
+	// If you use underscores in the uom, it gets split out and only the first part is taken.
+	// UOM is deliberately written without underscores here
+	splittedPerformanceData := helper.StringToMap(
+		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::'label'=1;123456789123456789123456789123456789:123456789123456789123456789123456789;;;	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
+		"\t", "::")
+
+	//nolint:prealloc // do not know the size of the iterable
+	collectedPerfData := []PerformanceData{}
+	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
+		collectedPerfData = append(collectedPerfData, *singlePerfdata)
+	}
+
+	assert.Emptyf(t, collectedPerfData, "Item should not be taken into the performance data due to long length of warning threshold, splittedPerformanceData: %v", splittedPerformanceData)
+}
+
+func TestPerformanceDataParser_LongCritTrehsold(t *testing.T) {
+	t.Helper()
+
+	config.InitConfigFromString(configFileContent)
+
+	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
+
+	// If you use underscores in the uom, it gets split out and only the first part is taken.
+	// UOM is deliberately written without underscores here
+	splittedPerformanceData := helper.StringToMap(
+		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::'label'=1;;123456789123456789123456789123456789:123456789123456789123456789123456789;;	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
+		"\t", "::")
+
+	//nolint:prealloc // do not know the size of the iterable
+	collectedPerfData := []PerformanceData{}
+	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
+		collectedPerfData = append(collectedPerfData, *singlePerfdata)
+	}
+
+	assert.Emptyf(t, collectedPerfData, "Item should not be taken into the performance data due to long length of critical threshold, splittedPerformanceData: %v", splittedPerformanceData)
+}
+
+func TestPerformanceDataParser_LongMinValue(t *testing.T) {
+	t.Helper()
+
+	config.InitConfigFromString(configFileContent)
+
+	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
+
+	// If you use underscores in the uom, it gets split out and only the first part is taken.
+	// UOM is deliberately written without underscores here
+	splittedPerformanceData := helper.StringToMap(
+		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::'label'=1;;;123456789123456789123456789123456789;	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
+		"\t", "::")
+
+	//nolint:prealloc // do not know the size of the iterable
+	collectedPerfData := []PerformanceData{}
+	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
+		collectedPerfData = append(collectedPerfData, *singlePerfdata)
+	}
+
+	assert.Emptyf(t, collectedPerfData, "Item should not be taken into the performance data due to long length of minimum value, splittedPerformanceData: %v", splittedPerformanceData)
+}
+
+func TestPerformanceDataParser_LongMaxValue(t *testing.T) {
+	t.Helper()
+
+	config.InitConfigFromString(configFileContent)
+
+	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
+
+	// If you use underscores in the uom, it gets split out and only the first part is taken.
+	// UOM is deliberately written without underscores here
+	splittedPerformanceData := helper.StringToMap(
+		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::'label'=1;;;;123456789123456789123456789123456789	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
+		"\t", "::")
+
+	//nolint:prealloc // do not know the size of the iterable
+	collectedPerfData := []PerformanceData{}
+	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
+		collectedPerfData = append(collectedPerfData, *singlePerfdata)
+	}
+
+	assert.Emptyf(t, collectedPerfData, "Item should not be taken into the performance data due to long length of maximum value, splittedPerformanceData: %v", splittedPerformanceData)
+}
+
 func testPerformanceDataParser(t *testing.T, input string, expect []PerformanceData) {
 	t.Helper()
 
 	config.InitConfigFromString(configFileContent)
 
-	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable)
+	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
 
 	splittedPerformanceData := helper.StringToMap(input, "\t", "::")
 	//nolint:prealloc // do not know the size of the iterable
