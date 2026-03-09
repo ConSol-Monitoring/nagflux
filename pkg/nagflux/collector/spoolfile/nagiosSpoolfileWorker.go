@@ -88,6 +88,7 @@ var (
 	//		Same as 6th capture group, but it is for the maximum value this time.
 	// '\s' matches any whitespace character, infinite times.
 	//	Idea: It seperates different perf data values as this must be matched new capture group can be captured
+	// Overall this script will detect a perfdata in Nagios syntax
 	regexPerformancelable = regexp.MustCompile(`([^=]+)=(U|[\d\.\,\-]+)([\pL\/\%]*);?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-]*)?;?([\d\.\,\-]*)?;?\s*`)
 
 	// The perfdata part might have some alternative check at the end, recognize it by it being at the end and only containing letters, '_', '-'
@@ -254,8 +255,8 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 
 	// anonymous closure, starts immediately after definition in another goroutine without blocking
 	go func() {
-		perdataString := input[dataType+"PERFDATA"]
-		cleaned := regexStripErrors.ReplaceAllString(perdataString, "")
+		perfdataString := input[dataType+"PERFDATA"]
+		perfdataStringErrorsRemoved := regexStripErrors.ReplaceAllString(perfdataString, "")
 
 		// Slices up the string into a form like this
 		// Each match is put into an array with their capture groups
@@ -269,12 +270,25 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 				["pl=0%;80;100;0;100","pl","0","%","80","100","0","100"]
 			]
 		*/
-		perfdataStringMatches := regexPerformancelable.FindAllStringSubmatch(cleaned, -1)
+		perfdataStringMatches := regexPerformancelable.FindAllStringSubmatch(perfdataStringErrorsRemoved, -1)
 		currentCheckMultiLabel := ""
 
 		// try to find a check_multi prefix
 		if len(perfdataStringMatches) > 0 && len(perfdataStringMatches[0]) > 1 {
 			currentCheckMultiLabel = getCheckMultiRegexMatch(perfdataStringMatches[0][1])
+		}
+
+		// check if concataneting matches makes up the original string
+		matchesConcatenated := ""
+		for _, matchAndCaptureGroups := range perfdataStringMatches {
+			match := matchAndCaptureGroups[0]
+			matchesConcatenated += match
+		}
+
+		if len(matchesConcatenated) > 0 && strings.TrimSpace(matchesConcatenated) != strings.TrimSpace(perfdataString) {
+			log.Warnf("Perfdata matches: '%v' when concatanted come up to be: '%s', and original perfdata string is: '%s' . They are not equal after stripping whitespace from both", perfdataStringMatches, matchesConcatenated, perfdataString)
+			close(ch)
+			return
 		}
 
 		for _, perfdataStringMatch := range perfdataStringMatches {
