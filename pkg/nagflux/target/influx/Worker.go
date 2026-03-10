@@ -17,7 +17,6 @@ import (
 	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/helper"
 	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/logging"
 	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/statistics"
-
 	"github.com/kdar/factorlog"
 )
 

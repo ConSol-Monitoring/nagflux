@@ -22,7 +22,6 @@ import (
 	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/target/elasticsearch"
 	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/target/file/jsontarget"
 	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/target/influx"
-
 	"github.com/kdar/factorlog"
 )
 
@@ -212,7 +211,6 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 			cfg.Main.FileBufferSize,
 			collector.Filterable{Filter: cfg.Main.DefaultTarget},
 		)
-
 		if err != nil {
 			log.Criticalf("Error when setting up NagiosSpoolfileCollectorFactory: %s", err.Error())
 			<-quit

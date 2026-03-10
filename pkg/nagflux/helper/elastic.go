@@ -11,6 +11,7 @@ import (
 func CreateJSONFromStringMap(input map[string]string) string {
 	str := strings.Builder{}
 	for k, v := range input {
+		//nolint:staticcheck // cant use fmt.Fprintf() on a strings.Builder
 		str.WriteString(fmt.Sprintf(`,%s:%s`, GenJSONValueString(k), GenJSONValueString(v)))
 	}
 	return str.String()

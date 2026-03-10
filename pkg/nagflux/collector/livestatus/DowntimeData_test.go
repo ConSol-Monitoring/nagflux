@@ -5,7 +5,6 @@ import (
 
 	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/config"
 	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/logging"
-
 	"github.com/stretchr/testify/assert"
 )
 

@@ -1,7 +1,7 @@
 package spoolfile
 
 import (
-	"fmt"
+	"errors"
 	"os"
 	"path"
 	"time"
@@ -21,17 +21,17 @@ const (
 	// IntervalToCheckDirectory the interval to check if there are new files
 	IntervalToCheckDirectory = 1500 * time.Millisecond
 
-	// If a perfdata label is longer than this, it will be logged as an anomaly and skipped
+	// PerfdataLabelMaxLengthDefault: If a perfdata label is longer than this, it will be logged as an anomaly and skipped
 	PerfdataLabelMaxLengthDefault = int(32)
 
-	// If a perfdata UOM is longer than this, it will be logged as an anomaly and skipped
+	// PerfdataUOMMaxLengthDefault: If a perfdata UOM is longer than this, it will be logged as an anomaly and skipped
 	PerfdataUOMMaxLengthDefault = int(16)
 
-	// If a perfdata numeric value, e.g current value, min, and max is longer than this, it will be logged as an anomaly and skipped
+	// PerfdataNumericValuesMaxLengthDefault: If a perfdata numeric value, e.g current value, min, and max is longer than this, it will be logged as an anomaly and skipped
 	// Reasoning: Largest uint64 is 20 characters wide, floats are not printed with too much precision either
 	PerfdataNumericValuesMaxLengthDefault = int(32)
 
-	// If a perfdata numeric value, e.g current value, min, and max is longer than this, it will be logged as an anomaly and skipped
+	// PerfdataThresholdsMaxLengthDefault: If a perfdata numeric value, e.g current value, min, and max is longer than this, it will be logged as an anomaly and skipped
 	// Reasoning: Twice the numeric value max length, since there are seperators as well
 	PerfdataThresholdsMaxLengthDefault = int(64)
 )
@@ -48,29 +48,27 @@ type NagiosSpoolfileCollector struct {
 func NagiosSpoolfileCollectorFactory(cfg config.Config, results collector.ResultQueues,
 	livestatusCacheBuilder *livestatus.CacheBuilder, fileBufferSize int, defaultTarget collector.Filterable,
 ) (*NagiosSpoolfileCollector, error) {
-	spoolDirectory := ""
 	search, found := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.Folder", []string{"Main.NagiosSpoolfileFolder"})
 	if !found {
-		return nil, fmt.Errorf("Could not find a config value for Nagios Spoolfile Folder")
-	}
-	spoolDirectoryPtr, ok := search.(*string)
-	if ok {
-		spoolDirectory = *(spoolDirectoryPtr)
-	} else {
-		return nil, fmt.Errorf("Expected a *string value out of the config value for Nagios Spoolfile Folder")
+		return nil, errors.New("could not find a config value for Nagios Spoolfile Folder")
 	}
 
-	workerAmount := 0
+	spoolDirectoryPtr, ok := search.(*string)
+	if !ok {
+		return nil, errors.New("expected a *string value out of the config value for Nagios Spoolfile Folder")
+	}
+	spoolDirectory := *(spoolDirectoryPtr)
+
 	search, found = helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.WorkerCount", []string{"Main.NagiosSpoolfileWorker"})
 	if !found {
-		return nil, fmt.Errorf("Could not find a config value for Nagios Spoolfile Worker Count")
+		return nil, errors.New("could not find a config value for Nagios Spoolfile Worker Count")
 	}
+
 	workerAmountPtr, ok := search.(*int)
-	if ok {
-		workerAmount = *(workerAmountPtr)
-	} else {
-		return nil, fmt.Errorf("Expected a *int value out of the config value for Nagios Spoolfile Worker Count")
+	if !ok {
+		return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Worker Count")
 	}
+	workerAmount := *(workerAmountPtr)
 
 	perfdataLabelMaxLength := PerfdataLabelMaxLengthDefault
 	search, found = helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.PerfdataLabelMaxLength", []string{})
@@ -79,7 +77,7 @@ func NagiosSpoolfileCollectorFactory(cfg config.Config, results collector.Result
 		if ok {
 			perfdataLabelMaxLength = *(perfdataLabelMaxLengthPtr)
 		} else {
-			return nil, fmt.Errorf("Expected a *int value out of the config value for Nagios Spoolfile Perfdata Label Max Length")
+			return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Perfdata Label Max Length")
 		}
 	}
 
@@ -90,7 +88,7 @@ func NagiosSpoolfileCollectorFactory(cfg config.Config, results collector.Result
 		if ok {
 			perfdataUOMMaxLength = *(perfdataUOMMaxLengthPtr)
 		} else {
-			return nil, fmt.Errorf("Expected a *int value out of the config value for Nagios Spoolfile Perfdata UOM Max Length")
+			return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Perfdata UOM Max Length")
 		}
 	}
 
@@ -101,7 +99,7 @@ func NagiosSpoolfileCollectorFactory(cfg config.Config, results collector.Result
 		if ok {
 			perfdataNumericValuesMaxLength = *(perfdataNumericValuesMaxLengthPtr)
 		} else {
-			return nil, fmt.Errorf("Expected a *int value out of the config value for Nagios Spoolfile Perfdata UOM Max Length")
+			return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Perfdata UOM Max Length")
 		}
 	}
 
@@ -112,7 +110,7 @@ func NagiosSpoolfileCollectorFactory(cfg config.Config, results collector.Result
 		if ok {
 			perfdataThresholdsMaxLength = *(perfdataThresholdsMaxLengthPtr)
 		} else {
-			return nil, fmt.Errorf("Expected a *int value out of the config value for Nagios Spoolfile Perfdata Thresholds Max Length")
+			return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Perfdata Thresholds Max Length")
 		}
 	}
 

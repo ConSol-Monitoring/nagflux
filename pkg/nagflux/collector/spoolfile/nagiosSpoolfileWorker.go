@@ -18,7 +18,6 @@ import (
 	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/helper"
 	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/logging"
 	"github.com/ConSol-Monitoring/nagflux/pkg/nagflux/statistics"
-
 	"github.com/kdar/factorlog"
 )
 
@@ -87,7 +86,7 @@ var (
 	//	7th Capture Group: ([\d\.\,\-]*)
 	//		Same as 6th capture group, but it is for the maximum value this time.
 	// '\s' matches any whitespace character, infinite times.
-	//	Idea: It seperates different perf data values as this must be matched new capture group can be captured
+	//	Idea: It separates different perf data values as this must be matched new capture group can be captured
 	// Overall this script will detect a perfdata in Nagios syntax
 	regexPerformancelable = regexp.MustCompile(`([^=]+)=(U|[\d\.\,\-]+)([\pL\/\%]*);?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-]*)?;?([\d\.\,\-]*)?;?\s*`)
 
@@ -98,14 +97,12 @@ var (
 
 	// The perfdata part might report errors for different data
 	// it has to put them in square brackets first, and use an equal sign for the error
-	// This is to differenciate it from alternative command, which does not have an equal sign.
+	// This is to differentiate it from alternative command, which does not have an equal sign.
 	// This convention is not found in monitoring-plugins development guidelines
 	regexStripErrors = regexp.MustCompile(`\[[^\]]*=[^\]]*\]`)
 )
 
-var (
-	log *factorlog.FactorLog = logging.GetLogger()
-)
+var log *factorlog.FactorLog = logging.GetLogger()
 
 // NagiosSpoolfileWorker parses the given spoolfiles and adds the extraced perfdata to the queue.
 type NagiosSpoolfileWorker struct {
@@ -234,6 +231,8 @@ func (w *NagiosSpoolfileWorker) run() {
 }
 
 // PerformanceDataIterator returns an iterator to loop over generated perf data.
+//
+//nolint:maintidx // the lambda inside has to check all fields of the performance data, adds a lot of branching code
 func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string) <-chan *PerformanceData {
 	ch := make(chan *PerformanceData)
 	dataType := findDataType(input)
@@ -261,15 +260,12 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 		// Slices up the string into a form like this
 		// Each match is put into an array with their capture groups
 		// These arrays are put into another array
-		// Here is an example:
-		/*
-			[][]string len: 4, cap: 10, [
-				["rta=0.024ms;3000.000;5000.000;0; ","rta","0.024","ms","3000.000","5000.000","0",""],
-				["rtmax=0.085ms;;;; ","rtmax","0.085","ms","","","",""],
-				["rtmin=0.000ms;;;; ","rtmin","0.000","ms","","","",""],
-				["pl=0%;80;100;0;100","pl","0","%","80","100","0","100"]
-			]
-		*/
+		// Example: [][]string len: 4, cap: 10, [
+		// 	["rta=0.024ms;3000.000;5000.000;0; ","rta","0.024","ms","3000.000","5000.000","0",""],
+		// 	["rtmax=0.085ms;;;; ","rtmax","0.085","ms","","","",""],
+		// 	["rtmin=0.000ms;;;; ","rtmin","0.000","ms","","","",""],
+		// 	["pl=0%;80;100;0;100","pl","0","%","80","100","0","100"]
+		// ]
 		perfdataStringMatches := regexPerformancelable.FindAllStringSubmatch(perfdataStringErrorsRemoved, -1)
 		currentCheckMultiLabel := ""
 
@@ -279,11 +275,17 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 		}
 
 		// check if concataneting matches makes up the original string
-		matchesConcatenated := ""
+		matchesConcatenatedBuilder := strings.Builder{}
 		for _, matchAndCaptureGroups := range perfdataStringMatches {
 			match := matchAndCaptureGroups[0]
-			matchesConcatenated += match
+			_, err := matchesConcatenatedBuilder.WriteString(match)
+			if err != nil {
+				log.Warnf("Error when building the matchesConcaatenated string: %s", err.Error())
+				close(ch)
+				return
+			}
 		}
+		matchesConcatenated := matchesConcatenatedBuilder.String()
 
 		if len(matchesConcatenated) > 0 && strings.TrimSpace(matchesConcatenated) != strings.TrimSpace(perfdataString) {
 			log.Warnf("Perfdata matches: '%v' when concatanted come up to be: '%s', and original perfdata string is: '%s' . They are not equal after stripping whitespace from both", perfdataStringMatches, matchesConcatenated, perfdataString)
@@ -313,16 +315,15 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 				Service:          currentService,
 				Command:          currentCommand,
 				Time:             currentTime,
-				PerformanceLabel: perfdataStringMatch[PerformanceDataSliceFields(Label)],
-				Unit:             perfdataStringMatch[PerformanceDataSliceFields(UOM)],
+				PerformanceLabel: perfdataStringMatch[Label],
+				Unit:             perfdataStringMatch[UOM],
 				Tags:             tags,
 				Fields:           field,
 				Filterable:       target,
 			}
 
 			if currentCheckMultiLabel != "" {
-				// if an check_multi prefix was found last time
-				// test if the current one has also one
+				// if an check_multi prefix was found last time, test if the current one has also one
 				if potentialNextOne := getCheckMultiRegexMatch(perf.PerformanceLabel); potentialNextOne == "" {
 					// if not put the last one in front the current
 					perf.PerformanceLabel = currentCheckMultiLabel + perf.PerformanceLabel
@@ -332,8 +333,7 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 				}
 			}
 
-			// perfdataStringMatch might not have all fields like perfdataStringMatch[Crit] available,
-			// iterate each field until the end
+			// perfdataStringMatch might not have all fields like perfdataStringMatch[Crit] available, iterate each field until the end
 			for i, data := range perfdataStringMatch {
 				fieldType, err := indexToPerformanceDataSliceField(i)
 				if err != nil {
@@ -345,22 +345,22 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 				case RawMatch:
 				case Label:
 					if len(data) > w.perfdataLabelMaxSize {
-						log.Warnf("Perfdata Label: '%s' is too long with length: %s and longer than the limit: %s. Probably an anomally. Skipping this perfdata item, Host: %v , Service: %v, Perfdata fields: %v", data, len(data), w.perfdataLabelMaxSize, perf.Hostname, perf.Service, perfdataStringMatch)
+						log.Warnf("Perfdata Label: '%s' is too long with length: %d and longer than the limit: %d. Probably an anomally. Skipping this perfdata item, Host: %v , Service: %v, Perfdata fields: %v", data, len(data), w.perfdataLabelMaxSize, perf.Hostname, perf.Service, perfdataStringMatch)
 						goto perfdataStringMatchLoopEnd
 					}
 				case UOM:
 					if len(data) > w.perfdataUOMMaxLength {
-						log.Warnf("Perfdata UOM: '%s' is too long with length: %s and longer than the limit: %s. Probably an anomally. Host: %v , Service: %v, Perfdata fields: %v", data, len(data), w.perfdataUOMMaxLength, perf.Hostname, perf.Service, perfdataStringMatch)
+						log.Warnf("Perfdata UOM: '%s' is too long with length: %d and longer than the limit: %d. Probably an anomally. Host: %v , Service: %v, Perfdata fields: %v", data, len(data), w.perfdataUOMMaxLength, perf.Hostname, perf.Service, perfdataStringMatch)
 						goto perfdataStringMatchLoopEnd
 					}
 				case Value, Min, Max:
 					if len(data) > w.perfdataNumericValuesMaxLength {
-						log.Warnf("Perfdata field %s: '%s' is too long with length: %s and longer than the limit: %s. Probably an anomally. Host: %v , Service: %v, Perfdata fields: %v", fieldType.String(), data, len(data), w.perfdataNumericValuesMaxLength, perf.Hostname, perf.Service, perfdataStringMatch)
+						log.Warnf("Perfdata field %s: '%s' is too long with length: %d and longer than the limit: %d. Probably an anomally. Host: %v , Service: %v, Perfdata fields: %v", fieldType.String(), data, len(data), w.perfdataNumericValuesMaxLength, perf.Hostname, perf.Service, perfdataStringMatch)
 						goto perfdataStringMatchLoopEnd
 					}
 				case Warn, Crit:
 					if len(data) > w.perfdataThresholdsMaxLength {
-						log.Warnf("Perfdata field %s: '%s' is too long with length: %s and longer than the limit: %s. Probably an anomally. Host: %v , Service: %v, Perfdata fields: %v", fieldType.String(), data, len(data), w.perfdataThresholdsMaxLength, perf.Hostname, perf.Service, perfdataStringMatch)
+						log.Warnf("Perfdata field %s: '%s' is too long with length: %d and longer than the limit: %d. Probably an anomally. Host: %v , Service: %v, Perfdata fields: %v", fieldType.String(), data, len(data), w.perfdataThresholdsMaxLength, perf.Hostname, perf.Service, perfdataStringMatch)
 						goto perfdataStringMatchLoopEnd
 					}
 				}
@@ -368,13 +368,11 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 				if data == "" {
 					continue
 				}
-
-				// Anything after here is a number or a range
-				// Convert all commas to points, to help in the integer/float parsing
+				// Anything after here is a number or a range, so convert all commas to points to help in the integer/float parsing
 				data = strings.ReplaceAll(data, ",", ".")
 
 				// Add downtime tag if needed
-				if fieldType == PerformanceDataSliceFields(Value) && w.livestatusCacheBuilder != nil && w.livestatusCacheBuilder.IsServiceInDowntime(perf.Hostname, perf.Service, input[timet]) {
+				if fieldType == Value && w.livestatusCacheBuilder != nil && w.livestatusCacheBuilder.IsServiceInDowntime(perf.Hostname, perf.Service, input[timet]) {
 					perf.Tags["downtime"] = "true"
 				}
 
@@ -412,13 +410,13 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 						goto perfdataStringMatchLoopEnd
 					}
 					perf.Fields[fieldType.String()] = helper.StringIntToStringFloat(data)
+				case RawMatch, Label, UOM:
 				}
 			}
 
 			ch <- perf
 
-			// Skip item without sending it to the channel
-		perfdataStringMatchLoopEnd:
+		perfdataStringMatchLoopEnd: // To skip item without sending it to the channel
 		}
 		close(ch)
 	}()
