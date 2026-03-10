@@ -1,6 +1,6 @@
 module github.com/ConSol-Monitoring/nagflux
 
-go 1.25.7
+go 1.26.1
 
 require (
 	github.com/appscode/g2 v0.0.0-20190123131438-388ba74fd273
@@ -22,11 +22,11 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
-	github.com/prometheus/common v0.67.4 // indirect
-	github.com/prometheus/procfs v0.19.2 // indirect
-	go.yaml.in/yaml/v2 v2.4.3 // indirect
-	golang.org/x/sys v0.38.0 // indirect
-	google.golang.org/protobuf v1.36.10 // indirect
+	github.com/prometheus/common v0.67.5 // indirect
+	github.com/prometheus/procfs v0.20.1 // indirect
+	go.yaml.in/yaml/v2 v2.4.4 // indirect
+	golang.org/x/sys v0.42.0 // indirect
+	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/robfig/cron.v2 v2.0.0-20150107220207-be2e0b0deed5 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
