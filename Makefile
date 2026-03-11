@@ -9,8 +9,8 @@ GOVERSION:=$(shell \
 )
 # also update go.mod files when changing minumum version
 # find . -name go.mod
-MINGOVERSION:=00010025
-MINGOVERSIONSTR:=1.25
+MINGOVERSION:=00010026
+MINGOVERSIONSTR:=1.26
 BUILD:=$(shell git rev-parse --short HEAD)
 # see https://github.com/go-modules-by-example/index/blob/master/010_tools/README.md
 # and https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module
@@ -84,7 +84,7 @@ build-watch: vendor tools
 
 
 test: dump vendor
-	$(GO) test -short -v $(TEST_FLAGS) pkg/...
+	$(GO) test -short -v $(TEST_FLAGS) ./pkg/*
 	if grep -Irn TODO: ./cmd/ ./pkg/;  then exit 1; fi
 	if grep -Irn Dump ./cmd/ ./pkg/ | $(DUMPEXCEPTIONS); then exit 1; fi
 
@@ -135,18 +135,18 @@ citest: tools vendor
 	#
 
 benchmark:
-	$(GO) test $(TEST_FLAGS) -v -bench=B\* -run=^$$ -benchmem pkg/...
+	$(GO) test $(TEST_FLAGS) -v -bench=B\* -run=^$$ -benchmem ./pkg/*
 
 racetest:
-	$(GO) test -race -short $(TEST_FLAGS) -coverprofile=coverage.txt -covermode=atomic -gcflags "-d=checkptr=0" pkg/...
+	$(GO) test -race -short $(TEST_FLAGS) -coverprofile=coverage.txt -covermode=atomic -gcflags "-d=checkptr=0" ./pkg/*
 
 covertest:
-	$(GO) test -v $(TEST_FLAGS) -coverprofile=cover.out pkg/...
+	$(GO) test -v $(TEST_FLAGS) -coverprofile=cover.out ./pkg/*
 	$(GO) tool cover -func=cover.out
 	$(GO) tool cover -html=cover.out -o coverage.html
 
 coverweb:
-	$(GO) test -v $(TEST_FLAGS) -coverprofile=cover.out pkg/...
+	$(GO) test -v $(TEST_FLAGS) -coverprofile=cover.out ./pkg/*
 	$(GO) tool cover -html=cover.out
 
 clean:
@@ -192,6 +192,8 @@ golangci: tools
 	# golangci combines a few static code analyzer
 	# See https://github.com/golangci/golangci-lint
 	#
+	@which golangci-lint
+	@golangci-lint version
 	@set -e; for dir in $$(ls -1d pkg/* cmd); do \
 		echo $$dir; \
 		echo "  - GOOS=linux"; \

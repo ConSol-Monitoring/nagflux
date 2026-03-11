@@ -9,20 +9,19 @@ import (
 	"syscall"
 	"time"
 
-	"pkg/nagflux/collector"
-	"pkg/nagflux/collector/livestatus"
-	"pkg/nagflux/collector/modgearman"
-	"pkg/nagflux/collector/nagflux"
-	"pkg/nagflux/collector/spoolfile"
-	"pkg/nagflux/config"
-	"pkg/nagflux/data"
-	"pkg/nagflux/helper"
-	"pkg/nagflux/logging"
-	"pkg/nagflux/statistics"
-	"pkg/nagflux/target/elasticsearch"
-	"pkg/nagflux/target/file/jsontarget"
-	"pkg/nagflux/target/influx"
-
+	"github.com/ConSol-Monitoring/nagflux/pkg/collector"
+	"github.com/ConSol-Monitoring/nagflux/pkg/collector/livestatus"
+	"github.com/ConSol-Monitoring/nagflux/pkg/collector/modgearman"
+	"github.com/ConSol-Monitoring/nagflux/pkg/collector/nagflux"
+	"github.com/ConSol-Monitoring/nagflux/pkg/collector/spoolfile"
+	"github.com/ConSol-Monitoring/nagflux/pkg/config"
+	"github.com/ConSol-Monitoring/nagflux/pkg/data"
+	"github.com/ConSol-Monitoring/nagflux/pkg/helper"
+	"github.com/ConSol-Monitoring/nagflux/pkg/logging"
+	"github.com/ConSol-Monitoring/nagflux/pkg/statistics"
+	"github.com/ConSol-Monitoring/nagflux/pkg/target/elasticsearch"
+	"github.com/ConSol-Monitoring/nagflux/pkg/target/file/jsontarget"
+	"github.com/ConSol-Monitoring/nagflux/pkg/target/influx"
 	"github.com/kdar/factorlog"
 )
 
@@ -192,6 +191,7 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 	}
 
 	var nagiosCollector *spoolfile.NagiosSpoolfileCollector
+	var err error
 	// nagios spoolfile collection is enabled by default
 	nagiosSpoolFileCollectorEnabled := true
 	if search, found := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.Enabled", []string{}); found {
@@ -202,44 +202,18 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 			log.Warnf("Expected a *bool value out of the config value for Nagios Spoolfile Collection Enablement")
 		}
 	}
+
 	if nagiosSpoolFileCollectorEnabled {
-		spoolDirectoryString := ""
-		spoolDirectorySearch, spoolDirectoryFound := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.Folder", []string{"Main.NagiosSpoolfileFolder"})
-		if !spoolDirectoryFound {
-			log.Criticalf("Could not find a config value for Nagios Spoolfile Folder")
+		nagiosCollector, err = spoolfile.NagiosSpoolfileCollectorFactory(
+			cfg,
+			resultQueues,
+			livestatusCache,
+			cfg.Main.FileBufferSize,
+			collector.Filterable{Filter: cfg.Main.DefaultTarget},
+		)
+		if err != nil {
+			log.Criticalf("Error when setting up NagiosSpoolfileCollectorFactory: %s", err.Error())
 			<-quit
-		}
-		spoolDirectoryPtr, ok := spoolDirectorySearch.(*string)
-		if ok {
-			spoolDirectoryString = *(spoolDirectoryPtr)
-		} else {
-			log.Warnf("Expected a *string value out of the config value for Nagios Spoolfile Folder")
-		}
-
-		workerCountInt := 0
-		workerCountSearch, workerCountFound := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.WorkerCount", []string{"Main.NagiosSpoolfileWorker"})
-		if !workerCountFound {
-			log.Criticalf("Could not find a config value for Nagios Spoolfile Worker Count")
-			<-quit
-		}
-		workerCountPtr, ok := workerCountSearch.(*int)
-		if ok {
-			workerCountInt = *(workerCountPtr)
-		} else {
-			log.Warnf("Expected a *int value out of the config value for Nagios Spoolfile Worker Count")
-		}
-
-		if spoolDirectoryFound && workerCountFound {
-			log.Info("Nagios Spoolfile Directory: ", spoolDirectoryString)
-			log.Info("Nagios Spoolfile Worker Count: ", workerCountInt)
-			nagiosCollector = spoolfile.NagiosSpoolfileCollectorFactory(
-				spoolDirectoryString,
-				workerCountInt,
-				resultQueues,
-				livestatusCache,
-				cfg.Main.FileBufferSize,
-				collector.Filterable{Filter: cfg.Main.DefaultTarget},
-			)
 		}
 	}
 
