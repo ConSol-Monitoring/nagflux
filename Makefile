@@ -84,7 +84,7 @@ build-watch: vendor tools
 
 
 test: dump vendor
-	$(GO) test -short -v $(TEST_FLAGS) pkg/...
+	$(GO) test -short -v $(TEST_FLAGS) ./pkg/*
 	if grep -Irn TODO: ./cmd/ ./pkg/;  then exit 1; fi
 	if grep -Irn Dump ./cmd/ ./pkg/ | $(DUMPEXCEPTIONS); then exit 1; fi
 
@@ -135,18 +135,18 @@ citest: tools vendor
 	#
 
 benchmark:
-	$(GO) test $(TEST_FLAGS) -v -bench=B\* -run=^$$ -benchmem pkg/...
+	$(GO) test $(TEST_FLAGS) -v -bench=B\* -run=^$$ -benchmem ./pkg/*
 
 racetest:
-	$(GO) test -race -short $(TEST_FLAGS) -coverprofile=coverage.txt -covermode=atomic -gcflags "-d=checkptr=0" pkg/...
+	$(GO) test -race -short $(TEST_FLAGS) -coverprofile=coverage.txt -covermode=atomic -gcflags "-d=checkptr=0" ./pkg/*
 
 covertest:
-	$(GO) test -v $(TEST_FLAGS) -coverprofile=cover.out pkg/...
+	$(GO) test -v $(TEST_FLAGS) -coverprofile=cover.out ./pkg/*
 	$(GO) tool cover -func=cover.out
 	$(GO) tool cover -html=cover.out -o coverage.html
 
 coverweb:
-	$(GO) test -v $(TEST_FLAGS) -coverprofile=cover.out pkg/...
+	$(GO) test -v $(TEST_FLAGS) -coverprofile=cover.out ./pkg/*
 	$(GO) tool cover -html=cover.out
 
 clean:
