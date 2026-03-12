@@ -1,3 +1,8 @@
+## v0.5.7 - 12.03.2026
+### Feature
+- add length based anomaly detection when parsing perfdata fields
+- add detection of unmatched substrings after regex search for perfdata groups in log string
+
 ## v0.5.6 - 10.02.2026
 ### Fix
 - fix panic on shutdown
