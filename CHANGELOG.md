@@ -1,4 +1,4 @@
-## next
+## v0.5.8 - 28.03.2026
 ### Change
 - Increase default PerfdataLabelMaxLength to 64
 
