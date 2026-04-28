@@ -1,3 +1,7 @@
+## next
+### Change
+- Increase default PerfdataLabelMaxLength to 64
+
 ## v0.5.7 - 12.03.2026
 ### Feature
 - add length based anomaly detection when parsing perfdata fields

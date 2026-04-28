@@ -22,7 +22,7 @@ const (
 	IntervalToCheckDirectory = 1500 * time.Millisecond
 
 	// PerfdataLabelMaxLengthDefault: If a perfdata label is longer than this, it will be logged as an anomaly and skipped
-	PerfdataLabelMaxLengthDefault = int(32)
+	PerfdataLabelMaxLengthDefault = int(64)
 
 	// PerfdataUOMMaxLengthDefault: If a perfdata UOM is longer than this, it will be logged as an anomaly and skipped
 	PerfdataUOMMaxLengthDefault = int(16)

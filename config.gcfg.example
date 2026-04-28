@@ -68,7 +68,7 @@
     Folder = "/var/spool/nagios"
     # This option takes predence over Main.NagiosSpoolfileWorker if set
     WorkerCount = 1
-    PerfdataLabelMaxLength = 32
+    PerfdataLabelMaxLength = 64
     PerfdataUOMMaxLength = 16
     PerfdataNumericValuesMaxLength = 32
     PerfdataThresholdsMaxLength = 64
