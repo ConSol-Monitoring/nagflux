@@ -1,3 +1,7 @@
+## v0.6.0 - 08.07.2026
+### Change
+- Fix crash in gearman worker
+
 ## v0.5.9 - 07.07.2026
 ### Change
 - Increase default PerfdataLabelMaxLength to 150
