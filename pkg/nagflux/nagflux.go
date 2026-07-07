@@ -188,7 +188,10 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 				resultQueues,
 				livestatusCache,
 			)
-			log.Criticalf("Error when setting up GearmanWorker: %s", wErr.Error())
+			if wErr != nil {
+				log.Criticalf("Error when setting up GearmanWorker: %s", wErr.Error())
+				<-quit
+			}
 			stoppables = append(stoppables, gearmanWorker)
 		}
 	}
