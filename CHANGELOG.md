@@ -1,3 +1,8 @@
+## next
+### Change
+- Increase default PerfdataLabelMaxLength to 150
+- Apply PerfdataLabel* configs to gearman worker too
+
 ## v0.5.8 - 28.03.2026
 ### Change
 - Increase default PerfdataLabelMaxLength to 64
