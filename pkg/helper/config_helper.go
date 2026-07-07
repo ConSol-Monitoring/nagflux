@@ -52,7 +52,7 @@ func getConfigValueByPath(rootObject any, path string) (value any, found bool) {
 	splits := strings.Split(path, ".")
 	current := reflect.ValueOf(rootObject)
 
-	if current.Kind() == reflect.Ptr {
+	if current.Kind() == reflect.Pointer {
 		if current.IsNil() {
 			return nil, false
 		}
@@ -76,7 +76,7 @@ func getConfigValueByPath(rootObject any, path string) (value any, found bool) {
 			return nil, false
 		}
 		current = reflect.ValueOf(fieldValue)
-		if current.Kind() == reflect.Ptr {
+		if current.Kind() == reflect.Pointer {
 			if current.IsNil() {
 				return nil, false
 			}
@@ -93,14 +93,14 @@ func isNilOrInterfaceToNilPointer(v any) bool {
 		return false
 	}
 	rv := reflect.ValueOf(v)
-	return rv.Kind() == reflect.Ptr && rv.IsNil()
+	return rv.Kind() == reflect.Pointer && rv.IsNil()
 }
 
 // getFieldValue gets the value of a struct field by name
 // If its does not exist in that object, returned value is: (nil,false)
 func getFieldValue(object reflect.Value, fieldName string) (value any, found bool) {
 	// if its a pointer we have to get the name of it
-	if object.Kind() == reflect.Ptr {
+	if object.Kind() == reflect.Pointer {
 		if object.IsNil() {
 			return nil, false
 		}

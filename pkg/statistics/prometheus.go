@@ -38,7 +38,8 @@ func initServerConfig() PrometheusServer {
 			Subsystem: "main",
 			Name:      "buffer_size",
 			Help:      "Current Elements in Buffer",
-		}, []string{"type"})
+		}, []string{"type"},
+	)
 	prometheus.MustRegister(bufferLength)
 	spoolFilesOnDisk := prometheus.NewGauge(
 		prometheus.GaugeOpts{
@@ -46,7 +47,8 @@ func initServerConfig() PrometheusServer {
 			Subsystem: "spoolfile",
 			Name:      "disk",
 			Help:      "Nagiosspoolfiles left on disk",
-		})
+		},
+	)
 	prometheus.MustRegister(spoolFilesOnDisk)
 	SpoolFilesInQueue := prometheus.NewGauge(
 		prometheus.GaugeOpts{
@@ -54,7 +56,8 @@ func initServerConfig() PrometheusServer {
 			Subsystem: "spoolfile",
 			Name:      "queue",
 			Help:      "Nagiosspoolfiles in queue",
-		})
+		},
+	)
 	prometheus.MustRegister(SpoolFilesInQueue)
 	SpoolFilesParsedDuration := prometheus.NewCounter(
 		prometheus.CounterOpts{
@@ -62,7 +65,8 @@ func initServerConfig() PrometheusServer {
 			Subsystem: "spoolfile",
 			Name:      "files_parsed_milliseconds",
 			Help:      "Nagiosspoolfiles parsed in milliseconds",
-		})
+		},
+	)
 	prometheus.MustRegister(SpoolFilesParsedDuration)
 	SpoolFilesParsed := prometheus.NewCounter(
 		prometheus.CounterOpts{
@@ -70,7 +74,8 @@ func initServerConfig() PrometheusServer {
 			Subsystem: "spoolfile",
 			Name:      "files_parsed_count",
 			Help:      "Nagiosspoolfiles parsed count",
-		})
+		},
+	)
 	prometheus.MustRegister(SpoolFilesParsed)
 	SpoolFilesParsedSize := prometheus.NewCounter(
 		prometheus.CounterOpts{
@@ -78,7 +83,8 @@ func initServerConfig() PrometheusServer {
 			Subsystem: "spoolfile",
 			Name:      "parsed_lines",
 			Help:      "Nagiosspoolfilelines parsed",
-		})
+		},
+	)
 	prometheus.MustRegister(SpoolFilesParsedSize)
 	BytesSend := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
@@ -86,7 +92,8 @@ func initServerConfig() PrometheusServer {
 			Subsystem: "target",
 			Name:      "sent_bytes",
 			Help:      "Bytes send to database",
-		}, []string{"type"})
+		}, []string{"type"},
+	)
 	prometheus.MustRegister(BytesSend)
 	SendDuration := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
@@ -94,7 +101,8 @@ func initServerConfig() PrometheusServer {
 			Subsystem: "target",
 			Name:      "sent_duration_milliseconds",
 			Help:      "Time per package to sent to database",
-		}, []string{"type"})
+		}, []string{"type"},
+	)
 	prometheus.MustRegister(SendDuration)
 
 	return PrometheusServer{

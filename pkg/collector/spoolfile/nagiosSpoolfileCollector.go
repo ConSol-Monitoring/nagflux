@@ -57,7 +57,7 @@ func NagiosSpoolfileCollectorFactory(cfg config.Config, results collector.Result
 	if !ok {
 		return nil, errors.New("expected a *string value out of the config value for Nagios Spoolfile Folder")
 	}
-	spoolDirectory := *(spoolDirectoryPtr)
+	spoolDirectory := *spoolDirectoryPtr
 
 	search, found = helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.WorkerCount", []string{"Main.NagiosSpoolfileWorker"})
 	if !found {
@@ -68,14 +68,14 @@ func NagiosSpoolfileCollectorFactory(cfg config.Config, results collector.Result
 	if !ok {
 		return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Worker Count")
 	}
-	workerAmount := *(workerAmountPtr)
+	workerAmount := *workerAmountPtr
 
 	perfdataLabelMaxLength := PerfdataLabelMaxLengthDefault
 	search, found = helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.PerfdataLabelMaxLength", []string{})
 	if found {
 		perfdataLabelMaxLengthPtr, ok := search.(*int)
 		if ok {
-			perfdataLabelMaxLength = *(perfdataLabelMaxLengthPtr)
+			perfdataLabelMaxLength = *perfdataLabelMaxLengthPtr
 		} else {
 			return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Perfdata Label Max Length")
 		}
@@ -86,7 +86,7 @@ func NagiosSpoolfileCollectorFactory(cfg config.Config, results collector.Result
 	if found {
 		perfdataUOMMaxLengthPtr, ok := search.(*int)
 		if ok {
-			perfdataUOMMaxLength = *(perfdataUOMMaxLengthPtr)
+			perfdataUOMMaxLength = *perfdataUOMMaxLengthPtr
 		} else {
 			return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Perfdata UOM Max Length")
 		}
@@ -97,7 +97,7 @@ func NagiosSpoolfileCollectorFactory(cfg config.Config, results collector.Result
 	if found {
 		perfdataNumericValuesMaxLengthPtr, ok := search.(*int)
 		if ok {
-			perfdataNumericValuesMaxLength = *(perfdataNumericValuesMaxLengthPtr)
+			perfdataNumericValuesMaxLength = *perfdataNumericValuesMaxLengthPtr
 		} else {
 			return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Perfdata UOM Max Length")
 		}
@@ -108,7 +108,7 @@ func NagiosSpoolfileCollectorFactory(cfg config.Config, results collector.Result
 	if found {
 		perfdataThresholdsMaxLengthPtr, ok := search.(*int)
 		if ok {
-			perfdataThresholdsMaxLength = *(perfdataThresholdsMaxLengthPtr)
+			perfdataThresholdsMaxLength = *perfdataThresholdsMaxLengthPtr
 		} else {
 			return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Perfdata Thresholds Max Length")
 		}

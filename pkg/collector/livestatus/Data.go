@@ -50,7 +50,8 @@ func (live *Data) genElasticLineWithValue(index, typ, value, timestamp string) s
 		live.serviceDisplayName = config.GetConfig().ElasticsearchGlobal.HostcheckAlias
 	}
 	head := fmt.Sprintf(`{"index":{"_index":"%s","_type":"messages"}}`, helper.GenIndex(index, timestamp)) + "\n"
-	data := fmt.Sprintf(`{"timestamp":%s,"message":"%s","author":"%s","host":"%s","service":"%s","type":"%s"}`+"\n",
+	data := fmt.Sprintf(
+		`{"timestamp":%s,"message":"%s","author":"%s","host":"%s","service":"%s","type":"%s"}`+"\n",
 		helper.CastStringTimeFromSToMs(timestamp), value, live.author, live.hostName, live.serviceDisplayName, typ,
 	)
 	return head + data

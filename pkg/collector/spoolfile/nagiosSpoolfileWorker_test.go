@@ -22,7 +22,8 @@ const configFileContent = `
 `
 
 func TestPerformanceDataParser_01(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -39,7 +40,8 @@ func TestPerformanceDataParser_01(t *testing.T) {
 }
 
 func TestPerformanceDataParser_02(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		`DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4 'C:\ used %'=44%;89;94;0;100	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1`,
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -66,7 +68,8 @@ func TestPerformanceDataParser_02(t *testing.T) {
 }
 
 func TestPerformanceDataParser_03(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791001	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4;2;10	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -83,7 +86,8 @@ func TestPerformanceDataParser_03(t *testing.T) {
 }
 
 func TestPerformanceDataParser_04(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791002	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4;2;10;1;4	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -100,7 +104,8 @@ func TestPerformanceDataParser_04(t *testing.T) {
 }
 
 func TestPerformanceDataParser_05(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791003	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4;2:4;8:10;1;4	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -117,7 +122,8 @@ func TestPerformanceDataParser_05(t *testing.T) {
 }
 
 func TestPerformanceDataParser_06(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791004	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4;@2:4;@8:10;1;4	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -134,7 +140,8 @@ func TestPerformanceDataParser_06(t *testing.T) {
 }
 
 func TestPerformanceDataParser_07(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791005	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4;2:;10:;1;4	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -151,7 +158,8 @@ func TestPerformanceDataParser_07(t *testing.T) {
 }
 
 func TestPerformanceDataParser_08(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791006	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4;:2;:10;1;4	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -168,7 +176,8 @@ func TestPerformanceDataParser_08(t *testing.T) {
 }
 
 func TestPerformanceDataParser_09(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791007	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4;~:2;10:~;1;4	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -186,7 +195,8 @@ func TestPerformanceDataParser_09(t *testing.T) {
 
 // test dot separated data
 func TestPerformanceDataParser_10(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4.5	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -204,7 +214,8 @@ func TestPerformanceDataParser_10(t *testing.T) {
 
 // test comma separated data
 func TestPerformanceDataParser_11(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::comma=4,5	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -222,7 +233,8 @@ func TestPerformanceDataParser_11(t *testing.T) {
 
 // test comma separated data II
 func TestPerformanceDataParser_12(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		`DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::a used=4,6 'C:\ used %'=44,1%;89,2;94,3;0,4;100,5	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1`,
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -250,7 +262,8 @@ func TestPerformanceDataParser_12(t *testing.T) {
 
 // test tag
 func TestPerformanceDataParser_13(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	NAGFLUX:TAG::foo=bar	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::tag=4.5	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -268,7 +281,8 @@ func TestPerformanceDataParser_13(t *testing.T) {
 
 // test empty tag
 func TestPerformanceDataParser_14(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	NAGFLUX:TAG::	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::tag=4.5	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -286,7 +300,8 @@ func TestPerformanceDataParser_14(t *testing.T) {
 
 // test malformed tag
 func TestPerformanceDataParser_15(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	NAGFLUX:TAG::$_SERVICENAGFLUX_TAG$	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::tag=4.5	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -304,7 +319,8 @@ func TestPerformanceDataParser_15(t *testing.T) {
 
 // test filterable
 func TestPerformanceDataParser_16(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	NAGFLUX:TARGET::foo	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::tag=4.5	SERVICECHECKCOMMAND::check_ranges!-w 3: -c 4: -g :46 -l :48 SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "xxx",
@@ -322,7 +338,8 @@ func TestPerformanceDataParser_16(t *testing.T) {
 
 // github https://github.com/Griesbacher/nagflux/issues/19#issuecomment-286799167
 func TestPerformanceDataParser_17(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1489572014	HOSTNAME::HOST_SERVER	SERVICEDESC::web	SERVICEPERFDATA::time=0,004118s;;;0,000000 size=128766B;;;0	SERVICECHECKCOMMAND::check_http!HOST_SERVER!80!/!20	HOSTSTATE::UP	HOSTSTATETYPE::HARD SERVICESTATE::OK	SERVICESTATETYPE::HARD	SERVICEOUTPUT::HTTP OK: HTTP/1.1 200 OK - 128766 bytes in 0,004 second response time",
 		[]PerformanceData{{
 			Hostname:         "HOST_SERVER",
@@ -350,7 +367,8 @@ func TestPerformanceDataParser_17(t *testing.T) {
 
 // github https://github.com/Griesbacher/nagflux/issues/32
 func TestPerformanceDataParser_18(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1490957788	HOSTNAME::müü	SERVICEDESC::möö	SERVICEPERFDATA::getItinerary_min=34385µs getItinerary_avg=130925µs getItinerary_max=267719µs	SERVICECHECKCOMMAND::check_perfs	SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "müü",
@@ -388,7 +406,8 @@ func TestPerformanceDataParser_18(t *testing.T) {
 
 // test spaces in service name
 func TestPerformanceDataParser_19(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1490957788	HOSTNAME::test	SERVICEDESC::test space	SERVICEPERFDATA::'test rss'=35512320B;;;0;	SERVICECHECKCOMMAND::check_test	SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "test",
@@ -406,7 +425,8 @@ func TestPerformanceDataParser_19(t *testing.T) {
 
 // test error output in brackets
 func TestPerformanceDataParser_20(t *testing.T) {
-	testPerformanceDataParser(t,
+	testPerformanceDataParser(
+		t,
 		"DATATYPE::SERVICEPERFDATA	TIMET::1490957788	HOSTNAME::test	SERVICEDESC::test	SERVICEPERFDATA::sessions=10% [si signo=11] 'valid[1]'=5 [si_errno=0] [si_code=1]	SERVICECHECKCOMMAND::check_test	SERVICESTATE::0	SERVICESTATETYPE::1",
 		[]PerformanceData{{
 			Hostname:         "test",
@@ -456,7 +476,8 @@ func TestPerformanceDataParser_LongPerformanceLabel(t *testing.T) {
 
 	splittedPerformanceData := helper.StringToMap(
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::'i_am_a_very_long_performance_label_exceeding_the_default_limit_for_performance_labels_yeah'=35512320B;;;;	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
-		"\t", "::")
+		"\t", "::",
+	)
 
 	collectedPerfData := []PerformanceData{}
 	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
@@ -475,7 +496,8 @@ func TestPerformanceDataParser_LongValue(t *testing.T) {
 
 	splittedPerformanceData := helper.StringToMap(
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::'label'=123456789123456789123456789123456789;;;;	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
-		"\t", "::")
+		"\t", "::",
+	)
 
 	collectedPerfData := []PerformanceData{}
 	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
@@ -496,7 +518,8 @@ func TestPerformanceDataParser_LongUOM(t *testing.T) {
 	// UOM is deliberately written without underscores here
 	splittedPerformanceData := helper.StringToMap(
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::'label'=1iamaverylonguomthatshouldberejected;;;;	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
-		"\t", "::")
+		"\t", "::",
+	)
 
 	collectedPerfData := []PerformanceData{}
 	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
@@ -515,7 +538,8 @@ func TestPerformanceDataParser_LongWarnTrehsold(t *testing.T) {
 
 	splittedPerformanceData := helper.StringToMap(
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::'label'=1;123456789123456789123456789123456789:123456789123456789123456789123456789;;;	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
-		"\t", "::")
+		"\t", "::",
+	)
 
 	collectedPerfData := []PerformanceData{}
 	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
@@ -536,7 +560,8 @@ func TestPerformanceDataParser_LongCritTrehsold(t *testing.T) {
 	// UOM is deliberately written without underscores here
 	splittedPerformanceData := helper.StringToMap(
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::'label'=1;;123456789123456789123456789123456789:123456789123456789123456789123456789;;	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
-		"\t", "::")
+		"\t", "::",
+	)
 
 	collectedPerfData := []PerformanceData{}
 	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
@@ -555,7 +580,8 @@ func TestPerformanceDataParser_LongMinValue(t *testing.T) {
 
 	splittedPerformanceData := helper.StringToMap(
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::'label'=1;;;123456789123456789123456789123456789;	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
-		"\t", "::")
+		"\t", "::",
+	)
 
 	collectedPerfData := []PerformanceData{}
 	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
@@ -574,7 +600,8 @@ func TestPerformanceDataParser_LongMaxValue(t *testing.T) {
 
 	splittedPerformanceData := helper.StringToMap(
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::'label'=1;;;;123456789123456789123456789123456789	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
-		"\t", "::")
+		"\t", "::",
+	)
 
 	collectedPerfData := []PerformanceData{}
 	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
@@ -593,7 +620,8 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata1(t *testing.T) {
 
 	splittedPerformanceData := helper.StringToMap(
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::passme=1 failme=1;1:2;3:4;5;6-hello-i-am-garbage-string-that-should-be-detected-as-i-am-not-whitespace	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
-		"\t", "::")
+		"\t", "::",
+	)
 
 	collectedPerfData := []PerformanceData{}
 	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
@@ -612,7 +640,8 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata2(t *testing.T) {
 
 	splittedPerformanceData := helper.StringToMap(
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::passme=1 failme=1;1:2;3:4;5;6-garbage foo bar xyz=3;4afvdv23	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
-		"\t", "::")
+		"\t", "::",
+	)
 
 	collectedPerfData := []PerformanceData{}
 	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
@@ -631,7 +660,8 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata3(t *testing.T) {
 
 	splittedPerformanceData := helper.StringToMap(
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::xyz=3;45afv	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
-		"\t", "::")
+		"\t", "::",
+	)
 
 	collectedPerfData := []PerformanceData{}
 	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
@@ -650,7 +680,8 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata4(t *testing.T) {
 
 	splittedPerformanceData := helper.StringToMap(
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::label=1;2;label2	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
-		"\t", "::")
+		"\t", "::",
+	)
 
 	collectedPerfData := []PerformanceData{}
 	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
@@ -669,7 +700,8 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata5(t *testing.T) {
 
 	splittedPerformanceData := helper.StringToMap(
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::asd label=1;2; other=1;3;4asdasdasd	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
-		"\t", "::")
+		"\t", "::",
+	)
 
 	collectedPerfData := []PerformanceData{}
 	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
@@ -688,7 +720,8 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata6(t *testing.T) {
 
 	splittedPerformanceData := helper.StringToMap(
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::asd label=1;2; other=1;3;4asdasdasd  [anza=ffgg] [si signo=11] 'valid[1]'=5 [si_errno=0] [si_code=1]	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
-		"\t", "::")
+		"\t", "::",
+	)
 
 	collectedPerfData := []PerformanceData{}
 	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
@@ -707,7 +740,8 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata7(t *testing.T) {
 
 	splittedPerformanceData := helper.StringToMap(
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::asd label=1;2; other=1;3;4asdasdasd  [anza=ffgg] [si signo=11] 'valid[1]'=5 [si_errno=0] [si_code=1]fasdgew	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
-		"\t", "::")
+		"\t", "::",
+	)
 
 	collectedPerfData := []PerformanceData{}
 	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {

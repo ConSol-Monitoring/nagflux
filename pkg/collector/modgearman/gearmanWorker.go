@@ -53,7 +53,7 @@ func NewGearmanWorker(address, queue, key string, results collector.ResultQueues
 	if found {
 		perfdataLabelMaxLengthPtr, ok := search.(*int)
 		if ok {
-			perfdataLabelMaxLength = *(perfdataLabelMaxLengthPtr)
+			perfdataLabelMaxLength = *perfdataLabelMaxLengthPtr
 		} else {
 			return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Perfdata Label Max Length")
 		}
@@ -64,7 +64,7 @@ func NewGearmanWorker(address, queue, key string, results collector.ResultQueues
 	if found {
 		perfdataUOMMaxLengthPtr, ok := search.(*int)
 		if ok {
-			perfdataUOMMaxLength = *(perfdataUOMMaxLengthPtr)
+			perfdataUOMMaxLength = *perfdataUOMMaxLengthPtr
 		} else {
 			return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Perfdata UOM Max Length")
 		}
@@ -75,7 +75,7 @@ func NewGearmanWorker(address, queue, key string, results collector.ResultQueues
 	if found {
 		perfdataNumericValuesMaxLengthPtr, ok := search.(*int)
 		if ok {
-			perfdataNumericValuesMaxLength = *(perfdataNumericValuesMaxLengthPtr)
+			perfdataNumericValuesMaxLength = *perfdataNumericValuesMaxLengthPtr
 		} else {
 			return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Perfdata UOM Max Length")
 		}
@@ -86,7 +86,7 @@ func NewGearmanWorker(address, queue, key string, results collector.ResultQueues
 	if found {
 		perfdataThresholdsMaxLengthPtr, ok := search.(*int)
 		if ok {
-			perfdataThresholdsMaxLength = *(perfdataThresholdsMaxLengthPtr)
+			perfdataThresholdsMaxLength = *perfdataThresholdsMaxLengthPtr
 		} else {
 			return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Perfdata Thresholds Max Length")
 		}
@@ -98,7 +98,8 @@ func NewGearmanWorker(address, queue, key string, results collector.ResultQueues
 		pauseQuit: make(chan bool, 1),
 		results:   results,
 		nagiosSpoolfileWorker: spoolfile.NewNagiosSpoolfileWorker(
-			-1, make(chan string), make(collector.ResultQueues), livestatusCacheBuilder, 4096, collector.AllFilterable, perfdataLabelMaxLength, perfdataUOMMaxLength, perfdataNumericValuesMaxLength, perfdataThresholdsMaxLength),
+			-1, make(chan string), make(collector.ResultQueues), livestatusCacheBuilder, 4096, collector.AllFilterable, perfdataLabelMaxLength, perfdataUOMMaxLength, perfdataNumericValuesMaxLength, perfdataThresholdsMaxLength,
+		),
 		aesECBDecrypter: decrypter,
 		worker:          nil,
 		address:         address,

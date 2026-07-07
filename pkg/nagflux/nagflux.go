@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"slices"
 	"syscall"
 	"time"
 
@@ -155,7 +156,7 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 	if search, found := helper.GetPreferredConfigValue(cfg, "Livestatus.Enabled", []string{}); found {
 		ptr, ok := search.(*bool)
 		if ok {
-			livestatusEnabled = *(ptr)
+			livestatusEnabled = *ptr
 		} else {
 			log.Warnf("Expected a *bool value out of the config value for Livestatus Enablement")
 		}
@@ -180,7 +181,8 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 		log.Infof("Mod_Gearman: %s - %s [%s]", name, data.Address, data.Queue)
 		secret := modgearman.GetSecret(data.Secret, data.SecretFile)
 		for range data.Worker {
-			gearmanWorker, wErr := modgearman.NewGearmanWorker(data.Address,
+			gearmanWorker, wErr := modgearman.NewGearmanWorker(
+				data.Address,
 				data.Queue,
 				secret,
 				resultQueues,
@@ -198,7 +200,7 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 	if search, found := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.Enabled", []string{}); found {
 		ptr, ok := search.(*bool)
 		if ok {
-			nagiosSpoolFileCollectorEnabled = *(ptr)
+			nagiosSpoolFileCollectorEnabled = *ptr
 		} else {
 			log.Warnf("Expected a *bool value out of the config value for Nagios Spoolfile Collection Enablement")
 		}
@@ -224,7 +226,7 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 	if val, found := helper.GetPreferredConfigValue(cfg, "NagfluxSpoolfile.Enabled", []string{}); found {
 		ptr, ok := val.(*bool)
 		if ok {
-			nagfluxCollectorEnabled = *(ptr)
+			nagfluxCollectorEnabled = *ptr
 		} else {
 			log.Warnf("Expected a *bool value out of the config value for Nagflux Spoolfile Enablement")
 		}
@@ -238,7 +240,7 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 		}
 		nagfluxCollectionFolderPtr, ok := nagfluxCollectorFolderSearch.(*string)
 		if ok {
-			nagfluxCollectorFolderString = *(nagfluxCollectionFolderPtr)
+			nagfluxCollectorFolderString = *nagfluxCollectionFolderPtr
 		} else {
 			log.Warnf("Expected a *string value out of the config value for Nagflux Spoolfile Folder")
 		}
@@ -302,7 +304,7 @@ func waitForDumpfileCollector(dump *nagflux.DumpfileCollector) {
 // Wait till the Performance Data is sent.
 func cleanUp(itemsToStop []Stoppable, resultQueues collector.ResultQueues) {
 	log.Info("Cleaning up...")
-	for i := len(itemsToStop) - 1; i >= 0; i-- {
+	for i := range slices.Backward(itemsToStop) {
 		itemsToStop[i].Stop()
 	}
 	for _, q := range resultQueues {

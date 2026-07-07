@@ -16,6 +16,7 @@ linters:
     - gocritic
     - gocyclo
     - godot
+    - gomodguard
     - gosec
     - inamedparam
     - lll
@@ -24,8 +25,8 @@ linters:
     - nestif
     - nlreturn
     - noctx
-    - nonamedreturns
     - noinlineerr
+    - nonamedreturns
     - paralleltest
     - promlinter
     - tagliatelle
@@ -81,6 +82,7 @@ linters:
           - forbidigo
           - forcetypeassert
           - mnd
+          - goconst
         path: _test\.go
       - linters:
           - forbidigo
