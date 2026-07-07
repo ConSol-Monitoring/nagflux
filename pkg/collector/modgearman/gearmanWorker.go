@@ -1,6 +1,7 @@
 package modgearman
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -35,7 +36,7 @@ type GearmanWorker struct {
 // NewGearmanWorker generates a new GearmanWorker.
 // leave the key empty to disable encryption, otherwise the gearmanpacketes are expected to be encrpyten with AES-ECB 128Bit and a 32 Byte Key.
 // livestatusCacheBuilder can be nil, which disables ????
-func NewGearmanWorker(address, queue, key string, results collector.ResultQueues, livestatusCacheBuilder *livestatus.CacheBuilder) *GearmanWorker {
+func NewGearmanWorker(address, queue, key string, results collector.ResultQueues, livestatusCacheBuilder *livestatus.CacheBuilder) (*GearmanWorker, error) {
 	cfg := config.GetConfig()
 	var decrypter *cryptohelper.AESECBDecrypter
 	if key != "" {
@@ -46,13 +47,58 @@ func NewGearmanWorker(address, queue, key string, results collector.ResultQueues
 			panic(err)
 		}
 	}
+
+	perfdataLabelMaxLength := spoolfile.PerfdataLabelMaxLengthDefault
+	search, found := helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.PerfdataLabelMaxLength", []string{})
+	if found {
+		perfdataLabelMaxLengthPtr, ok := search.(*int)
+		if ok {
+			perfdataLabelMaxLength = *(perfdataLabelMaxLengthPtr)
+		} else {
+			return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Perfdata Label Max Length")
+		}
+	}
+
+	perfdataUOMMaxLength := spoolfile.PerfdataUOMMaxLengthDefault
+	search, found = helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.PerfdataUOMMaxLength", []string{})
+	if found {
+		perfdataUOMMaxLengthPtr, ok := search.(*int)
+		if ok {
+			perfdataUOMMaxLength = *(perfdataUOMMaxLengthPtr)
+		} else {
+			return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Perfdata UOM Max Length")
+		}
+	}
+
+	perfdataNumericValuesMaxLength := spoolfile.PerfdataNumericValuesMaxLengthDefault
+	search, found = helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.PerfdataNumericValuesMaxLength", []string{})
+	if found {
+		perfdataNumericValuesMaxLengthPtr, ok := search.(*int)
+		if ok {
+			perfdataNumericValuesMaxLength = *(perfdataNumericValuesMaxLengthPtr)
+		} else {
+			return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Perfdata UOM Max Length")
+		}
+	}
+
+	perfdataThresholdsMaxLength := spoolfile.PerfdataThresholdsMaxLengthDefault
+	search, found = helper.GetPreferredConfigValue(cfg, "NagiosSpoolfile.PerfdataThresholdsMaxLength", []string{})
+	if found {
+		perfdataThresholdsMaxLengthPtr, ok := search.(*int)
+		if ok {
+			perfdataThresholdsMaxLength = *(perfdataThresholdsMaxLengthPtr)
+		} else {
+			return nil, errors.New("expected a *int value out of the config value for Nagios Spoolfile Perfdata Thresholds Max Length")
+		}
+	}
+
 	worker := &GearmanWorker{
 		runQuit:   make(chan bool, 1),
 		loadQuit:  make(chan bool, 1),
 		pauseQuit: make(chan bool, 1),
 		results:   results,
 		nagiosSpoolfileWorker: spoolfile.NewNagiosSpoolfileWorker(
-			-1, make(chan string), make(collector.ResultQueues), livestatusCacheBuilder, 4096, collector.AllFilterable, spoolfile.PerfdataLabelMaxLengthDefault, spoolfile.PerfdataUOMMaxLengthDefault, spoolfile.PerfdataNumericValuesMaxLengthDefault, spoolfile.PerfdataThresholdsMaxLengthDefault),
+			-1, make(chan string), make(collector.ResultQueues), livestatusCacheBuilder, 4096, collector.AllFilterable, perfdataLabelMaxLength, perfdataUOMMaxLength, perfdataNumericValuesMaxLength, perfdataThresholdsMaxLength),
 		aesECBDecrypter: decrypter,
 		worker:          nil,
 		address:         address,
@@ -64,7 +110,7 @@ func NewGearmanWorker(address, queue, key string, results collector.ResultQueues
 	go worker.handleLoad()
 	go worker.handlePause()
 
-	return worker
+	return worker, nil
 }
 
 func (g *GearmanWorker) startGearmanWorker() error {

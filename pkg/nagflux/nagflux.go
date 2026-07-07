@@ -180,12 +180,13 @@ For further informations / bugs reports: https://github.com/ConSol-Monitoring/na
 		log.Infof("Mod_Gearman: %s - %s [%s]", name, data.Address, data.Queue)
 		secret := modgearman.GetSecret(data.Secret, data.SecretFile)
 		for range data.Worker {
-			gearmanWorker := modgearman.NewGearmanWorker(data.Address,
+			gearmanWorker, wErr := modgearman.NewGearmanWorker(data.Address,
 				data.Queue,
 				secret,
 				resultQueues,
 				livestatusCache,
 			)
+			log.Criticalf("Error when setting up GearmanWorker: %s", wErr.Error())
 			stoppables = append(stoppables, gearmanWorker)
 		}
 	}
