@@ -18,7 +18,6 @@ var CreateJSONFromStringMapData = []struct {
 }
 
 func TestCreateJSONFromStringMap(t *testing.T) {
-	t.Parallel()
 	for _, data := range CreateJSONFromStringMapData {
 		actual := CreateJSONFromStringMap(data.input)
 		if actual != data.expected && actual != data.alternate {
@@ -39,7 +38,6 @@ var SanitizeElasicInputData = []struct {
 }
 
 func TestSanitizeElasicInput(t *testing.T) {
-	t.Parallel()
 	for _, data := range SanitizeElasicInputData {
 		actual := SanitizeElasicInput(data.input)
 		if actual != data.expected {

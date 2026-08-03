@@ -1,16 +1,17 @@
 package spoolfile
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/ConSol-Monitoring/nagflux/pkg/collector"
 	"github.com/ConSol-Monitoring/nagflux/pkg/config"
 	"github.com/ConSol-Monitoring/nagflux/pkg/helper"
+	"github.com/ConSol-Monitoring/nagflux/pkg/logging"
 	"github.com/stretchr/testify/assert"
 )
 
 const configFileContent = `
-
 [Filter]
 	SpoolFileLineTerms = check-host-alive
 
@@ -458,6 +459,9 @@ func testPerformanceDataParser(t *testing.T, input string, expect []PerformanceD
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
+	log := logging.GetLogger()
+	buf := &bytes.Buffer{}
+	log.SetOutput(buf)
 
 	splittedPerformanceData := helper.StringToMap(input, "\t", "::")
 	collectedPerfData := []PerformanceData{}
@@ -465,6 +469,9 @@ func testPerformanceDataParser(t *testing.T, input string, expect []PerformanceD
 		collectedPerfData = append(collectedPerfData, *singlePerfdata)
 	}
 	assert.Equalf(t, expect, collectedPerfData, "performance data matches")
+
+	logs := buf.String()
+	assert.Emptyf(t, logs, "there should be no log entries")
 }
 
 func TestPerformanceDataParser_LongPerformanceLabel(t *testing.T) {
@@ -728,7 +735,7 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata6(t *testing.T) {
 		collectedPerfData = append(collectedPerfData, *singlePerfdata)
 	}
 
-	assert.Emptyf(t, collectedPerfData, "Item should not be taken it contains garbage data, splittedPerformanceData: %v", splittedPerformanceData)
+	assert.Emptyf(t, collectedPerfData, "Item should not be taken it contains garbage data.\nperformance data: %#v\nresult: %#v", splittedPerformanceData["SERVICEPERFDATA"], collectedPerfData)
 }
 
 func TestPerformanceDataParser_GarbageStringAfterPerfdata7(t *testing.T) {

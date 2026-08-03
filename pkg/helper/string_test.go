@@ -19,7 +19,6 @@ var StringToMapData = []struct {
 }
 
 func TestStringToMap(t *testing.T) {
-	t.Parallel()
 	for _, data := range StringToMapData {
 		actual := StringToMap(data.string, data.entrySplitter, data.keyValueSplitter)
 		if !reflect.DeepEqual(actual, data.expected) {
@@ -38,7 +37,6 @@ var StringIntToStringFloatData = []struct {
 }
 
 func TestStringIntToStringFloat(t *testing.T) {
-	t.Parallel()
 	for _, data := range StringIntToStringFloatData {
 		actual := StringIntToStringFloat(data.input)
 		if actual != data.expected {
@@ -56,7 +54,6 @@ var CastStringTimeFromSToMsData = []struct {
 }
 
 func TestCastStringTimeFromSToMs(t *testing.T) {
-	t.Parallel()
 	for _, data := range CastStringTimeFromSToMsData {
 		actual := CastStringTimeFromSToMs(data.input)
 		if actual != data.expected {
@@ -76,7 +73,6 @@ var IsStringANumberData = []struct {
 }
 
 func TestIsStringANumber(t *testing.T) {
-	t.Parallel()
 	for _, data := range IsStringANumberData {
 		actual := IsStringANumber(data.input)
 		if actual != data.expected {
@@ -104,7 +100,6 @@ var VersionOrdinalData = []struct {
 }
 
 func TestVersionOrdinal(t *testing.T) {
-	t.Parallel()
 	for _, data := range VersionOrdinalData {
 		actual := VersionOrdinal(data.input) < VersionOrdinal(data.input2)
 		if actual != data.expected {

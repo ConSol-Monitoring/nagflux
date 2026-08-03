@@ -50,7 +50,6 @@ var PrintCommentData = []struct {
 }
 
 func TestSanitizeValuesComment(t *testing.T) {
-	t.Parallel()
 	comment := CommentData{Data: Data{hostName: "host 1", serviceDisplayName: "service 1", author: "philip"}, entryType: "1"}
 	comment.sanitizeValues()
 	if comment.hostName != `host\ 1` {
@@ -59,7 +58,6 @@ func TestSanitizeValuesComment(t *testing.T) {
 }
 
 func TestPrintInfluxdbComment(t *testing.T) {
-	t.Parallel()
 	logging.InitTestLogger()
 	comment := CommentData{Data: Data{hostName: "host 1", serviceDisplayName: "service 1", author: "philip", comment: "hallo world"}, entryType: "1"}
 	if !didThisPanic(comment.PrintForInfluxDB, "0.8") {

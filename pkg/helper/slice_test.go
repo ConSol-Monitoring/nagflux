@@ -26,7 +26,6 @@ var ContainsData = []struct {
 }
 
 func TestSumIntSliceTillPos(t *testing.T) {
-	t.Parallel()
 	for _, data := range SumIntSliceTillPosData {
 		actual := SumIntSliceTillPos(data.slice, data.pos)
 		if actual != data.output {
@@ -36,7 +35,6 @@ func TestSumIntSliceTillPos(t *testing.T) {
 }
 
 func TestContains(t *testing.T) {
-	t.Parallel()
 	for _, data := range ContainsData {
 		actual := Contains(data.hay, data.needls)
 		if actual != data.output {

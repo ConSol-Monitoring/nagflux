@@ -8,7 +8,6 @@ import (
 )
 
 func TestSanitizeValuesNotification(t *testing.T) {
-	t.Parallel()
 	notification := NotificationData{Data: Data{hostName: "host 1"}, notificationType: "HOST NOTIFICATION", notificationLevel: "WARN"}
 	notification.sanitizeValues()
 

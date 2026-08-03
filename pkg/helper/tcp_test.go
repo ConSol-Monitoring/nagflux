@@ -25,7 +25,6 @@ func dummyServer() {
 }
 
 func TestWaitForPort(t *testing.T) {
-	t.Parallel()
 	// timeout
 	if err := WaitForPort(typ, address, time.Duration(100)*time.Millisecond); err == nil {
 		t.Errorf("on %s %s should no service listen", typ, address)

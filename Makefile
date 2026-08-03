@@ -17,6 +17,7 @@ BUILD:=$(shell git rev-parse --short HEAD)
 TOOLSFOLDER=$(shell pwd)/tools
 export GOBIN := $(TOOLSFOLDER)
 export PATH := $(GOBIN):$(PATH)
+GOLANG_CI_OPTIONS=--show-stats=0 --uniq-by-line=0 --timeout=5m
 
 BUILD_FLAGS=-ldflags "-s -w -X main.Build=$(BUILD)"
 TEST_FLAGS=-timeout=5m $(BUILD_FLAGS)
@@ -84,16 +85,16 @@ build-watch: vendor tools
 
 
 test: dump vendor
-	$(GO) test -short -v $(TEST_FLAGS) ./pkg/*
+	$(GO) test -short -v $(TEST_FLAGS) ./pkg/...
 	if grep -Irn TODO: ./cmd/ ./pkg/;  then exit 1; fi
 	if grep -Irn Dump ./cmd/ ./pkg/ | $(DUMPEXCEPTIONS); then exit 1; fi
 
 # test with filter
 testf: vendor
-	$(GO) test -short -v $(TEST_FLAGS) pkg/... -run "$(filter-out $@,$(MAKECMDGOALS))" 2>&1 | grep -v "no test files" | grep -v "no tests to run" | grep -v "^PASS"
+	$(GO) test -count=1 -v $(TEST_FLAGS) ./pkg/... -run "$(filter-out $@,$(MAKECMDGOALS))" 2>&1 | grep -v "no test files" | grep -v "no tests to run" | grep -v "^PASS"
 
 longtest: vendor
-	$(GO) test -v $(TEST_FLAGS) pkg/...
+	$(GO) test -v $(TEST_FLAGS) ./pkg/...
 
 citest: tools vendor
 	#
@@ -135,18 +136,18 @@ citest: tools vendor
 	#
 
 benchmark:
-	$(GO) test $(TEST_FLAGS) -v -bench=B\* -run=^$$ -benchmem ./pkg/*
+	$(GO) test $(TEST_FLAGS) -v -bench=B\* -run=^$$ -benchmem ./pkg/...
 
 racetest:
-	$(GO) test -race -short $(TEST_FLAGS) -coverprofile=coverage.txt -covermode=atomic -gcflags "-d=checkptr=0" ./pkg/*
+	$(GO) test -race -short $(TEST_FLAGS) -coverprofile=coverage.txt -covermode=atomic -gcflags "-d=checkptr=0" ./pkg/...
 
 covertest:
-	$(GO) test -v $(TEST_FLAGS) -coverprofile=cover.out ./pkg/*
+	$(GO) test -v $(TEST_FLAGS) -coverprofile=cover.out ./pkg/...
 	$(GO) tool cover -func=cover.out
 	$(GO) tool cover -html=cover.out -o coverage.html
 
 coverweb:
-	$(GO) test -v $(TEST_FLAGS) -coverprofile=cover.out ./pkg/*
+	$(GO) test -v $(TEST_FLAGS) -coverprofile=cover.out ./pkg/...
 	$(GO) tool cover -html=cover.out
 
 clean:
@@ -178,7 +179,6 @@ fmt: tools
 	./tools/gci write --skip-generated $(SRCFOLDER)
 	./tools/goimports -w $(SRCFOLDER)
 
-
 versioncheck:
 	@[ $$( printf '%s\n' $(GOVERSION) $(MINGOVERSION) | sort | head -n 1 ) = $(MINGOVERSION) ] || { \
 		echo "**** ERROR:"; \
@@ -194,11 +194,8 @@ golangci: tools
 	#
 	@which golangci-lint
 	@golangci-lint version
-	@set -e; for dir in $$(ls -1d pkg/* cmd); do \
-		echo $$dir; \
-		echo "  - GOOS=linux"; \
-		( cd $$dir && GOOS=linux golangci-lint run --timeout=5m ./... ); \
-	done
+	@echo "  - GOOS=linux"; \
+	GOOS=linux CGO_ENABLED=0 golangci-lint run $(GOLANG_CI_OPTIONS) pkg/... cmd/...
 
 govulncheck: tools
 	govulncheck ./...

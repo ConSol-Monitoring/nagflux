@@ -15,7 +15,6 @@ const (
 )
 
 func TestNewAESECBDecrypter(t *testing.T) {
-	t.Parallel()
 	pt, err := NewAESECBDecrypter([]byte("abcdefghijklmnopqrstuvwxyz"))
 	if pt != nil && err == nil {
 		t.Error("This key should not be valid")
@@ -27,7 +26,6 @@ func TestNewAESECBDecrypter(t *testing.T) {
 }
 
 func TestAESECBDecrypter_Decypt(t *testing.T) {
-	t.Parallel()
 	pt, err := NewAESECBDecrypter([]byte(key + string([]rune{'\x00'})))
 	if pt == nil && err != nil {
 		t.Error("This key should be valid: err:", err)

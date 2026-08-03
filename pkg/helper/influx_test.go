@@ -33,7 +33,7 @@ var SanitizeInfluxDataMap = []struct {
 }
 
 func TestSanitizeInfluxInput(t *testing.T) {
-	// t.Parallel()
+	//
 	config.InitConfigFromString(`[InfluxDBGlobal]
     # leave empty to disable
     NastyString = "§"
@@ -49,7 +49,6 @@ func TestSanitizeInfluxInput(t *testing.T) {
 }
 
 func TestSanitizeMap(t *testing.T) {
-	t.Parallel()
 	for _, data := range SanitizeInfluxDataMap {
 		actual := SanitizeMap(data.input)
 		if !reflect.DeepEqual(actual, data.output) {
