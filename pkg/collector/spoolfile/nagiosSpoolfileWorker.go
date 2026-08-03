@@ -48,7 +48,6 @@ var (
 	// This idea is to get how many numbers, possibly negative, are in a string
 	rangeRegex = regexp.MustCompile(`[\d\.\-]+`)
 
-	// https://regex101.com/r/wNeesp/1
 	// Read this as well if you are new to monitoring plugins output.
 	// https://www.monitoring-plugins.org/doc/guidelines.html#AEN197
 	// https://www.monitoring-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
@@ -63,26 +62,26 @@ var (
 	//				Means "Unknown". This is used by plugins to indicate that it could not get performance data for some reason.
 	// 				Writing 'U' is better than not including it, which would mean its unavailable.
 	//			2. [\d\.,\-]+
-	//				'\d' is for digits, '\.' is a literal point, '\,' is a literal comma, '\-' is a literal dash i.e negative sign. Repat any of these one or more times.
+	//				'\d' is for digits, '\.' is a literal point, '\,' is a literal comma, '\-' is a literal dash i.e negative sign. Repeat any of these one or more times.
 	//				Idea: This captures the current value of the perfdata, which should be some kind of number, possibly negative as well. Examples: '123' '24.5' '-54,2'
 	//	3rd Capture Group: ([\pL\/\%]*)
 	//		'\pL' matches any kind of letter in any language. '\/' matches a literal forward slash, '\%' matches a literal percentage sign. Repeat any of it zero or more times.
 	//		Idea: This captures the Unit of Measurement for the current value.
 	// 		Might be empty since the raw value might be enough. Forward slash is used for rate. Examples: '' 's' 'ms' 'B' 'KB' '%' 'B/s' '/s'
-	//	A literal ';'. Zero or Once. Semicolons are used as seperators between different fields in a perfdata.
+	//	A literal ';'. Zero or Once. Semicolons are used as separators between different fields in a perfdata.
 	// 	Idea: Perfdata might only have the current value, and does not report, warning, critical, min, max and other values.
 	//	4rd Capture Group: ([\d\.\,\-\:\~\@]*)
 	//		Literal digits, point, comma, dash, colon, tilde, at sign. Colon and at sign is used in range definitions. Tilde is used when specifying ranges for negative infinity
 	//		Repeat this capture group zero or one time.
 	//		Idea: These are the threshold definitions for warning threshold. It does not have to be set
-	//	A literal ';'. Zero or Once. Semicolons are used as seperators between different fields in a perfdata.
+	//	A literal ';'. Zero or Once. Semicolons are used as separators between different fields in a perfdata.
 	//	5th Capture Group: ([\d\.\,\-\:\~\@]*)
 	//		Same as 4th capture group, but it is for critical threshold this time
-	//	A literal ';'. Zero or Once. Semicolons are used as seperators between different fields in a perfdata.
+	//	A literal ';'. Zero or Once. Semicolons are used as separators between different fields in a perfdata.
 	//	6th Capture Group: ([\d\.\,\-]*)
 	//		Similar to the 2nd capture group, but it might be repeated zero or more times instead, as this field may be empty
 	//		Idea: Used for the min value so far. It does not need an Unit of Measurement or might be specified as a range like a threshold. Therefore it is simpler
-	//	A literal ';'. Zero or Once. Semicolons are used as seperators between different fields in a perfdata.
+	//	A literal ';'. Zero or Once. Semicolons are used as separators between different fields in a perfdata.
 	//	7th Capture Group: ([\d\.\,\-]*)
 	//		Same as 6th capture group, but it is for the maximum value this time.
 	// '\s' matches any whitespace character, infinite times.
@@ -231,8 +230,6 @@ func (w *NagiosSpoolfileWorker) run() {
 }
 
 // PerformanceDataIterator returns an iterator to loop over generated perf data.
-//
-//nolint:maintidx // the lambda inside has to check all fields of the performance data, adds a lot of branching code
 func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string) <-chan *PerformanceData {
 	ch := make(chan *PerformanceData)
 	dataType := findDataType(input)
@@ -254,42 +251,11 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 
 	// anonymous closure, starts immediately after definition in another goroutine without blocking
 	go func() {
-		perfdataString := input[dataType+"PERFDATA"]
-		perfdataStringErrorsRemoved := regexStripErrors.ReplaceAllString(perfdataString, "")
-
-		// Slices up the string into a form like this
-		// Each match is put into an array with their capture groups
-		// These arrays are put into another array
-		// Example: [][]string len: 4, cap: 10, [
-		// 	["rta=0.024ms;3000.000;5000.000;0; ","rta","0.024","ms","3000.000","5000.000","0",""],
-		// 	["rtmax=0.085ms;;;; ","rtmax","0.085","ms","","","",""],
-		// 	["rtmin=0.000ms;;;; ","rtmin","0.000","ms","","","",""],
-		// 	["pl=0%;80;100;0;100","pl","0","%","80","100","0","100"]
-		// ]
-		perfdataStringMatches := regexPerformancelable.FindAllStringSubmatch(perfdataStringErrorsRemoved, -1)
-		currentCheckMultiLabel := ""
-
-		// try to find a check_multi prefix
-		if len(perfdataStringMatches) > 0 && len(perfdataStringMatches[0]) > 1 {
-			currentCheckMultiLabel = getCheckMultiRegexMatch(perfdataStringMatches[0][1])
-		}
-
-		// check if concataneting matches makes up the original string
-		matchesConcatenatedBuilder := strings.Builder{}
-		for _, matchAndCaptureGroups := range perfdataStringMatches {
-			match := matchAndCaptureGroups[0]
-			_, err := matchesConcatenatedBuilder.WriteString(match)
-			if err != nil {
-				log.Warnf("Error when building the matchesConcaatenated string: %s", err.Error())
-				close(ch)
-				return
-			}
-		}
-		matchesConcatenated := matchesConcatenatedBuilder.String()
-
-		if len(matchesConcatenated) > 0 && strings.TrimSpace(matchesConcatenated) != strings.TrimSpace(perfdataString) {
-			log.Warnf("Perfdata matches: '%v' when concatanted come up to be: '%s', and original perfdata string is: '%s' . They are not equal after stripping whitespace from both", perfdataStringMatches, matchesConcatenated, perfdataString)
+		perfdataStringMatches, currentCheckMultiLabel, err := w.parsePerfData(input[dataType+"PERFDATA"])
+		if err != nil {
+			log.Warnf("%s", err.Error())
 			close(ch)
+
 			return
 		}
 
@@ -524,4 +490,43 @@ func (pt PerformanceDataSliceFields) String() string {
 	default:
 		return ""
 	}
+}
+
+// Slices up the string into a form like this
+// Each match is put into an array with their capture groups
+// These arrays are put into another array
+// Example: [][]string len: 4, cap: 10, [
+//
+//	["rta=0.024ms;3000.000;5000.000;0; ","rta","0.024","ms","3000.000","5000.000","0",""],
+//	["rtmax=0.085ms;;;; ","rtmax","0.085","ms","","","",""],
+//	["rtmin=0.000ms;;;; ","rtmin","0.000","ms","","","",""],
+//	["pl=0%;80;100;0;100","pl","0","%","80","100","0","100"]
+//
+// ]
+func (w *NagiosSpoolfileWorker) parsePerfData(perfdataString string) (matches [][]string, currentCheckMultiLabel string, err error) {
+	perfdataStringErrorsRemoved := regexStripErrors.ReplaceAllString(perfdataString, "")
+
+	perfdataStringMatches := regexPerformancelable.FindAllStringSubmatch(perfdataStringErrorsRemoved, -1)
+
+	// try to find a check_multi prefix
+	if len(perfdataStringMatches) > 0 && len(perfdataStringMatches[0]) > 1 {
+		currentCheckMultiLabel = getCheckMultiRegexMatch(perfdataStringMatches[0][1])
+	}
+
+	// check if concataneting matches makes up the original string
+	matchesConcatenatedBuilder := strings.Builder{}
+	for _, matchAndCaptureGroups := range perfdataStringMatches {
+		match := matchAndCaptureGroups[0]
+		_, err := matchesConcatenatedBuilder.WriteString(match)
+		if err != nil {
+			return nil, "", fmt.Errorf("error when building the matchesConcaatenated string: %w", err)
+		}
+	}
+	matchesConcatenated := matchesConcatenatedBuilder.String()
+
+	if len(matchesConcatenated) > 0 && strings.TrimSpace(matchesConcatenated) != strings.TrimSpace(perfdataString) {
+		return nil, "", fmt.Errorf("perfdata matches: '%#v' when concatanted come up to be: '%s', and original perfdata string is: '%s' . They are not equal after stripping whitespace from both", perfdataStringMatches, matchesConcatenated, perfdataString)
+	}
+
+	return perfdataStringMatches, currentCheckMultiLabel, nil
 }
