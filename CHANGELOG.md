@@ -1,4 +1,4 @@
-## next
+## v0.6.1 - 04.08.2026
 ### Fix
 - fix parsing performance data containing square brackets
 ### Change
