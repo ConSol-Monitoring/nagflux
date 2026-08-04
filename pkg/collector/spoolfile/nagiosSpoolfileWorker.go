@@ -311,22 +311,28 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 				case RawMatch:
 				case Label:
 					if len(data) > w.perfdataLabelMaxSize {
-						log.Warnf("Perfdata Label: '%s' is too long with length: %d and longer than the limit: %d. Probably an anomaly. Skipping this perfdata item, Host: %v , Service: %v, Perfdata fields: %v", data, len(data), w.perfdataLabelMaxSize, perf.Hostname, perf.Service, perfdataStringMatch)
+						log.Warnf("perfdata label: '%s' is too long with length: %d and longer than the limit: %d. Probably an anomaly. Skipping this perfdata item, Host: %v , Service: %v, Perfdata fields: %v", data, len(data), w.perfdataLabelMaxSize, perf.Hostname, perf.Service, perfdataStringMatch)
+						goto perfdataStringMatchLoopEnd
+					}
+					// label must not contain single quotes
+					data, err = w.sanitizeLabel(data)
+					if err != nil {
+						log.Warnf("perfdata label: '%s' is invalid: %s", data, err.Error())
 						goto perfdataStringMatchLoopEnd
 					}
 				case UOM:
 					if len(data) > w.perfdataUOMMaxLength {
-						log.Warnf("Perfdata UOM: '%s' is too long with length: %d and longer than the limit: %d. Probably an anomaly. Host: %v , Service: %v, Perfdata fields: %v", data, len(data), w.perfdataUOMMaxLength, perf.Hostname, perf.Service, perfdataStringMatch)
+						log.Warnf("perfdata uom: '%s' is too long with length: %d and longer than the limit: %d. Probably an anomaly. Host: %v , Service: %v, Perfdata fields: %v", data, len(data), w.perfdataUOMMaxLength, perf.Hostname, perf.Service, perfdataStringMatch)
 						goto perfdataStringMatchLoopEnd
 					}
 				case Value, Min, Max:
 					if len(data) > w.perfdataNumericValuesMaxLength {
-						log.Warnf("Perfdata field %s: '%s' is too long with length: %d and longer than the limit: %d. Probably an anomaly. Host: %v , Service: %v, Perfdata fields: %v", fieldType.String(), data, len(data), w.perfdataNumericValuesMaxLength, perf.Hostname, perf.Service, perfdataStringMatch)
+						log.Warnf("perfdata field %s: '%s' is too long with length: %d and longer than the limit: %d. Probably an anomaly. Host: %v , Service: %v, Perfdata fields: %v", fieldType.String(), data, len(data), w.perfdataNumericValuesMaxLength, perf.Hostname, perf.Service, perfdataStringMatch)
 						goto perfdataStringMatchLoopEnd
 					}
 				case Warn, Crit:
 					if len(data) > w.perfdataThresholdsMaxLength {
-						log.Warnf("Perfdata field %s: '%s' is too long with length: %d and longer than the limit: %d. Probably an anomaly. Host: %v , Service: %v, Perfdata fields: %v", fieldType.String(), data, len(data), w.perfdataThresholdsMaxLength, perf.Hostname, perf.Service, perfdataStringMatch)
+						log.Warnf("perfdata field %s: '%s' is too long with length: %d and longer than the limit: %d. Probably an anomaly. Host: %v , Service: %v, Perfdata fields: %v", fieldType.String(), data, len(data), w.perfdataThresholdsMaxLength, perf.Hostname, perf.Service, perfdataStringMatch)
 						goto perfdataStringMatchLoopEnd
 					}
 				}
@@ -363,7 +369,7 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 							perf.Fields[tagKey] = helper.StringIntToStringFloat(rangeHits[i][0])
 						}
 					} else {
-						log.Warnf("String: '%s' in field '%s' could not be parsed. Host: %v, Service: %v, Perf Data Fields: %v", data, fieldType.String(), perf.Hostname, perf.Service, perfdataStringMatch)
+						log.Warnf("text: '%s' in field '%s' could not be parsed. Host: %v, Service: %v, Perf Data Fields: %v", data, fieldType.String(), perf.Hostname, perf.Service, perfdataStringMatch)
 						goto perfdataStringMatchLoopEnd
 					}
 				case Value, Min, Max:
@@ -372,7 +378,7 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 						continue
 					}
 					if !helper.IsStringANumber(data) {
-						log.Warnf("String: '%s' in field '%s' is not a number, should be one. Host: %v, Service: %v, Perf Data Fields: %v", data, fieldType.String(), perf.Hostname, perf.Service, perfdataStringMatch)
+						log.Warnf("text: '%s' in field '%s' is not a number, should be one. Host: %v, Service: %v, Perf Data Fields: %v", data, fieldType.String(), perf.Hostname, perf.Service, perfdataStringMatch)
 						goto perfdataStringMatchLoopEnd
 					}
 					perf.Fields[fieldType.String()] = helper.StringIntToStringFloat(data)
@@ -533,4 +539,28 @@ func (w *NagiosSpoolfileWorker) parsePerfData(perfdataString string) (matches []
 	}
 
 	return perfdataStringMatches, currentCheckMultiLabel, nil
+}
+
+func (w *NagiosSpoolfileWorker) sanitizeLabel(label string) (string, error) {
+	label = strings.TrimSpace(label)
+	if len(label) == 0 {
+		return label, fmt.Errorf("label cannot be empty")
+	}
+
+	// remove quotes
+	if len(label) >= 2 {
+		switch {
+		case label[0] == '\'' && label[len(label)-1] == '\'':
+			label = label[1 : len(label)-1]
+		case label[0] == '"' && label[len(label)-1] == '"':
+			label = label[1 : len(label)-1]
+		}
+	}
+
+	// label must not contain single quotes now
+	if strings.Contains(label, "'") {
+		return label, fmt.Errorf("label cannot contain single quotes")
+	}
+
+	return label, nil
 }

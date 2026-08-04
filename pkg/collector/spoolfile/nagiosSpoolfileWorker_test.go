@@ -475,8 +475,6 @@ func testPerformanceDataParser(t *testing.T, input string, expect []PerformanceD
 }
 
 func TestPerformanceDataParser_LongPerformanceLabel(t *testing.T) {
-	t.Helper()
-
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
@@ -495,8 +493,6 @@ func TestPerformanceDataParser_LongPerformanceLabel(t *testing.T) {
 }
 
 func TestPerformanceDataParser_LongValue(t *testing.T) {
-	t.Helper()
-
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
@@ -515,8 +511,6 @@ func TestPerformanceDataParser_LongValue(t *testing.T) {
 }
 
 func TestPerformanceDataParser_LongUOM(t *testing.T) {
-	t.Helper()
-
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
@@ -537,8 +531,6 @@ func TestPerformanceDataParser_LongUOM(t *testing.T) {
 }
 
 func TestPerformanceDataParser_LongWarnTrehsold(t *testing.T) {
-	t.Helper()
-
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
@@ -557,8 +549,6 @@ func TestPerformanceDataParser_LongWarnTrehsold(t *testing.T) {
 }
 
 func TestPerformanceDataParser_LongCritTrehsold(t *testing.T) {
-	t.Helper()
-
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
@@ -579,8 +569,6 @@ func TestPerformanceDataParser_LongCritTrehsold(t *testing.T) {
 }
 
 func TestPerformanceDataParser_LongMinValue(t *testing.T) {
-	t.Helper()
-
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
@@ -599,8 +587,6 @@ func TestPerformanceDataParser_LongMinValue(t *testing.T) {
 }
 
 func TestPerformanceDataParser_LongMaxValue(t *testing.T) {
-	t.Helper()
-
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
@@ -619,8 +605,6 @@ func TestPerformanceDataParser_LongMaxValue(t *testing.T) {
 }
 
 func TestPerformanceDataParser_GarbageStringAfterPerfdata1(t *testing.T) {
-	t.Helper()
-
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
@@ -639,8 +623,6 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata1(t *testing.T) {
 }
 
 func TestPerformanceDataParser_GarbageStringAfterPerfdata2(t *testing.T) {
-	t.Helper()
-
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
@@ -659,8 +641,6 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata2(t *testing.T) {
 }
 
 func TestPerformanceDataParser_GarbageStringAfterPerfdata3(t *testing.T) {
-	t.Helper()
-
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
@@ -679,8 +659,6 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata3(t *testing.T) {
 }
 
 func TestPerformanceDataParser_GarbageStringAfterPerfdata4(t *testing.T) {
-	t.Helper()
-
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
@@ -699,8 +677,6 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata4(t *testing.T) {
 }
 
 func TestPerformanceDataParser_GarbageStringAfterPerfdata5(t *testing.T) {
-	t.Helper()
-
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
@@ -719,11 +695,13 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata5(t *testing.T) {
 }
 
 func TestPerformanceDataParser_GarbageStringAfterPerfdata6(t *testing.T) {
-	t.Helper()
-
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
+
+	log := logging.GetLogger()
+	buf := &bytes.Buffer{}
+	log.SetOutput(buf)
 
 	splittedPerformanceData := helper.StringToMap(
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::asd label=1;2; other=1;3;4asdasdasd  [anza=ffgg] [si signo=11] 'valid[1]'=5 [si_errno=0] [si_code=1]	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
@@ -735,12 +713,13 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata6(t *testing.T) {
 		collectedPerfData = append(collectedPerfData, *singlePerfdata)
 	}
 
-	assert.Emptyf(t, collectedPerfData, "Item should not be taken it contains garbage data.\nperformance data: %#v\nresult: %#v", splittedPerformanceData["SERVICEPERFDATA"], collectedPerfData)
+	assert.Lenf(t, collectedPerfData, 2, "first 2 items can be parsed.\nperformance data: %#v\nresult: %#v", splittedPerformanceData["SERVICEPERFDATA"], collectedPerfData)
+
+	logs := buf.String()
+	assert.Contains(t, logs, "label cannot contain single quotes")
 }
 
 func TestPerformanceDataParser_GarbageStringAfterPerfdata7(t *testing.T) {
-	t.Helper()
-
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
