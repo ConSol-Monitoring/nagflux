@@ -544,7 +544,7 @@ func (w *NagiosSpoolfileWorker) parsePerfData(perfdataString string) (matches []
 func (w *NagiosSpoolfileWorker) sanitizeLabel(label string) (string, error) {
 	label = strings.TrimSpace(label)
 	if len(label) == 0 {
-		return label, fmt.Errorf("label cannot be empty")
+		return label, errors.New("label cannot be empty")
 	}
 
 	// remove quotes
@@ -559,7 +559,7 @@ func (w *NagiosSpoolfileWorker) sanitizeLabel(label string) (string, error) {
 
 	// label must not contain single quotes now
 	if strings.Contains(label, "'") {
-		return label, fmt.Errorf("label cannot contain single quotes")
+		return label, errors.New("label cannot contain single quotes")
 	}
 
 	return label, nil

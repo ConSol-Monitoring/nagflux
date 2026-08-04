@@ -530,7 +530,7 @@ func TestPerformanceDataParser_LongUOM(t *testing.T) {
 	assert.Emptyf(t, collectedPerfData, "Item should not be taken into the performance data due to long length unit of measurement, splittedPerformanceData: %v", splittedPerformanceData)
 }
 
-func TestPerformanceDataParser_LongWarnTrehsold(t *testing.T) {
+func TestPerformanceDataParser_LongWarnThreshold(t *testing.T) {
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
@@ -548,7 +548,7 @@ func TestPerformanceDataParser_LongWarnTrehsold(t *testing.T) {
 	assert.Emptyf(t, collectedPerfData, "Item should not be taken into the performance data due to long length of warning threshold, splittedPerformanceData: %v", splittedPerformanceData)
 }
 
-func TestPerformanceDataParser_LongCritTrehsold(t *testing.T) {
+func TestPerformanceDataParser_LongCritThreshold(t *testing.T) {
 	config.InitConfigFromString(configFileContent)
 
 	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
