@@ -7,7 +7,7 @@ GOVERSION:=$(shell \
     go version | \
     awk -F'go| ' '{ split($$5, a, /\./); printf ("%04d%04d", a[1], a[2]); exit; }' \
 )
-# also update go.mod files when changing minumum version
+# also update other go.mod files when changing minimum version
 # find . -name go.mod
 MINGOVERSION:=00010026
 MINGOVERSIONSTR:=1.26
@@ -157,6 +157,7 @@ clean:
 	rm -f $(CMDS)
 	rm -f *.windows.*.exe
 	rm -f *.linux.*
+	rm -rf go.work
 	rm -rf go.work.sum
 	rm -f cover.out
 	rm -f coverage.html

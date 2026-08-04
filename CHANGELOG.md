@@ -1,22 +1,25 @@
 ## next
 ### Fix
-- Fix parsing performance data containing square brackets
+- fix parsing performance data containing square brackets
+### Change
+- update golang version to 1.26.5
+- update dependencies
 
 
 ## v0.6.0 - 08.07.2026
 ### Fix
-- Fix crash in gearman worker
+- fix crash in gearman worker
 
 
 ## v0.5.9 - 07.07.2026
 ### Change
-- Increase default PerfdataLabelMaxLength to 150
-- Apply PerfdataLabel* configs to gearman worker too
+- increase default PerfdataLabelMaxLength to 150
+- apply PerfdataLabel* configs to gearman worker too
 
 
 ## v0.5.8 - 28.03.2026
 ### Change
-- Increase default PerfdataLabelMaxLength to 64
+- increase default PerfdataLabelMaxLength to 64
 
 
 ## v0.5.7 - 12.03.2026
