@@ -1,20 +1,29 @@
+## next
+### Fix
+- Fix parsing performance data containing square brackets
+
+
 ## v0.6.0 - 08.07.2026
-### Change
+### Fix
 - Fix crash in gearman worker
+
 
 ## v0.5.9 - 07.07.2026
 ### Change
 - Increase default PerfdataLabelMaxLength to 150
 - Apply PerfdataLabel* configs to gearman worker too
 
+
 ## v0.5.8 - 28.03.2026
 ### Change
 - Increase default PerfdataLabelMaxLength to 64
+
 
 ## v0.5.7 - 12.03.2026
 ### Feature
 - add length based anomaly detection when parsing perfdata fields
 - add detection of unmatched substrings after regex search for perfdata groups in log string
+
 
 ## v0.5.6 - 10.02.2026
 ### Fix
@@ -92,7 +101,7 @@ will be send to all targets. So "all" is a magic word and should not be uses as 
 ### Fix
 - Allow comma separated Performancedata
 - Spoolfilebuffer is now configurable
-- Nagflux Tags and Fields are ignoring empty or malformed data. Valid but ignored Performancedate would be: NAGFLUX:TAG::$_SERVICENAGFLUX_TAG$ or NAGFLUX:TAG::
+- Nagflux Tags and Fields are ignoring empty or malformed data. Valid but ignored performance data would be: NAGFLUX:TAG::$_SERVICENAGFLUX_TAG$ or NAGFLUX:TAG::
 
 ## v0.3.0 - 07.12.2016
 ### Fix
@@ -142,14 +151,14 @@ will be send to all targets. So "all" is a magic word and should not be uses as 
 - ignore selfsigned ssl certs
 - livestatus detection improved
 - wait for influxdb on start
-- pause fileparsing when influxdb is not reachable
+- pause file parsing when influxdb is not reachable
 - skip non digit perfdata(U are ignored)
 
 
 ## v0.2.2 - 17.05.2016
 ### Fix
 - livestatus ServiceNotifications with just 9 entries
-- nagflux fileimport exception when column name is too short
+- nagflux file import exception when column name is too short
 - nagios livestatus query for performance issues
 
 ## v0.2.1.1 - 08.04.2016
