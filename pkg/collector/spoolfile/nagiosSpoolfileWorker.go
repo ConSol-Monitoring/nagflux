@@ -259,6 +259,9 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 			return
 		}
 
+		// save perf data before sending into target channel, in case of errors we want to discard the hole line
+		bulkSend := []*PerformanceData{}
+
 		for _, perfdataStringMatch := range perfdataStringMatches {
 			// Allows to add tags and fields to spoolfile entries
 			tags := map[string]string{}
@@ -386,10 +389,14 @@ func (w *NagiosSpoolfileWorker) PerformanceDataIterator(input map[string]string)
 				}
 			}
 
-			ch <- perf
-
-		perfdataStringMatchLoopEnd: // To skip item without sending it to the channel
+			bulkSend = append(bulkSend, perf)
 		}
+
+		for _, item := range bulkSend {
+			ch <- item
+		}
+
+	perfdataStringMatchLoopEnd: // To skip item without sending it to the channel
 		close(ch)
 	}()
 

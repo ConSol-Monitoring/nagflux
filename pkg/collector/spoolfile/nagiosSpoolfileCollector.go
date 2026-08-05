@@ -32,7 +32,7 @@ const (
 	PerfdataNumericValuesMaxLengthDefault = int(32)
 
 	// PerfdataThresholdsMaxLengthDefault: If a perfdata numeric value, e.g current value, min, and max is longer than this, it will be logged as an anomaly and skipped
-	// Reasoning: Twice the numeric value max length, since there are seperators as well
+	// Reasoning: Twice the numeric value max length, since there are separators as well
 	PerfdataThresholdsMaxLengthDefault = int(64)
 )
 
@@ -44,7 +44,7 @@ type NagiosSpoolfileCollector struct {
 	workers        []*NagiosSpoolfileWorker
 }
 
-// NagiosSpoolfileCollectorFactory creates the give amount of Woker and starts them.
+// NagiosSpoolfileCollectorFactory creates the give amount of worker and starts them.
 func NagiosSpoolfileCollectorFactory(cfg config.Config, results collector.ResultQueues,
 	livestatusCacheBuilder *livestatus.CacheBuilder, fileBufferSize int, defaultTarget collector.Filterable,
 ) (*NagiosSpoolfileCollector, error) {

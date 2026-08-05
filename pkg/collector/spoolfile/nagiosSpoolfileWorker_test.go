@@ -713,7 +713,7 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata6(t *testing.T) {
 		collectedPerfData = append(collectedPerfData, *singlePerfdata)
 	}
 
-	assert.Lenf(t, collectedPerfData, 2, "first 2 items can be parsed.\nperformance data: %#v\nresult: %#v", splittedPerformanceData["SERVICEPERFDATA"], collectedPerfData)
+	assert.Emptyf(t, collectedPerfData, "Item should not be taken it contains garbage data.\nperf data: %#v\nparsed: %#v", splittedPerformanceData, collectedPerfData)
 
 	logs := buf.String()
 	assert.Contains(t, logs, "label cannot contain single quotes")
