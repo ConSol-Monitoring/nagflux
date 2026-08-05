@@ -87,7 +87,7 @@ var (
 	// '\s' matches any whitespace character, infinite times.
 	//	Idea: It separates different perf data values as this must be matched new capture group can be captured
 	// Overall this script will detect a perfdata in Nagios syntax
-	regexPerformanceLabel = regexp.MustCompile(`([^=]+)=(U|[\d\.\,\-]+)([\pL\/\%]*);?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-]*)?;?([\d\.\,\-]*)?;?\s*`)
+	regexPerformanceLabel = regexp.MustCompile(`\s*([^=]+)=(U|[\d\.\,\-]+)([\pL\/\%]*);?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-]*)?;?([\d\.\,\-]*)?;?\s*`)
 
 	// The perfdata part might have some alternative check at the end, recognize it by it being at the end and only containing letters, '_', '-'
 	// The check name will be in the capture group.
@@ -517,8 +517,11 @@ func (pt PerformanceDataSliceFields) String() string {
 //
 // ]
 func (w *NagiosSpoolfileWorker) parsePerfData(perfdataString string) (matches [][]string, currentCheckMultiLabel string, err error) {
-	perfdataStringErrorsRemoved := regexStripErrors.ReplaceAllString(perfdataString, "")
-	perfdataStringMatches := regexPerformanceLabel.FindAllStringSubmatch(perfdataStringErrorsRemoved, -1)
+	perfdataStringErrorsRemoved := regexStripErrors.Split(perfdataString, -1)
+	perfdataStringMatches := make([][]string, 0, len(perfdataStringErrorsRemoved))
+	for _, part := range perfdataStringErrorsRemoved {
+		perfdataStringMatches = append(perfdataStringMatches, regexPerformanceLabel.FindAllStringSubmatch(part, -1)...)
+	}
 
 	// try to find a check_multi prefix
 	if len(perfdataStringMatches) > 0 && len(perfdataStringMatches[0]) > 1 {
@@ -536,7 +539,7 @@ func (w *NagiosSpoolfileWorker) parsePerfData(perfdataString string) (matches []
 	}
 	matchesConcatenated := matchesConcatenatedBuilder.String()
 
-	if len(matchesConcatenated) > 0 && strings.TrimSpace(matchesConcatenated) != strings.TrimSpace(perfdataStringErrorsRemoved) {
+	if len(matchesConcatenated) > 0 && strings.TrimSpace(matchesConcatenated) != strings.TrimSpace(strings.Join(perfdataStringErrorsRemoved, "")) {
 		return nil, "", fmt.Errorf(
 			"perfdata matches: '%#v' when concatenated come up to be: '%s', and original perfdata string is: '%s'. They are not equal after stripping whitespace from both",
 			perfdataStringMatches,

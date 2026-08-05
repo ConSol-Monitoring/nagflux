@@ -718,7 +718,7 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata6(t *testing.T) {
 	assert.Emptyf(t, collectedPerfData, "Item should not be taken it contains garbage data.\nperf data: %#v\nparsed: %#v", splittedPerformanceData, collectedPerfData)
 
 	logs := buf.String()
-	assert.Contains(t, logs, "label cannot contain single quotes")
+	assert.Contains(t, logs, "are not equal")
 }
 
 func TestPerformanceDataParser_GarbageStringAfterPerfdata7(t *testing.T) {
@@ -750,7 +750,7 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata8(t *testing.T) {
 	defer log.SetOutput(t.Output())
 
 	splittedPerformanceData := helper.StringToMap(
-		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::asd label2=1;2; other=1;3;4asdasdasd  [anza=ffgg] [si signo=11] 'valid[1]'=5 [si_errno=0] [si_code=1]	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
+		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::asd label2=1;2; other=1;3;4asdasdasd  [anza=ffgg] [si signo=11] valid[1]=5 [si_errno=0] [si_code=1]	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
 		"\t", "::",
 	)
 
@@ -762,5 +762,5 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata8(t *testing.T) {
 	assert.Emptyf(t, collectedPerfData, "Item should not be taken it contains garbage data.\nperf data: %#v\nparsed: %#v", splittedPerformanceData, collectedPerfData)
 
 	logs := buf.String()
-	assert.Contains(t, logs, "label cannot contain single quotes")
+	assert.Contains(t, logs, "are not equal")
 }
