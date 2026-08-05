@@ -23,8 +23,6 @@ BUILD_FLAGS=-ldflags "-s -w -X main.Build=$(BUILD)"
 TEST_FLAGS=-timeout=5m $(BUILD_FLAGS)
 GO=go
 
-DUMPEXCEPTIONS=grep -vi 'Dumpfile' | grep -vi 'Dumping' | grep -vi 'Dumper' | grep -vi 'Dumps' | grep -v 'httputil.Dump' | grep -v logThreadDump | grep -v dump.go
-
 all: build
 
 CMDS = $(shell cd ./cmd && ls -1)
@@ -66,14 +64,6 @@ go.work: pkg/*
 	echo "go $(MINGOVERSIONSTR)" > go.work
 	$(GO) work use . pkg/* cmd/* buildtools/.
 
-dump:
-	if [ $(shell grep -r Dump ./cmd/*/*.go ./pkg/*/*.go | $(DUMPEXCEPTIONS) | wc -l) -ne 0 ]; then \
-		sed -i.bak -e 's/\/\/go:build.*/\/\/ :build with debug functions/' -e 's/\/\/ +build.*/\/\/ build with debug functions/' pkg/$(PROJECT)/dump.go; \
-	else \
-		sed -i.bak -e 's/\/\/ :build.*/\/\/go:build ignore/' -e 's/\/\/ build.*/\/\/ +build ignore/' pkg/$(PROJECT)/dump.go; \
-	fi
-	rm -f pkg/$(PROJECT)/dump.go.bak
-
 build: vendor
 	set -e; for CMD in $(CMDS); do \
 		( cd ./cmd/$$CMD && $(GO) build $(BUILD_FLAGS) -o ../../$$CMD ) ; \
@@ -84,10 +74,10 @@ build-watch: vendor tools
 	set -x ; ls pkg/*/*.go cmd/*/*.go | entr -sr "$(MAKE) build && ./lmd $(filter-out $@,$(MAKECMDGOALS)) $(shell echo $(filter-out --,$(MAKEFLAGS)) | tac -s " ")"
 
 
-test: dump vendor
+test: vendor
 	$(GO) test -short -v $(TEST_FLAGS) ./pkg/...
 	if grep -Irn TODO: ./cmd/ ./pkg/;  then exit 1; fi
-	if grep -Irn Dump ./cmd/ ./pkg/ | $(DUMPEXCEPTIONS); then exit 1; fi
+	if grep -Irn dump.Dump ./cmd/ ./pkg/ | grep -v dump.go; then exit 1; fi
 
 # test with filter
 testf: vendor
@@ -112,7 +102,7 @@ citest: tools vendor
 	#
 	# Checking remaining debug calls
 	#
-	if grep -Irn Dump ./cmd/ ./pkg/ | $(DUMPEXCEPTIONS); then exit 1; fi
+	if grep -Irn dump.Dump ./cmd/ ./pkg/ | grep -v dump.go; then exit 1; fi
 	#
 	# Run other subtests
 	#
