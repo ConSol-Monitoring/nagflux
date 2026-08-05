@@ -462,6 +462,7 @@ func testPerformanceDataParser(t *testing.T, input string, expect []PerformanceD
 	log := logging.GetLogger()
 	buf := &bytes.Buffer{}
 	log.SetOutput(buf)
+	defer log.SetOutput(t.Output())
 
 	splittedPerformanceData := helper.StringToMap(input, "\t", "::")
 	collectedPerfData := []PerformanceData{}
@@ -702,6 +703,7 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata6(t *testing.T) {
 	log := logging.GetLogger()
 	buf := &bytes.Buffer{}
 	log.SetOutput(buf)
+	defer log.SetOutput(t.Output())
 
 	splittedPerformanceData := helper.StringToMap(
 		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::asd label=1;2; other=1;3;4asdasdasd  [anza=ffgg] [si signo=11] 'valid[1]'=5 [si_errno=0] [si_code=1]	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
@@ -735,4 +737,30 @@ func TestPerformanceDataParser_GarbageStringAfterPerfdata7(t *testing.T) {
 	}
 
 	assert.Emptyf(t, collectedPerfData, "Item should not be taken it contains garbage data, splittedPerformanceData: %v", splittedPerformanceData)
+}
+
+func TestPerformanceDataParser_GarbageStringAfterPerfdata8(t *testing.T) {
+	config.InitConfigFromString(configFileContent)
+
+	w := NewNagiosSpoolfileWorker(0, nil, nil, nil, 4096, collector.AllFilterable, PerfdataLabelMaxLengthDefault, PerfdataUOMMaxLengthDefault, PerfdataNumericValuesMaxLengthDefault, PerfdataThresholdsMaxLengthDefault)
+
+	log := logging.GetLogger()
+	buf := &bytes.Buffer{}
+	log.SetOutput(buf)
+	defer log.SetOutput(t.Output())
+
+	splittedPerformanceData := helper.StringToMap(
+		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::range	SERVICEPERFDATA::asd label2=1;2; other=1;3;4asdasdasd  [anza=ffgg] [si signo=11] 'valid[1]'=5 [si_errno=0] [si_code=1]	SERVICECHECKCOMMAND::check_dummy	SERVICESTATE::0	SERVICESTATETYPE::1",
+		"\t", "::",
+	)
+
+	collectedPerfData := []PerformanceData{}
+	for singlePerfdata := range w.PerformanceDataIterator(splittedPerformanceData) {
+		collectedPerfData = append(collectedPerfData, *singlePerfdata)
+	}
+
+	assert.Emptyf(t, collectedPerfData, "Item should not be taken it contains garbage data.\nperf data: %#v\nparsed: %#v", splittedPerformanceData, collectedPerfData)
+
+	logs := buf.String()
+	assert.Contains(t, logs, "label cannot contain single quotes")
 }
