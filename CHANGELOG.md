@@ -1,3 +1,8 @@
+## v0.6.2 - 05.08.2026
+### Fix
+- improve parsing performance data containing error output
+
+
 ## v0.6.1 - 04.08.2026
 ### Fix
 - fix parsing performance data containing square brackets
