@@ -1,3 +1,8 @@
+## next
+### Fix
+- improve parsing performance data containing check_command label
+
+
 ## v0.6.2 - 05.08.2026
 ### Fix
 - improve parsing performance data containing error output

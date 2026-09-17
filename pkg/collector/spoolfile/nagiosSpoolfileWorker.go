@@ -92,7 +92,10 @@ var (
 	// The perfdata part might have some alternative check at the end, recognize it by it being at the end and only containing letters, '_', '-'
 	// The check name will be in the capture group.
 	// This convention is not found in monitoring-plugins development guidelines
-	regexAlternativeCommand = regexp.MustCompile(`.*\[([a-zA-Z\_\-\.\ ]+)\]\s?$`)
+	regexAlternativeCommand = regexp.MustCompile(`.*\[([a-zA-Z\_\-\.\ ]+)\]\s*$`)
+
+	// same as above but can be used to remove the label
+	regexAlternativeCommandRemove = regexp.MustCompile(`\s*\[[a-zA-Z\_\-\.\ ]+\]\s*$`)
 
 	// The perfdata part might report errors for different data
 	// it has to put them in square brackets first, and use an equal sign for the error
@@ -539,7 +542,10 @@ func (w *NagiosSpoolfileWorker) parsePerfData(perfdataString string) (matches []
 	}
 	matchesConcatenated := matchesConcatenatedBuilder.String()
 
-	if len(matchesConcatenated) > 0 && strings.TrimSpace(matchesConcatenated) != strings.TrimSpace(strings.Join(perfdataStringErrorsRemoved, "")) {
+	if len(matchesConcatenated) > 0 && strings.TrimSpace(matchesConcatenated) != strings.TrimSpace(regexAlternativeCommandRemove.ReplaceAllString(strings.Join(perfdataStringErrorsRemoved, ""), "")) {
+		log.Errorf("orig: >'%s'<", strings.TrimSpace(matchesConcatenated))
+		log.Errorf("test: >'%s'<", strings.TrimSpace(strings.Join(perfdataStringErrorsRemoved, "")))
+		log.Errorf("test: >'%s'<", strings.TrimSpace(regexAlternativeCommandRemove.ReplaceAllString(strings.Join(perfdataStringErrorsRemoved, ""), "")))
 		return nil, "", fmt.Errorf(
 			"perfdata matches: '%#v' when concatenated come up to be: '%s', and original perfdata string is: '%s'. They are not equal after stripping whitespace from both",
 			perfdataStringMatches,

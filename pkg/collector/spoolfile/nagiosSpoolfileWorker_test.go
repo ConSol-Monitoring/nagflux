@@ -453,6 +453,34 @@ func TestPerformanceDataParser_20(t *testing.T) {
 	)
 }
 
+func TestPerformanceDataParser_CheckCommandOverride(t *testing.T) {
+	testPerformanceDataParser(
+		t,
+		"DATATYPE::SERVICEPERFDATA	TIMET::1441791000	HOSTNAME::xxx	SERVICEDESC::test	SERVICECHECKCOMMAND::check_other	SERVICEPERFDATA::'time'=11.306s;0;0 'errors'=0;0;0  [check_test]",
+		[]PerformanceData{{
+			Hostname:         "xxx",
+			Service:          "test",
+			Command:          "check_test",
+			Time:             "1441791000000",
+			PerformanceLabel: "'time'",
+			Unit:             "s",
+			Tags:             map[string]string{"warn-fill": "none", "crit-fill": "none"},
+			Fields:           map[string]string{"value": "11.306", "warn": "0.0", "crit": "0.0"},
+			Filterable:       collector.AllFilterable,
+		}, {
+			Hostname:         "xxx",
+			Service:          "test",
+			Command:          "check_test",
+			Time:             "1441791000000",
+			PerformanceLabel: "'errors'",
+			Unit:             "",
+			Tags:             map[string]string{"warn-fill": "none", "crit-fill": "none"},
+			Fields:           map[string]string{"value": "0.0", "warn": "0.0", "crit": "0.0"},
+			Filterable:       collector.AllFilterable,
+		}},
+	)
+}
+
 func testPerformanceDataParser(t *testing.T, input string, expect []PerformanceData) {
 	t.Helper()
 
