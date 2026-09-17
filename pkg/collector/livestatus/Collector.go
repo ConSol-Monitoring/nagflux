@@ -295,12 +295,12 @@ Loop:
 	}
 
 	live.log.Info("Livestatus version: ", version)
-	if icinga2, _ := regexp.MatchString(`^r[\d\.-]+$`, version); icinga2 {
+	if naemon, _ := regexp.MatchString(`\-naemon$`, version); naemon {
+		return Naemon
+	} else if icinga2, _ := regexp.MatchString(`^r[\d\.-]+$`, version); icinga2 {
 		return Icinga2
 	} else if nagios, _ := regexp.MatchString(`^[\d\.]+p[\d\.]+$`, version); nagios {
 		return Nagios
-	} else if naemon, _ := regexp.MatchString(`^[\d\.]+(source-naemon|-naemon)?$`, version); naemon {
-		return Naemon
 	}
 	live.log.Warn("Could not detect livestatus type, with version: ", version, ". Assuming Nagios")
 	return -1
