@@ -9,6 +9,7 @@ linters:
     - errname
     - errorlint
     - exhaustruct
+    - exhaustruct_v5
     - funcorder
     - gochecknoglobals
     - gochecknoinits
