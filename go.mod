@@ -28,3 +28,5 @@ require (
 	gopkg.in/robfig/cron.v2 v2.0.0-20150107220207-be2e0b0deed5 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
+
+replace github.com/appscode/g2 => github.com/sni/g2 v0.0.0-20190123131438-388ba74fd273

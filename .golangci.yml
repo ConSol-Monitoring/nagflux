@@ -108,6 +108,8 @@ linters:
         text: 'stringsbuilder:'
       - path: (.+)_test\.go$
         text: 'concat-loop:'
+      - path: (.+)\.mod$
+        text: 'replacement are not allowed: github.com/appscode/g2'
     paths:
       - third_party$
       - builtin$
