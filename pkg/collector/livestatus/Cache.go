@@ -18,7 +18,7 @@ func (cache *Cache) addDowntime(host, service, start string) {
 		oldTimestamp, _ := strconv.Atoi(cache.downtime[host][service])
 		newTimestamp, _ := strconv.Atoi(start)
 		// Take timestamp if its newer
-		if oldTimestamp > newTimestamp {
+		if oldTimestamp < newTimestamp {
 			cache.downtime[host][service] = start
 		}
 	}

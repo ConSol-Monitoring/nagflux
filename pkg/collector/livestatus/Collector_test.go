@@ -13,7 +13,7 @@ func TestNewLivestatusCollector(t *testing.T) {
 	livestatus := &MockLivestatus{
 		LivestatusAddress: "localhost:6559",
 		ConnectionType:    "tcp",
-		Queries:           map[string]string{},
+		Queries:           map[string]string{QueryLivestatusVersion: "r2.12.0\n"},
 		isRunning:         true,
 	}
 	go livestatus.StartMockLivestatus()
@@ -27,6 +27,7 @@ func TestNewLivestatusCollector(t *testing.T) {
 		t.Error("Constructor returned null pointer")
 	}
 	collector.Stop()
+	livestatus.StopMockLivestatus()
 }
 
 func TestAddTimestampToLivestatusQuery(t *testing.T) {

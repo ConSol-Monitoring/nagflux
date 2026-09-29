@@ -19,6 +19,7 @@ type MockLivestatus struct {
 	ConnectionType    string
 	Queries           map[string]string
 	isRunning         bool
+	listener          net.Listener
 }
 
 var mutex = &sync.Mutex{}
@@ -39,13 +40,13 @@ func (mockLive *MockLivestatus) StartMockLivestatus() {
 	if err != nil {
 		log.Panic(err)
 	}
+	mockLive.listener = listener
 
 	isRunning := true
 	for isRunning {
 		conn, err := listener.Accept()
 		if err != nil {
-			// log.Println(err)
-			continue
+			break
 		}
 		go mockLive.handle(conn)
 
@@ -75,11 +76,17 @@ func (mockLive *MockLivestatus) handle(conn net.Conn) {
 }
 
 func (mockLive *MockLivestatus) StopMockLivestatus() {
+	mutex.Lock()
+	mockLive.isRunning = false
+	if mockLive.listener != nil {
+		mockLive.listener.Close()
+	}
+	mutex.Unlock()
 }
 
 func TestConnectToLivestatus(t *testing.T) {
 	// Create Livestatus mock
-	livestatus := MockLivestatus{"localhost:6560", "tcp", map[string]string{"test\n\n": "foo;bar\n"}, true}
+	livestatus := MockLivestatus{LivestatusAddress: "localhost:6560", ConnectionType: "tcp", Queries: map[string]string{"test\n\n": "foo;bar\n"}, isRunning: true}
 
 	go livestatus.StartMockLivestatus()
 	connector := Connector{logging.GetLogger(), livestatus.LivestatusAddress, livestatus.ConnectionType}
