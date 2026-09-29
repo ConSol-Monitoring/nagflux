@@ -22,8 +22,12 @@ func SanitizeInfluxInput(input string) string {
 		)
 	}
 	input = strings.Trim(input, `'`)
+	// A backslash only escapes the following space, comma or =, so it must
+	// not be escaped itself: values ending in a backslash are unrepresentable
+	// in line protocol, use InfluxDBGlobal.NastyString for those.
 	input = strings.ReplaceAll(input, " ", `\ `)
 	input = strings.ReplaceAll(input, ",", `\,`)
+	input = strings.ReplaceAll(input, "=", `\=`)
 
 	return input
 }

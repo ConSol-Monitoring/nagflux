@@ -13,9 +13,13 @@ var SanitizeInfluxData = []struct {
 }{
 	{"a a", `a\ a`},
 	{"a,a", `a\,a`},
+	{"a=b", `a\=b`},
 	{", ", `\,\ `},
 	{"aa", "aa"},
+	{`a\b`, `a\b`},
+	{`a\,b`, `a\\,b`},
 	{`c:\ `, `c:\\ `},
+	{`Disk C:\`, `Disk\ C:\`},
 	{"", ""},
 	{`"a a"`, `"a a"`},
 	{`§`, `SS`},

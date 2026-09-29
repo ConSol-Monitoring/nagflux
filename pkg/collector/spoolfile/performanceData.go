@@ -37,7 +37,7 @@ func (p *PerformanceData) PrintForInfluxDB(version string) string {
 			tableName += `,` + helper.PrintMapAsString(helper.SanitizeMap(p.Tags), ",", "=")
 		}
 		if p.Unit != "" {
-			tableName += `,unit=` + p.Unit
+			tableName += `,unit=` + helper.SanitizeInfluxInput(p.Unit)
 		}
 
 		tableName += ` ` + helper.PrintMapAsString(helper.SanitizeMap(p.Fields), ",", "=")
