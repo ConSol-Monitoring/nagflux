@@ -32,19 +32,18 @@ func TestDisabledServiceInDowntime(t *testing.T) {
 
 	cacheBuilder := NewLivestatusCacheBuilder(connector)
 
+	intern := map[string]map[string]string{"host1": {"": "1", "service1": "1"}, "host2": {"": "2"}}
+
 	// wait 10 seconds till cache matches
-	waitUntil := time.Now().Add(10 * time.Second)
-	for time.Now().Before(waitUntil) {
-		if cacheBuilder.IsServiceInDowntime("host1", "service1", "1") && cacheBuilder.IsServiceInDowntime("host1", "", "2") {
-			break
-		}
-		time.Sleep(100 * time.Millisecond)
-	}
+	assert.Eventually(t, func() bool {
+		cacheBuilder.mutex.Lock()
+		defer cacheBuilder.mutex.Unlock()
+		return assert.ObjectsAreEqual(intern, cacheBuilder.downtimeCache.downtime)
+	}, 10*time.Second, 100*time.Millisecond, "internal cache does not fit.")
 
 	cacheBuilder.Stop()
 	livestatus.StopMockLivestatus()
 
-	intern := map[string]map[string]string{"host1": {"": "1", "service1": "1"}, "host2": {"": "2"}}
 	cacheBuilder.mutex.Lock()
 	assert.Equalf(t, intern, cacheBuilder.downtimeCache.downtime, "internal cache does not fit.")
 	cacheBuilder.mutex.Unlock()

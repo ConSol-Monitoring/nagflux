@@ -153,7 +153,8 @@ func (builder *CacheBuilder) IsServiceInDowntime(host, service, time string) boo
 	builder.mutex.Lock()
 	if _, hostExists := builder.downtimeCache.downtime[host]; hostExists {
 		if _, serviceExists := builder.downtimeCache.downtime[host][service]; serviceExists {
-			if builder.downtimeCache.downtime[host][service] <= time {
+			// an empty timestamp is corrupted data and must not count as downtime
+			if start := builder.downtimeCache.downtime[host][service]; start != "" && start <= time {
 				result = true
 			}
 		}
