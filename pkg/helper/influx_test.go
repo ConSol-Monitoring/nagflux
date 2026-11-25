@@ -60,3 +60,22 @@ func TestSanitizeMap(t *testing.T) {
 		}
 	}
 }
+
+func TestEscapeInfluxStringField(t *testing.T) {
+	for _, data := range []struct {
+		input  string
+		output string
+	}{
+		{"", ""},
+		{"plain text, with = and spaces", "plain text, with = and spaces"},
+		{`Toner Low ("Ready")`, `Toner Low (\"Ready\")`},
+		{`C:\ is full`, `C:\\ is full`},
+		{`ends with \`, `ends with \\`},
+		{`\"`, `\\\"`},
+	} {
+		actual := EscapeInfluxStringField(data.input)
+		if actual != data.output {
+			t.Errorf("EscapeInfluxStringField(%s): expected: %s, actual: %s", data.input, data.output, actual)
+		}
+	}
+}
