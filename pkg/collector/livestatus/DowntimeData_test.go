@@ -44,3 +44,12 @@ func TestPrintElasticsearchDowntime(t *testing.T) {
 `
 	assert.Equalf(t, expected, result, "The result did not match the expected")
 }
+
+func TestPrintInfluxdbDowntimeEscapesQuotes(t *testing.T) {
+	logging.InitTestLogger()
+	down := &DowntimeData{Data: Data{hostName: "host", serviceDisplayName: "service", author: "philip", comment: `"patch day" on C:\`}, endTime: "123"}
+	result := down.PrintForInfluxDB("0.9")
+	expected := `messages,host=host,service=service,type=downtime,author=philip message="Downtime start: <br>\"patch day\" on C:\\" 000
+messages,host=host,service=service,type=downtime,author=philip message="Downtime end: <br>\"patch day\" on C:\\" 123000`
+	assert.Equalf(t, expected, result, "The result did not match the expected")
+}

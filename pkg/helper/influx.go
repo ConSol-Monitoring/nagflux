@@ -32,6 +32,14 @@ func SanitizeInfluxInput(input string) string {
 	return input
 }
 
+var influxStringFieldEscaper = strings.NewReplacer(`\`, `\\`, `"`, `\"`)
+
+// EscapeInfluxStringField escapes backslashes and double quotes, the characters
+// line protocol requires to be escaped inside a double-quoted string field value.
+func EscapeInfluxStringField(input string) string {
+	return influxStringFieldEscaper.Replace(input)
+}
+
 // SanitizeMap calls SanitizeInfluxInput in key and value
 func SanitizeMap(input map[string]string) map[string]string {
 	result := map[string]string{}

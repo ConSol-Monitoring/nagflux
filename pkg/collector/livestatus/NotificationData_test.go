@@ -165,3 +165,13 @@ func didThatPanic(f func(string, string) string, arg1, arg2 string) (result bool
 	f(arg1, arg2)
 	return false
 }
+
+func TestPrintNotificationEscapesQuotes(t *testing.T) {
+	logging.InitTestLogger()
+	notification := NotificationData{Data: Data{hostName: "printer", serviceDisplayName: "Jet Direct", author: "naemonadmin", comment: `Toner Low ("Order blackcartridge")`}, notificationType: "SERVICE NOTIFICATION", notificationLevel: "WARNING"}
+	result := notification.PrintForInfluxDB("0.9")
+	expected := `messages,host=printer,service=Jet\ Direct,type=service_notification,author=naemonadmin message="WARNING:<br> Toner Low (\"Order blackcartridge\")" 000`
+	if result != expected {
+		t.Errorf("Result does not match the expected.\nResult:   %s\nExpected: %s", result, expected)
+	}
+}

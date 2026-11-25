@@ -47,3 +47,12 @@ func TestGenInfluxLine(t *testing.T) {
 		t.Errorf("Expected:%s\nResult:%s", expected, result)
 	}
 }
+
+func TestGenInfluxLineWithValueEscapesStringField(t *testing.T) {
+	live := Data{"host", "service", "comment", "0", "author"}
+	expected := `messages,host=host,service=service,author=author message="WARNING:<br> Toner Low (\"Ready\") C:\\" 0000`
+	result := live.genInfluxLineWithValue("", `WARNING:<br> Toner Low ("Ready") C:\`)
+	if expected != result {
+		t.Errorf("Expected:%s\nResult:%s", expected, result)
+	}
+}
